@@ -1,0 +1,64 @@
+import { useMatches } from "@remix-run/react";
+import { IoHomeSharp } from "react-icons/io5";
+import type { Route } from "~/types";
+
+export default function useBreadcrumbs(): Route[] {
+  const matches = useMatches();
+
+  const result = matches.reduce<Route[]>((acc, match) => {
+    switch (match.id) {
+      case "root":
+        return acc.concat({ to: "/app", name: "", icon: <IoHomeSharp /> });
+      case "routes/app.parts":
+        return acc.concat({
+          name: "Parts",
+          to: match.pathname,
+        });
+      case "routes/app.users":
+        return acc.concat({
+          name: "Users",
+          to: match.pathname,
+        });
+      case "routes/app.users.employees":
+        return acc.concat({
+          name: "Employees",
+          to: match.pathname,
+        });
+      case "routes/app.users.employee-types":
+        return acc.concat({
+          name: "Employee Types",
+          to: match.pathname,
+        });
+      case "routes/app.users.customers":
+        return acc.concat({
+          name: "Customers",
+          to: match.pathname,
+        });
+      case "routes/app.users.suppliers":
+        return acc.concat({
+          name: "Suppliers",
+          to: match.pathname,
+        });
+      case "routes/app.users.groups":
+        return acc.concat({
+          name: "Groups",
+          to: match.pathname,
+        });
+      case "routes/app.users.$personId":
+        return acc.concat({
+          name: match.params.personId!,
+          to: `app.users.${match.params.personId}`,
+        });
+      case "routes/app.users.new":
+        return acc.concat({
+          name: "New",
+          to: match.pathname,
+        });
+      default:
+        // don't include unspecified matches
+        return acc;
+    }
+  }, []);
+
+  return result;
+}
