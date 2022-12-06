@@ -11,7 +11,7 @@ import { CgProfile } from "react-icons/cg";
 import { GoSettings } from "react-icons/go";
 import { HiOutlineCube, HiOutlineDocumentDuplicate } from "react-icons/hi";
 import { SiHandshake } from "react-icons/si";
-import { usePermissions } from "~/hooks/usePermissions";
+import { usePermissions } from "~/hooks";
 
 const sidebarItems: Authenticated<NavItem>[] = [
   {
@@ -97,9 +97,7 @@ export function useSidebar() {
   const permissions = usePermissions();
   return sidebarItems.filter((item) => {
     if (item.permission) {
-      return (
-        item.permission in permissions && permissions[item.permission].view
-      );
+      return permissions.can("view", item.permission);
     } else {
       return true;
     }

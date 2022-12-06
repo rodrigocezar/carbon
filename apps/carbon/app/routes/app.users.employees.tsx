@@ -5,16 +5,16 @@ import { json } from "@remix-run/node";
 import { Outlet, useLoaderData, useNavigate } from "@remix-run/react";
 import { IoMdAdd } from "react-icons/io";
 import { DebouncedInput } from "~/components/Search";
-import { useUrlParams } from "~/hooks";
-import { getSupabase } from "~/lib/supabase";
+import { usePermissions, useUrlParams } from "~/hooks";
 import { EmployeesTable } from "~/modules/Users";
+import { requirePermissions } from "~/services/auth";
 import { getEmployees, getEmployeeTypes } from "~/services/users";
-import { requireAuthSession } from "~/services/session";
 import { mapRowsToOptions } from "~/utils/form";
 
 export async function loader({ request }: LoaderArgs) {
-  const { accessToken } = await requireAuthSession(request);
-  const client = getSupabase(accessToken);
+  const { client } = await requirePermissions(request, {
+    view: "users",
+  });
 
   const url = new URL(request.url);
   const search = new URLSearchParams(url.search);
@@ -33,6 +33,7 @@ export default function UsersEmployeesRoute() {
   const { employees, employeeTypes } = useLoaderData<typeof loader>();
   const [params, setParams] = useUrlParams();
   const navigate = useNavigate();
+  const permissions = usePermissions();
 
   const borderColor = useColorModeValue("gray.200", "gray.800");
 
@@ -76,15 +77,17 @@ export default function UsersEmployeesRoute() {
           />
         </HStack>
         <HStack spacing={2}>
-          <Button
-            colorScheme="brand"
-            onClick={() => {
-              navigate("new");
-            }}
-            leftIcon={<IoMdAdd />}
-          >
-            New Employee
-          </Button>
+          {permissions.can("create", "users") && (
+            <Button
+              colorScheme="brand"
+              onClick={() => {
+                navigate("new");
+              }}
+              leftIcon={<IoMdAdd />}
+            >
+              New Employee
+            </Button>
+          )}
         </HStack>
       </HStack>
       <EmployeesTable data={employees.data ?? []} />

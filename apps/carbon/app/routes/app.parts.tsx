@@ -12,7 +12,7 @@ import ReactFlow, {
   useEdgesState,
 } from "reactflow";
 import reactFlowStyles from "reactflow/dist/style.css";
-import { requireAuthSession } from "~/services/session";
+import { requirePermissions } from "~/services/auth";
 
 export const meta: MetaFunction = () => ({
   title: "Carbon | Parts",
@@ -23,7 +23,10 @@ export function links() {
 }
 
 export async function loader({ request }: LoaderArgs) {
-  await requireAuthSession(request);
+  await requirePermissions(request, {
+    view: "parts",
+  });
+
   const nodes: Node[] = [
     {
       id: "1",

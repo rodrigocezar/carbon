@@ -5,6 +5,7 @@ import { useLoaderData } from "@remix-run/react";
 import { validationError } from "remix-validated-form";
 import { getSupabase } from "~/lib/supabase";
 import { EmployeeTypeForm } from "~/modules/Users";
+import { requirePermissions } from "~/services/auth";
 import {
   employeeTypeValidator,
   getFeatures,
@@ -37,7 +38,10 @@ export async function loader({ request }: LoaderArgs) {
 
 export async function action({ request }: ActionArgs) {
   assertIsPost(request);
-  const { accessToken } = await requireAuthSession(request);
+  const { client } = await requirePermissions(request, {
+    create: "users",
+  });
+
   const validation = await employeeTypeValidator.validate(
     await request.formData()
   );
@@ -47,9 +51,9 @@ export async function action({ request }: ActionArgs) {
   }
 
   const { name, color, data } = validation.data;
+  // TODO: parse with io-ts
   const permissions = JSON.parse(data);
 
-  const client = getSupabase(accessToken);
   const insertEmployeeType = await upsertEmployeeType(client, {
     name,
     color: color || null,

@@ -10,20 +10,22 @@ import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Link, Outlet, useLoaderData } from "@remix-run/react";
 import { IoMdAdd } from "react-icons/io";
-import { getSupabase } from "~/lib/supabase";
+import { usePermissions } from "~/hooks";
 import { EmployeeTypesTable } from "~/modules/Users";
+import { requirePermissions } from "~/services/auth";
 import { getEmployeeTypes } from "~/services/users";
-import { requireAuthSession } from "~/services/session";
 
 export async function loader({ request }: LoaderArgs) {
-  const { accessToken } = await requireAuthSession(request);
-  const client = getSupabase(accessToken);
+  const { client } = await requirePermissions(request, {
+    view: "users",
+  });
 
   return json(await getEmployeeTypes(client));
 }
 
 export default function EmployeeTypesRoute() {
   const { data } = useLoaderData<typeof loader>();
+  const permissions = usePermissions();
   const borderColor = useColorModeValue("gray.200", "gray.800");
 
   return (
@@ -44,14 +46,16 @@ export default function EmployeeTypesRoute() {
             </Select>
           </HStack>
           <HStack spacing={2}>
-            <Button
-              as={Link}
-              to="new"
-              colorScheme="brand"
-              leftIcon={<IoMdAdd />}
-            >
-              New Employee Type
-            </Button>
+            {permissions.can("create", "users") && (
+              <Button
+                as={Link}
+                to="new"
+                colorScheme="brand"
+                leftIcon={<IoMdAdd />}
+              >
+                New Employee Type
+              </Button>
+            )}
           </HStack>
         </HStack>
         <EmployeeTypesTable data={data ?? []} />

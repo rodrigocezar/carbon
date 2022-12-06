@@ -3,8 +3,8 @@ import { redirect } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { validationError } from "remix-validated-form";
-import { getSupabase } from "~/lib/supabase";
 import { EmployeeTypeForm } from "~/modules/Users";
+import { requirePermissions } from "~/services/auth";
 import {
   employeeTypeValidator,
   getEmployeeType,
@@ -13,16 +13,16 @@ import {
   upsertEmployeeType,
   upsertEmployeeTypePermissions,
 } from "~/services/users";
-import { requireAuthSession, setSessionFlash } from "~/services/session";
+import { setSessionFlash } from "~/services/session";
 import { assertIsPost } from "~/utils/http";
 
 export async function loader({ request, params }: LoaderArgs) {
-  const { accessToken } = await requireAuthSession(request);
+  const { client } = await requirePermissions(request, {
+    view: "users",
+  });
 
   const { employeeTypeId } = params;
   if (!employeeTypeId) return redirect("/app/users/employee-types");
-
-  const client = getSupabase(accessToken);
 
   const [employeeType, employeeTypePermissions] = await Promise.all([
     getEmployeeType(client, employeeTypeId),
@@ -43,7 +43,10 @@ export async function loader({ request, params }: LoaderArgs) {
 
 export async function action({ request }: ActionArgs) {
   assertIsPost(request);
-  const { accessToken } = await requireAuthSession(request);
+  const { client } = await requirePermissions(request, {
+    update: "users",
+  });
+
   const validation = await employeeTypeValidator.validate(
     await request.formData()
   );
@@ -53,9 +56,9 @@ export async function action({ request }: ActionArgs) {
   }
 
   const { id, name, color, data } = validation.data;
+  // TODO: parse with io-ts
   const permissions = JSON.parse(data);
 
-  const client = getSupabase(accessToken);
   const updateEmployeeType = await upsertEmployeeType(client, {
     id,
     name,

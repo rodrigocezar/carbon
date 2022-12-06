@@ -4,6 +4,7 @@ import { useNavigate } from "@remix-run/react";
 import { memo } from "react";
 import { BsPencilSquare } from "react-icons/bs";
 import { IoMdTrash } from "react-icons/io";
+import { usePermissions } from "~/hooks";
 import type { Employee } from "../types";
 
 type EmployeesTableProps = {
@@ -12,6 +13,8 @@ type EmployeesTableProps = {
 
 const EmployeesTable = memo(({ data }: EmployeesTableProps) => {
   const navigate = useNavigate();
+  const permissions = usePermissions();
+
   const rows = data.map(({ User, EmployeeType }) => {
     if (
       User === null ||
@@ -28,18 +31,21 @@ const EmployeesTable = memo(({ data }: EmployeesTableProps) => {
       employeeType: EmployeeType.name,
       actions: (
         <Flex justifyContent="end">
-          <ActionMenu>
-            <MenuItem icon={<BsPencilSquare />}>Edit Permissions</MenuItem>
-            <MenuItem
-              icon={<IoMdTrash />}
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/app/users/employeess/deactivate/${User.id}`);
-              }}
-            >
-              Deactivate Employee
-            </MenuItem>
-          </ActionMenu>
+          {(permissions.can("update", "users") ||
+            permissions.can("delete", "users")) && (
+            <ActionMenu>
+              <MenuItem icon={<BsPencilSquare />}>Edit Permissions</MenuItem>
+              <MenuItem
+                icon={<IoMdTrash />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/app/users/employeess/deactivate/${User.id}`);
+                }}
+              >
+                Deactivate Employee
+              </MenuItem>
+            </ActionMenu>
+          )}
         </Flex>
       ),
     };

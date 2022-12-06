@@ -1,4 +1,5 @@
 import type { Database } from "@carbon/database";
+import { redirect } from "@remix-run/node";
 import type {
   AuthSession as SupabaseAuthSession,
   SupabaseClient,
@@ -6,6 +7,8 @@ import type {
 import { SERVER_URL } from "~/config/env";
 import { REFRESH_ACCESS_TOKEN_THRESHOLD } from "~/config/env";
 import { getSupabase, getSupabaseAdmin } from "~/lib/supabase";
+import { requireAuthSession, setSessionFlash } from "../session";
+import { makePermissionsFromClaims } from "../users";
 import type { AuthSession } from "./types";
 
 export async function getUserByClient(client: SupabaseClient<Database>) {
@@ -102,6 +105,76 @@ export async function refreshAccessToken(
   if (!data.session || error) return null;
 
   return makeAuthSession(data.session);
+}
+
+export async function requirePermissions(
+  request: Request,
+  requiredPermissions: {
+    view?: string | string[];
+    create?: string | string[];
+    update?: string | string[];
+    delete?: string | string[];
+  }
+) {
+  const { accessToken } = await requireAuthSession(request);
+  const client = getSupabase(accessToken);
+  // early exit if no requiredPermissions are required
+  if (Object.keys(requiredPermissions).length === 0) return { client };
+
+  // TODO: use redis to cache permissions
+  const getMyClaims = await client.rpc("get_my_claims");
+
+  if (getMyClaims.error || getMyClaims.data === null) {
+    throw redirect(
+      "/app",
+      await setSessionFlash(request, {
+        success: false,
+        message: "Failed to parse claims",
+      })
+    );
+  }
+
+  const myPermissions = makePermissionsFromClaims(getMyClaims.data);
+
+  if (!myPermissions) {
+    throw redirect(
+      "/app",
+      await setSessionFlash(request, {
+        success: false,
+        message: "Failed to parse claims",
+      })
+    );
+  }
+
+  const hasRequiredPermissions = Object.entries(requiredPermissions).every(
+    ([action, permission]) => {
+      if (typeof permission === "string") {
+        return myPermissions![permission][
+          action as "view" | "create" | "update" | "delete"
+        ];
+      } else if (Array.isArray(permission)) {
+        return permission.every((p) => {
+          return !myPermissions![p][
+            action as "view" | "create" | "update" | "delete"
+          ];
+        });
+      } else {
+        return false;
+      }
+    }
+  );
+
+  if (!hasRequiredPermissions) {
+    throw redirect(
+      "/app",
+      await setSessionFlash(request, {
+        success: false,
+        message: "Access Denied",
+      })
+    );
+  }
+
+  return { client };
 }
 
 export async function resetPassword(accessToken: string, password: string) {

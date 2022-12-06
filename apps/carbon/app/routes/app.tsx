@@ -29,11 +29,11 @@ export async function loader({ request }: LoaderArgs) {
     getUserByClient(client),
   ]);
 
-  if (user.error) {
+  if (user?.error) {
     await destroyAuthSession(request);
   }
 
-  if (claims.error || user.error || claims.data === null) {
+  if (claims?.error || user?.error || claims?.data === null) {
     await destroyAuthSession(request);
   }
 

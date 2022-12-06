@@ -3,9 +3,9 @@ import { json } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { validationError } from "remix-validated-form";
-import { getSupabase } from "~/lib/supabase";
 import { EmployeePermissionsForm } from "~/modules/Users";
-import { requireAuthSession, setSessionFlash } from "~/services/session";
+import { requirePermissions } from "~/services/auth";
+import { setSessionFlash } from "~/services/session";
 import {
   employeeValidator,
   getClaimsById,
@@ -16,12 +16,13 @@ import {
 import { assertIsPost } from "~/utils/http";
 
 export async function loader({ request, params }: LoaderArgs) {
-  const { accessToken } = await requireAuthSession(request);
+  const { client } = await requirePermissions(request, {
+    view: "users",
+  });
 
   const { employeeId } = params;
   if (!employeeId) return redirect("/app/users/employees");
 
-  const client = getSupabase(accessToken);
   const [claims, employee] = await Promise.all([
     getClaimsById(client, employeeId),
     getUserById(client, employeeId),
@@ -56,7 +57,10 @@ export async function loader({ request, params }: LoaderArgs) {
 
 export async function action({ request }: ActionArgs) {
   assertIsPost(request);
-  const { accessToken } = await requireAuthSession(request);
+  const { client } = await requirePermissions(request, {
+    update: "users",
+  });
+
   const validation = await employeeValidator.validate(await request.formData());
 
   if (validation.error) {
@@ -64,11 +68,9 @@ export async function action({ request }: ActionArgs) {
   }
 
   const { id, data } = validation.data;
+  // TODO: io-ts validation on permissions
   const permissions = JSON.parse(data);
 
-  // TODO: io-ts validation on permissions
-
-  const client = getSupabase(accessToken);
   const result = await updatePermissions(client, {
     id,
     permissions,

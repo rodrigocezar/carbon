@@ -18,6 +18,12 @@ module.exports = {
       ignoredRouteFiles: [], // same as remix config
     });
   },
+  serverDependenciesToBundle: [
+    "@carbon/database",
+    "@carbon/logger",
+    "@carbon/react",
+    "@carbon/utils",
+  ],
   watchPaths: async () => {
     return [
       "../../packages/carbon-react/src/**/*",

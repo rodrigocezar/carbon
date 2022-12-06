@@ -11,20 +11,23 @@ import {
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useLoaderData, useNavigate, useParams } from "@remix-run/react";
-import { getSupabase } from "~/lib/supabase";
+import { requirePermissions } from "~/services/auth";
 import { deleteEmployeeType, getEmployeeType } from "~/services/users";
-import { requireAuthSession, setSessionFlash } from "~/services/session";
+import { setSessionFlash } from "~/services/session";
 
 export async function loader({ request, params }: LoaderArgs) {
-  const { accessToken } = await requireAuthSession(request);
-  const client = getSupabase(accessToken);
+  const { client } = await requirePermissions(request, {
+    view: "users",
+  });
   const { employeeTypeId } = params;
 
   return json(await getEmployeeType(client, employeeTypeId!));
 }
 
 export async function action({ request, params }: ActionArgs) {
-  const { accessToken } = await requireAuthSession(request);
+  const { client } = await requirePermissions(request, {
+    delete: "users",
+  });
 
   const { employeeTypeId } = params;
   if (!employeeTypeId) {
@@ -37,7 +40,6 @@ export async function action({ request, params }: ActionArgs) {
     );
   }
 
-  const client = getSupabase(accessToken);
   const deleteType = await deleteEmployeeType(client, employeeTypeId);
   if (deleteType.error) {
     return redirect(

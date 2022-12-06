@@ -4,6 +4,7 @@ import { useNavigate } from "@remix-run/react";
 import { memo } from "react";
 import { BsPencilSquare } from "react-icons/bs";
 import { IoMdTrash } from "react-icons/io";
+import { usePermissions } from "~/hooks";
 import type { EmployeeType } from "~/modules/Users/types";
 
 type EmployeeTypesTableProps = {
@@ -12,6 +13,8 @@ type EmployeeTypesTableProps = {
 
 const EmployeeTypesTable = memo(({ data }: EmployeeTypesTableProps) => {
   const navigate = useNavigate();
+  const permissions = usePermissions();
+
   const rows = data.map((row) => ({
     id: row.id,
     protected: row.protected,
@@ -27,20 +30,28 @@ const EmployeeTypesTable = memo(({ data }: EmployeeTypesTableProps) => {
     ),
     actions: (
       <Flex justifyContent="end">
-        {!row.protected && (
-          <ActionMenu>
-            <MenuItem icon={<BsPencilSquare />}>Edit Employee Type</MenuItem>
-            <MenuItem
-              icon={<IoMdTrash />}
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/app/users/employee-types/delete/${row.id}`);
-              }}
-            >
-              Delete Employee Type
-            </MenuItem>
-          </ActionMenu>
-        )}
+        {!row.protected &&
+          (permissions.can("update", "users") ||
+            permissions.can("delete", "users")) && (
+            <ActionMenu>
+              {permissions.can("update", "users") && (
+                <MenuItem icon={<BsPencilSquare />}>
+                  Edit Employee Type
+                </MenuItem>
+              )}
+              {permissions.can("delete", "users") && (
+                <MenuItem
+                  icon={<IoMdTrash />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/app/users/employee-types/delete/${row.id}`);
+                  }}
+                >
+                  Delete Employee Type
+                </MenuItem>
+              )}
+            </ActionMenu>
+          )}
       </Flex>
     ),
   }));

@@ -20,10 +20,6 @@ import { refreshAccessToken, verifyAuthSession } from "../auth/auth.server";
 import type { AuthSession } from "../auth/types";
 import type { Result } from "~/types";
 
-/**
- * Session storage CRUD
- */
-
 const sessionStorage = createCookieSessionStorage({
   cookie: {
     name: "__authSession",
@@ -153,19 +149,19 @@ export async function requireAuthSession(
   {
     onFailRedirectTo,
     verify,
-  }: { onFailRedirectTo?: string; verify: boolean } = { verify: false }
+  }: {
+    onFailRedirectTo?: string;
+    verify: boolean;
+  } = { verify: false }
 ): Promise<AuthSession> {
-  // hello there
   const authSession = await assertAuthSession(request, {
     onFailRedirectTo,
   });
 
-  // ok, let's challenge its access token.
-  // by default, we don't verify the access token from supabase auth api to save some time
+  // by default we don't verify the session to save time
   const isValidSession = verify ? await verifyAuthSession(authSession) : true;
 
-  // damn, access token is not valid or expires soon
-  // let's try to refresh, in case of 🧐
+  // if not valid, we try to refresh the session
   if (!isValidSession || isExpiringSoon(authSession.expiresAt)) {
     return refreshAuthSession(request);
   }
