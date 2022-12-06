@@ -1,0 +1,21 @@
+.DS_Store
+node_modules
+.turbo
+*.log
+.next
+dist
+dist-ssr
+*.local
+.cache
+server/dist
+public/dist
+.turbo
+
+# local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!packages/apps/carbon/.env
+!packages/carbon-database/.env

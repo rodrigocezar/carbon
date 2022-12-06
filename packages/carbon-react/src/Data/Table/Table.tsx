@@ -70,7 +70,7 @@ const Table = <Data extends object>({
   const rowBackground = useColorModeValue("gray.50", "whiteAlpha.100");
 
   return (
-    <Box w="full" h="100%">
+    <Box w="full">
       <ChakraTable {...getTableProps()}>
         <Thead>
           {headerGroups.map((headerGroup, headerIdx) => (
