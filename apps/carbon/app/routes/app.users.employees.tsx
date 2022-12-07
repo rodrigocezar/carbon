@@ -17,9 +17,9 @@ export async function loader({ request }: LoaderArgs) {
   });
 
   const url = new URL(request.url);
-  const search = new URLSearchParams(url.search);
-  const name = search.get("name");
-  const type = search.get("type");
+  const searchParams = new URLSearchParams(url.search);
+  const name = searchParams.get("name");
+  const type = searchParams.get("type");
 
   const [employees, employeeTypes] = await Promise.all([
     getEmployees(client, { name, type }),

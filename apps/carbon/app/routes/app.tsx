@@ -6,39 +6,29 @@ import { Outlet, useLoaderData } from "@remix-run/react";
 import { useEffect } from "react";
 import { IconSidebar, Topbar } from "~/components/Navigation";
 import { getSupabase, SupabaseProvider } from "~/lib/supabase";
-import { getPermissionsByClient, getUserByClient } from "~/services/auth";
+import { getPermissions, getUser } from "~/services/users";
 import {
   destroyAuthSession,
   getSessionFlash,
   requireAuthSession,
 } from "~/services/session";
-import { makePermissionsFromClaims } from "~/services/users";
 
 export async function loader({ request }: LoaderArgs) {
   const { accessToken, expiresAt, expiresIn } = await requireAuthSession(
     request
   );
 
-  // don't create a new client for every request
+  // share a client between requests
   const client = getSupabase(accessToken);
 
   // parallelize the requests
-  const [sessionFlash, claims, user] = await Promise.all([
+  const [sessionFlash, permissions, user] = await Promise.all([
     getSessionFlash(request),
-    getPermissionsByClient(client),
-    getUserByClient(client),
+    getPermissions(request, client),
+    getUser(request, client),
   ]);
 
-  if (user?.error) {
-    await destroyAuthSession(request);
-  }
-
-  if (claims?.error || user?.error || claims?.data === null) {
-    await destroyAuthSession(request);
-  }
-
-  const permissions = makePermissionsFromClaims(claims?.data);
-  if (permissions === null) {
+  if (!permissions || !user) {
     await destroyAuthSession(request);
   }
 
@@ -50,7 +40,7 @@ export async function loader({ request }: LoaderArgs) {
         expiresAt,
       },
 
-      user: user?.data,
+      user,
       permissions,
       result: sessionFlash?.result,
     },

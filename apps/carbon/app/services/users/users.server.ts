@@ -1,4 +1,6 @@
 import type { Database, Json } from "@carbon/database";
+import { redis } from "@carbon/redis";
+import { redirect } from "@remix-run/node";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseAdmin } from "~/lib/supabase";
 import type {
@@ -9,6 +11,7 @@ import type {
   User,
 } from "~/modules/Users/types";
 import { deleteAuthAccount, sendInviteByEmail } from "~/services/auth";
+import { requireAuthSession, setSessionFlash } from "~/services/session";
 import type { Result } from "~/types";
 
 export async function createEmployeeAccount(
@@ -183,6 +186,72 @@ export async function getPermissionsByEmployeeType(
     .from("EmployeeTypePermission")
     .select("view, create, update, delete, Feature (id, name)")
     .eq("employeeTypeId", employeeTypeId);
+}
+
+function getPermissionCacheKey(userId: string) {
+  return `permissions:${userId}`;
+}
+
+export async function getPermissions(
+  request: Request,
+  client: SupabaseClient<Database>
+) {
+  const { userId } = await requireAuthSession(request);
+
+  let permissions: Record<string, Permission> | null = JSON.parse(
+    (await redis.get(getPermissionCacheKey(userId))) || "null"
+  );
+
+  // if we don't have permissions from redis, get them from the database
+  if (!permissions) {
+    const claims = await getClaimsById(client, userId);
+    if (claims.error || claims.data === null) {
+      throw redirect(
+        "/app",
+        await setSessionFlash(request, {
+          success: false,
+          message: "Failed to parse claims",
+        })
+      );
+    }
+    // convert claims to permissions
+    permissions = makePermissionsFromClaims(claims.data);
+    // store permissions in redis
+
+    await redis.set(getPermissionCacheKey(userId), JSON.stringify(permissions));
+
+    if (!permissions) {
+      throw redirect(
+        "/app",
+        await setSessionFlash(request, {
+          success: false,
+          message: "Failed to parse claims",
+        })
+      );
+    }
+  }
+
+  return permissions;
+}
+
+export async function getUser(
+  request: Request,
+  client: SupabaseClient<Database>
+) {
+  const { userId } = await requireAuthSession(request);
+
+  const user = await getUserById(client, userId);
+  if (user?.error || user?.data === null) {
+    throw redirect(
+      "/app",
+      await setSessionFlash(request, {
+        success: false,
+        message: "Failed to get user",
+      })
+    );
+  }
+
+  return user.data;
 }
 
 export async function getUserById(
@@ -391,6 +460,8 @@ export async function updatePermissions(
         message: "Failed to update permissions",
       };
     }
+
+    await redis.del(getPermissionCacheKey(id));
 
     return {
       success: true,

@@ -6,7 +6,7 @@ This mono-repository contains the source code for the Carbon ERP.
 
 | Package Name | Description     |
 | ------------ | --------------- |
-| `carbon`     | ERP Applicaiton |
+| `carbon`     | ERP Application |
 | `docs`       | Documentation   |
 
 ### Packages
@@ -18,6 +18,7 @@ This mono-repository contains the source code for the Carbon ERP.
 | `@carbon/jest`         | Jest preset configuration shared across apps and packages               |
 | `@carbon/logger`       | Shared logger used across apps                                          |
 | `@carbon/react`        | Shared web-based UI components                                          |
+| `@carbon/redis`        | Redis cache client                                                      |
 | `@carbon/tsconfig`     | Shared, extendable tsconfig configuration used across apps and packages |
 | `@carbon/utils`        | Shared utility functions used across apps and packages                  |
 
@@ -26,7 +27,9 @@ This mono-repository contains the source code for the Carbon ERP.
 - [Turborepo](https://turbo.build)
 - [Remix](https://remix.run)
 - [Supabase](https://supabase.com/)
+- [Postgres] (https://postgresql.org/)
 - [Chakra UI](https://chakra-ui.com/)
+- [Redis](https://redis.io)
 - [Prisma](https://prisma.io/)
 
 ## Local Development
@@ -38,7 +41,7 @@ Then download and initialize the repository dependencies.
 
 ```bash
 $ yarn           # install dependencies
-$ yarn db:start  # pull and start the database containers
+$ yarn db:start  # pull and start the containers
 ```
 
 Copy the environment variables from the initialization script to an `.env` file:
