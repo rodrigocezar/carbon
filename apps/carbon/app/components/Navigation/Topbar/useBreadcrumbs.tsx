@@ -8,7 +8,7 @@ export default function useBreadcrumbs(): Route[] {
   const result = matches.reduce<Route[]>((acc, match) => {
     switch (match.id) {
       case "root":
-        return acc.concat({ to: "/app", name: "", icon: <IoHomeSharp /> });
+        return acc.concat({ to: "/app", name: "Home", icon: <IoHomeSharp /> });
       case "routes/app.parts":
         return acc.concat({
           name: "Parts",

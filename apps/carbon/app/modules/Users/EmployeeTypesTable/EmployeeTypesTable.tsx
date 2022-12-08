@@ -26,6 +26,7 @@ const EmployeeTypesTable = memo(({ data }: EmployeeTypesTableProps) => {
         h={6}
         borderRadius="md"
         bg={row.color ?? "#000000"}
+        role="img"
       />
     ),
     actions: (

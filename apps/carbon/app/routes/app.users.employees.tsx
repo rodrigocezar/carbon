@@ -64,7 +64,6 @@ export default function UsersEmployeesRoute() {
             // @ts-ignore
             size="sm"
             colorScheme="brand"
-            minW={180}
             defaultValue={employeeTypeOptions.filter(
               (type) => type.value === params.get("type")
             )}
@@ -73,6 +72,8 @@ export default function UsersEmployeesRoute() {
             onChange={(selected) => {
               setParams("type", selected?.value);
             }}
+            aria-label="Employee Type"
+            minW={180}
             placeholder="Employee Type"
           />
         </HStack>

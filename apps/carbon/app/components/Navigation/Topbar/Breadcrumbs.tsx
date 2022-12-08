@@ -26,6 +26,7 @@ const Breadcrumbs = ({ links = [] }: BreadcrumbProps) => {
               color={linkColor}
               as={Link}
               to={link.to}
+              aria-label={link.name}
             >
               {link.icon ? link.icon : link.name}
             </BreadcrumbLink>

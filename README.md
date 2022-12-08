@@ -1,6 +1,20 @@
-# Carbon Applications and Packages
+# Carbon ERP
 
-This mono-repository contains the source code for the Carbon ERP.
+Carbon is a high permformance, open-source, single tenant (incomplete) ERP written in Typescript.
+
+It includes:
+
+- Role-based access control (RBAC)
+- Row-level security (RLS)
+- Full-stack type safety (DB➡FE)
+- Nested, file-based routing
+
+## Project Status
+
+- [ ] Alpha: Under heavy development
+- [ ] Public Alpha: Ready for use. But go easy on us, there may be a few kinks.
+- [ ] Public Beta: Stable enough for most non-enterprise use-cases
+- [ ] Public: Production-ready
 
 ### Apps
 
@@ -27,7 +41,7 @@ This mono-repository contains the source code for the Carbon ERP.
 - [Turborepo](https://turbo.build)
 - [Remix](https://remix.run)
 - [Supabase](https://supabase.com/)
-- [Postgres] (https://postgresql.org/)
+- [Postgres](https://postgresql.org/)
 - [Chakra UI](https://chakra-ui.com/)
 - [Redis](https://redis.io)
 - [Prisma](https://prisma.io/)

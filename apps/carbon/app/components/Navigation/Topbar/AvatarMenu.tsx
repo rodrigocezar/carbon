@@ -16,7 +16,13 @@ const AvatarMenu = () => {
 
   return (
     <Menu>
-      <MenuButton as={Avatar} name="" size="sm" cursor="pointer" />
+      <MenuButton
+        as={Avatar}
+        role="button"
+        name=""
+        size="sm"
+        cursor="pointer"
+      />
       <MenuList fontSize="sm" boxShadow="xl" minW={48}>
         <MenuItem>Signed in as {`${user.firstName} ${user.lastName}`}</MenuItem>
         <MenuDivider />

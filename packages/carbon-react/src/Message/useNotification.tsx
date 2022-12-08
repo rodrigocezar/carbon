@@ -73,7 +73,7 @@ export default function useNotification() {
           ...defaultOptions,
           render: (/*props: RenderProps*/) => {
             return (
-              // TODO: do we need a client only here?
+              // do we need a ClientOnly component here?
               <ClientOnly
                 fallback={<FakeCopyableErrorMessage message={message} />}
               >
