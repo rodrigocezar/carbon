@@ -1,25 +1,25 @@
 -- CreateTable
-CREATE TABLE "Feature" (
+CREATE TABLE "feature" (
     "id" TEXT NOT NULL DEFAULT uuid_generate_v4(),
     "name" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3),
 
-    CONSTRAINT "Feature_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "feature_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "EmployeeTypePermission" (
+CREATE TABLE "employeeTypePermission" (
     "employeeTypeId" TEXT NOT NULL,
-    "moduleId" TEXT NOT NULL,
+    "featureId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3),
 
-    CONSTRAINT "EmployeeTypePermission_pkey" PRIMARY KEY ("employeeTypeId", "moduleId")
+    CONSTRAINT "employeeTypePermission_pkey" PRIMARY KEY ("employeeTypeId", "featureId")
 );
 
 -- AddForeignKey
-ALTER TABLE "EmployeeTypePermission" ADD CONSTRAINT "EmployeeTypePermission_employeeTypeId_fkey" FOREIGN KEY ("employeeTypeId") REFERENCES "EmployeeType"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "employeeTypePermission" ADD CONSTRAINT "employeeTypePermission_employeeTypeId_fkey" FOREIGN KEY ("employeeTypeId") REFERENCES "employeeType"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "EmployeeTypePermission" ADD CONSTRAINT "EmployeeTypePermission_moduleId_fkey" FOREIGN KEY ("moduleId") REFERENCES "Feature"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "employeeTypePermission" ADD CONSTRAINT "employeeTypePermission_featureId_fkey" FOREIGN KEY ("featureId") REFERENCES "feature"("id") ON DELETE CASCADE ON UPDATE CASCADE;

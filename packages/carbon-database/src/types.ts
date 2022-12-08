@@ -41,7 +41,7 @@ export interface Database {
           applied_steps_count?: number
         }
       }
-      Employee: {
+      employee: {
         Row: {
           id: string
           employeeTypeId: string
@@ -55,38 +55,38 @@ export interface Database {
           employeeTypeId?: string
         }
       }
-      EmployeeType: {
+      employeeType: {
         Row: {
-          id: string
           name: string
+          updatedAt: string | null
+          id: string
           color: string | null
           protected: boolean
           createdAt: string
-          updatedAt: string | null
         }
         Insert: {
-          id?: string
           name: string
+          updatedAt?: string | null
+          id?: string
           color?: string | null
           protected?: boolean
           createdAt?: string
-          updatedAt?: string | null
         }
         Update: {
-          id?: string
           name?: string
+          updatedAt?: string | null
+          id?: string
           color?: string | null
           protected?: boolean
           createdAt?: string
-          updatedAt?: string | null
         }
       }
-      EmployeeTypePermission: {
+      employeeTypePermission: {
         Row: {
           employeeTypeId: string
-          moduleId: string
-          createdAt: string
+          featureId: string
           updatedAt: string | null
+          createdAt: string
           create: boolean
           delete: boolean
           update: boolean
@@ -94,9 +94,9 @@ export interface Database {
         }
         Insert: {
           employeeTypeId: string
-          moduleId: string
-          createdAt?: string
+          featureId: string
           updatedAt?: string | null
+          createdAt?: string
           create?: boolean
           delete?: boolean
           update?: boolean
@@ -104,44 +104,45 @@ export interface Database {
         }
         Update: {
           employeeTypeId?: string
-          moduleId?: string
-          createdAt?: string
+          featureId?: string
           updatedAt?: string | null
+          createdAt?: string
           create?: boolean
           delete?: boolean
           update?: boolean
           view?: boolean
         }
       }
-      Feature: {
+      feature: {
         Row: {
-          id: string
           name: string
-          createdAt: string
           updatedAt: string | null
+          id: string
+          createdAt: string
         }
         Insert: {
-          id?: string
           name: string
-          createdAt?: string
           updatedAt?: string | null
+          id?: string
+          createdAt?: string
         }
         Update: {
-          id?: string
           name?: string
-          createdAt?: string
           updatedAt?: string | null
+          id?: string
+          createdAt?: string
         }
       }
-      User: {
+      user: {
         Row: {
           id: string
           email: string
           firstName: string
           lastName: string
           emailVerified: string | null
-          createdAt: string
           updatedAt: string | null
+          fullName: string | null
+          createdAt: string
         }
         Insert: {
           id: string
@@ -149,8 +150,9 @@ export interface Database {
           firstName: string
           lastName: string
           emailVerified?: string | null
-          createdAt?: string
           updatedAt?: string | null
+          fullName?: string | null
+          createdAt?: string
         }
         Update: {
           id?: string
@@ -158,8 +160,9 @@ export interface Database {
           firstName?: string
           lastName?: string
           emailVerified?: string | null
-          createdAt?: string
           updatedAt?: string | null
+          fullName?: string | null
+          createdAt?: string
         }
       }
     }

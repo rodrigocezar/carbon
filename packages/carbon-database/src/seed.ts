@@ -48,7 +48,7 @@ const getUserId = async (): Promise<string> => {
 async function seed() {
   const id = await getUserId();
 
-  const upsertAdmin = await supabaseAdmin.from("User").upsert([
+  const upsertAdmin = await supabaseAdmin.from("user").upsert([
     {
       id,
       email: admin.email,
@@ -65,30 +65,30 @@ async function seed() {
   });
 
   const deleteFeatures = await supabaseAdmin
-    .from("Feature")
+    .from("feature")
     .delete()
     .neq("id", 0);
   if (deleteFeatures.error) throw deleteFeatures.error;
 
   const insertFeatures = await supabaseAdmin
-    .from("Feature")
+    .from("feature")
     .insert([...Object.values(features)]);
   if (insertFeatures.error) throw insertFeatures.error;
 
   const deleteEmployeeTypes = await supabaseAdmin
-    .from("EmployeeType")
+    .from("employeeType")
     .delete()
     .neq("id", 0);
   if (deleteEmployeeTypes.error) throw deleteEmployeeTypes.error;
 
   const insertEmployeeTypes = await supabaseAdmin
-    .from("EmployeeType")
+    .from("employeeType")
     .insert([...Object.values(employeeTypes)]);
   if (insertEmployeeTypes.error) throw insertEmployeeTypes.error;
 
   const employeeTypePermissions = [] as {
     employeeTypeId: string;
-    moduleId: string;
+    featureId: string;
     create: boolean;
     update: boolean;
     delete: boolean;
@@ -96,28 +96,28 @@ async function seed() {
   }[];
 
   Object.entries(employeeTypePermissionsDefinitions).forEach(
-    ([empType, modulePermissions]) => {
+    ([empType, featurePermissions]) => {
       const employeeTypeId = employeeTypes[empType as EmployeeType].id;
-      Object.keys(modulePermissions).forEach((module) => {
-        const moduleId = features[module as Feature].id;
+      Object.keys(featurePermissions).forEach((feature) => {
+        const featureId = features[feature as Feature].id;
         employeeTypePermissions.push({
           employeeTypeId,
-          moduleId,
-          ...modulePermissions[module as Feature],
+          featureId,
+          ...featurePermissions[feature as Feature],
         });
       });
     }
   );
 
   const insertEmployeeTypePermissions = await supabaseAdmin
-    .from("EmployeeTypePermission")
+    .from("employeeTypePermission")
     .insert(employeeTypePermissions);
 
   if (insertEmployeeTypePermissions.error)
     throw insertEmployeeTypePermissions.error;
 
   const insertEmployee = await supabaseAdmin
-    .from("Employee")
+    .from("employee")
     .upsert([{ id, employeeTypeId: employeeTypes.Admin.id }]);
 
   if (insertEmployee.error) throw insertEmployee.error;

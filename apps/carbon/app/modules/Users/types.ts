@@ -11,7 +11,7 @@ export type Employee = NonNullable<
   Awaited<ReturnType<typeof getEmployees>>["data"]
 >[number];
 
-export type EmployeeRow = Database["public"]["Tables"]["Employee"]["Row"];
+export type EmployeeRow = Database["public"]["Tables"]["employee"]["Row"];
 
 export type EmployeeTypePermission = NonNullable<
   Awaited<ReturnType<typeof getPermissionsByEmployeeType>>["data"]

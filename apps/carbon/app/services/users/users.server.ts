@@ -113,7 +113,7 @@ export async function deleteEmployeeType(
   client: SupabaseClient<Database>,
   employeeTypeId: string
 ) {
-  return client.from("EmployeeType").delete().eq("id", employeeTypeId);
+  return client.from("employeeType").delete().eq("id", employeeTypeId);
 }
 
 export async function getClaimsById(
@@ -131,16 +131,16 @@ export async function getEmployees(
   }
 ) {
   let query = client
-    .from("Employee")
+    .from("employee")
     .select(
-      "User!inner(id, firstName, lastName, email), EmployeeType!inner(name)"
+      "user!inner(id, firstName, lastName, email), employeeType!inner(name)"
     );
 
   if (args.name) {
     query = query.or(
       `lastName.ilike.${args.name}%, firstName.ilike.${args.name}%`,
       {
-        foreignTable: "User",
+        foreignTable: "user",
       }
     );
   }
@@ -151,7 +151,7 @@ export async function getEmployees(
 
   query = query
     .range(0, 9)
-    .order("lastName", { foreignTable: "User", ascending: true });
+    .order("lastName", { foreignTable: "user", ascending: true });
 
   return query;
 }
@@ -161,7 +161,7 @@ export async function getEmployeeType(
   employeeTypeId: string
 ) {
   return client
-    .from("EmployeeType")
+    .from("employeeType")
     .select("id, name, color, protected")
     .eq("id", employeeTypeId)
     .single();
@@ -169,13 +169,13 @@ export async function getEmployeeType(
 
 export async function getEmployeeTypes(client: SupabaseClient<Database>) {
   return client
-    .from("EmployeeType")
+    .from("employeeType")
     .select("id, name, color, protected")
     .order("name");
 }
 
 export async function getFeatures(client: SupabaseClient<Database>) {
-  return client.from("Feature").select("id, name").order("name");
+  return client.from("feature").select("id, name").order("name");
 }
 
 export async function getPermissionsByEmployeeType(
@@ -183,8 +183,8 @@ export async function getPermissionsByEmployeeType(
   employeeTypeId: string
 ) {
   return client
-    .from("EmployeeTypePermission")
-    .select("view, create, update, delete, Feature (id, name)")
+    .from("employeeTypePermission")
+    .select("view, create, update, delete, feature (id, name)")
     .eq("employeeTypeId", employeeTypeId);
 }
 
@@ -258,12 +258,12 @@ export async function getUserById(
   client: SupabaseClient<Database>,
   id: string
 ) {
-  return client.from("User").select("*").eq("id", id).single();
+  return client.from("user").select("*").eq("id", id).single();
 }
 
 export async function getUserByEmail(email: string) {
   return getSupabaseAdmin()
-    .from("User")
+    .from("user")
     .select("*")
     .eq("email", email)
     .single();
@@ -271,7 +271,7 @@ export async function getUserByEmail(email: string) {
 
 export async function getUsers(client: SupabaseClient<Database>) {
   return client
-    .from("User")
+    .from("user")
     .select("id, firstName, lastName, email")
     .range(0, 9)
     .order("lastName");
@@ -281,11 +281,11 @@ export async function insertEmployee(
   client: SupabaseClient<Database>,
   employee: EmployeeRow
 ) {
-  return client.from("Employee").insert([employee]);
+  return client.from("employee").insert([employee]);
 }
 
 async function insertUser(client: SupabaseClient<Database>, user: User) {
-  return client.from("User").insert([user]).select("*");
+  return client.from("user").insert([user]).select("*");
 }
 
 function makeClaimsFromEmployeeType({
@@ -296,7 +296,7 @@ function makeClaimsFromEmployeeType({
     create: boolean;
     update: boolean;
     delete: boolean;
-    Feature:
+    feature:
       | { id: string; name: string }
       | { id: string; name: string }[]
       | null;
@@ -305,9 +305,9 @@ function makeClaimsFromEmployeeType({
   const claims: Record<string, boolean> = {};
 
   data.forEach((permission) => {
-    if (permission.Feature === null || Array.isArray(permission.Feature)) {
+    if (permission.feature === null || Array.isArray(permission.feature)) {
       throw new Error(
-        `TODO: permission.Feature is an array or null for permission ${JSON.stringify(
+        `TODO: permission.feature is an array or null for permission ${JSON.stringify(
           permission,
           null,
           2
@@ -315,7 +315,7 @@ function makeClaimsFromEmployeeType({
       );
     }
 
-    const module = permission.Feature.name.toLowerCase();
+    const module = permission.feature.name.toLowerCase();
 
     claims[`${module}_view`] = permission.view;
     claims[`${module}_create`] = permission.create;
@@ -391,7 +391,7 @@ export function makePermissionsFromEmployeeType(
   const result: Record<string, { id: string; permission: Permission }> = {};
   if (!data) return result;
   data.forEach((permission) => {
-    if (Array.isArray(permission.Feature) || !permission.Feature) {
+    if (Array.isArray(permission.feature) || !permission.feature) {
       // hmm... TODO: handle this
       throw new Error(
         `TODO: permission.Feature is an array or null for permission ${JSON.stringify(
@@ -401,8 +401,8 @@ export function makePermissionsFromEmployeeType(
         )}`
       );
     } else {
-      result[permission.Feature.name] = {
-        id: permission?.Feature?.id!,
+      result[permission.feature.name] = {
+        id: permission?.feature?.id!,
         permission: {
           view: permission.view,
           create: permission.create,
@@ -479,7 +479,7 @@ export async function upsertEmployeeType(
   client: SupabaseClient<Database>,
   employeeType: { id?: string; name: string; color: string | null }
 ) {
-  return client.from("EmployeeType").upsert([employeeType]).select("id");
+  return client.from("employeeType").upsert([employeeType]).select("id");
 }
 
 export async function upsertEmployeeTypePermissions(
@@ -489,12 +489,12 @@ export async function upsertEmployeeTypePermissions(
 ) {
   const employeeTypePermissions = permissions.map(({ id, permission }) => ({
     employeeTypeId,
-    moduleId: id,
+    featureId: id,
     view: permission.view,
     create: permission.create,
     update: permission.update,
     delete: permission.delete,
   }));
 
-  return client.from("EmployeeTypePermission").upsert(employeeTypePermissions);
+  return client.from("employeeTypePermission").upsert(employeeTypePermissions);
 }

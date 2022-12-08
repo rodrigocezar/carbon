@@ -15,20 +15,20 @@ const EmployeesTable = memo(({ data }: EmployeesTableProps) => {
   const navigate = useNavigate();
   const permissions = usePermissions();
 
-  const rows = data.map(({ User, EmployeeType }) => {
+  const rows = data.map(({ user, employeeType }) => {
     if (
-      User === null ||
-      EmployeeType === null ||
-      Array.isArray(User) ||
-      Array.isArray(EmployeeType)
+      user === null ||
+      employeeType === null ||
+      Array.isArray(user) ||
+      Array.isArray(employeeType)
     )
       throw new Error("Expected user and employee type to be objects");
     return {
-      id: User.id,
-      firstName: User.firstName,
-      lastName: User.lastName,
-      email: User.email,
-      employeeType: EmployeeType.name,
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      employeeType: employeeType.name,
       actions: (
         <Flex justifyContent="end">
           {(permissions.can("update", "users") ||
@@ -39,7 +39,7 @@ const EmployeesTable = memo(({ data }: EmployeesTableProps) => {
                 icon={<IoMdTrash />}
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate(`/app/users/employeess/deactivate/${User.id}`);
+                  navigate(`/app/users/employeess/deactivate/${user.id}`);
                 }}
               >
                 Deactivate Employee
