@@ -13,6 +13,7 @@
     "build": "turbo run build",
     "build:packages": "turbo run build --filter=./packages/*",
     "clean": "turbo run clean && rm -rf node_modules && rm -rf supabase",
+    "db:rebuild": "run-s db:kill db:start setup",
     "db:init": "turbo run db:init",
     "db:start": "run-p db:start:database db:start:redis",
     "db:start:database": "yarn workspace @carbon/database supabase start",

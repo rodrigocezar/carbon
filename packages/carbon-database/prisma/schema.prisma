@@ -7,54 +7,79 @@ datasource db {
   url      = env("DB_URL")
 }
 
-model User {
-  id            String                   @id @default(cuid())
-  email         String                   @unique
-  firstName     String
-  lastName      String
-  emailVerified DateTime?
-  createdAt     DateTime                 @default(now())
-  updatedAt     DateTime?                @updatedAt
-  Employee      Employee?
+model employee {
+  id             String       @id
+  employeeTypeId String
+  employeeType   employeeType @relation(fields: [employeeTypeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user           user         @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
-model EmployeeType {
+model employeeType {
   id                     String                   @id @default(dbgenerated("uuid_generate_v4()"))
   name                   String
   color                  String?                  @default("#000000")
   protected              Boolean                  @default(false)
   createdAt              DateTime                 @default(now())
-  updatedAt              DateTime?                @updatedAt
-  Employee               Employee[]
-  employeeTypePermission EmployeeTypePermission[]
+  updatedAt              DateTime?
+  employee               employee[]
+  employeeTypePermission employeeTypePermission[]
 }
 
-model Feature {
-  id                     String                   @id @default(dbgenerated("uuid_generate_v4()"))
-  name                   String
-  createdAt              DateTime                 @default(now())
-  updatedAt              DateTime?                @updatedAt
-  employeeTypePermission EmployeeTypePermission[]
-}
-
-model EmployeeTypePermission {
+model employeeTypePermission {
   employeeTypeId String
-  moduleId       String
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime?    @updatedAt
+  featureId      String
   create         Boolean      @default(false)
   delete         Boolean      @default(false)
   update         Boolean      @default(false)
   view           Boolean      @default(false)
-  employeeType   EmployeeType @relation(fields: [employeeTypeId], references: [id], onDelete: Cascade)
-  module         Feature       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime?
+  employeeType   employeeType @relation(fields: [employeeTypeId], references: [id], onDelete: Cascade)
+  feature        feature      @relation(fields: [featureId], references: [id], onDelete: Cascade)
 
-  @@id([employeeTypeId, moduleId])
+  @@id([employeeTypeId, featureId])
 }
 
-model Employee {
-  id             String       @id
-  employeeTypeId String
-  EmployeeType   EmployeeType @relation(fields: [employeeTypeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User           User         @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+model feature {
+  id                     String                   @id @default(dbgenerated("uuid_generate_v4()"))
+  name                   String
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime?
+  employeeTypePermission employeeTypePermission[]
+}
+
+model user {
+  id              String            @id
+  email           String            @unique
+  firstName       String
+  lastName        String
+  fullName        String?           @default(dbgenerated("((\"firstName\" || ' '::text) || \"lastName\")"))
+  emailVerified   DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime?
+  employee        employee?
+  groupMembership groupMembership[]
+}
+
+model group {
+  id                                                   String            @id @default(dbgenerated("uuid_generate_v4()"))
+  name                                                 String
+  isIdentityGroup                                      Boolean           @default(false)
+  isEmployeeTypeGroup                                  Boolean           @default(false)
+  createdAt                                            DateTime          @default(now())
+  updatedAt                                            DateTime?
+  groupMembership_groupTogroupMembership_groupId       groupMembership[] @relation("groupTogroupMembership_groupId")
+  groupMembership_groupTogroupMembership_memberGroupId groupMembership[] @relation("groupTogroupMembership_memberGroupId")
+}
+
+model groupMembership {
+  id                                         Int     @id @default(autoincrement())
+  groupId                                    String
+  memberGroupId                              String?
+  memberUserId                               String?
+  group_groupTogroupMembership_groupId       group   @relation("groupTogroupMembership_groupId", fields: [groupId], references: [id], onDelete: Cascade)
+  group_groupTogroupMembership_memberGroupId group?  @relation("groupTogroupMembership_memberGroupId", fields: [memberGroupId], references: [id], onDelete: Cascade)
+  user                                       user?   @relation(fields: [memberUserId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, memberGroupId, memberUserId], map: "uq_groupmembership")
 }

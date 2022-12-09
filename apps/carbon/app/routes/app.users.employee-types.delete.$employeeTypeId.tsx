@@ -51,6 +51,8 @@ export async function action({ request, params }: ActionArgs) {
     );
   }
 
+  // TODO - delete employeeType group
+
   return redirect(
     "/app/users/employee-types",
     await setSessionFlash(request, {

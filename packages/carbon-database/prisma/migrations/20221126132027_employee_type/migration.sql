@@ -9,12 +9,9 @@ CREATE TABLE "employeeType" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3),
 
-    CONSTRAINT "employeeType_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "employeeType_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "employeeType_colorCheck" CHECK ("color" is null or "color" ~* '^#[a-f0-9]{6}$')
 );
-
-ALTER TABLE "employeeType"
-ADD CONSTRAINT employee_type_color_check
-CHECK ("color" is null or "color" ~* '^#[a-f0-9]{6}$');
 
 ALTER TABLE "employeeType" ENABLE ROW LEVEL SECURITY;
 

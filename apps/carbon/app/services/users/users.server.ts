@@ -137,12 +137,7 @@ export async function getEmployees(
     );
 
   if (args.name) {
-    query = query.or(
-      `lastName.ilike.${args.name}%, firstName.ilike.${args.name}%`,
-      {
-        foreignTable: "user",
-      }
-    );
+    query = query.ilike("user.fullName", `%${args.name}%`);
   }
 
   if (args.type) {
