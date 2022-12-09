@@ -49,37 +49,37 @@ model feature {
 }
 
 model user {
-  id              String            @id
-  email           String            @unique
-  firstName       String
-  lastName        String
-  fullName        String?           @default(dbgenerated("((\"firstName\" || ' '::text) || \"lastName\")"))
-  emailVerified   DateTime?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime?
-  employee        employee?
-  groupMembership groupMembership[]
+  id            String       @id
+  email         String       @unique
+  firstName     String
+  lastName      String
+  fullName      String?      @unique @default(dbgenerated("((\"firstName\" || ' '::text) || \"lastName\")"))
+  emailVerified DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime?
+  employee      employee?
+  membership    membership[]
 }
 
 model group {
-  id                                                   String            @id @default(dbgenerated("uuid_generate_v4()"))
-  name                                                 String
-  isIdentityGroup                                      Boolean           @default(false)
-  isEmployeeTypeGroup                                  Boolean           @default(false)
-  createdAt                                            DateTime          @default(now())
-  updatedAt                                            DateTime?
-  groupMembership_groupTogroupMembership_groupId       groupMembership[] @relation("groupTogroupMembership_groupId")
-  groupMembership_groupTogroupMembership_memberGroupId groupMembership[] @relation("groupTogroupMembership_memberGroupId")
+  id                                         String       @id @default(dbgenerated("uuid_generate_v4()"))
+  name                                       String
+  isIdentityGroup                            Boolean      @default(false)
+  isEmployeeTypeGroup                        Boolean      @default(false)
+  createdAt                                  DateTime     @default(now())
+  updatedAt                                  DateTime?
+  membership_groupTomembership_groupId       membership[] @relation("groupTomembership_groupId")
+  membership_groupTomembership_memberGroupId membership[] @relation("groupTomembership_memberGroupId")
 }
 
-model groupMembership {
-  id                                         Int     @id @default(autoincrement())
-  groupId                                    String
-  memberGroupId                              String?
-  memberUserId                               String?
-  group_groupTogroupMembership_groupId       group   @relation("groupTogroupMembership_groupId", fields: [groupId], references: [id], onDelete: Cascade)
-  group_groupTogroupMembership_memberGroupId group?  @relation("groupTogroupMembership_memberGroupId", fields: [memberGroupId], references: [id], onDelete: Cascade)
-  user                                       user?   @relation(fields: [memberUserId], references: [id], onDelete: Cascade)
+model membership {
+  id                                    Int     @id @default(autoincrement())
+  groupId                               String
+  memberGroupId                         String?
+  memberUserId                          String?
+  group_groupTomembership_groupId       group   @relation("groupTomembership_groupId", fields: [groupId], references: [id], onDelete: Cascade)
+  group_groupTomembership_memberGroupId group?  @relation("groupTomembership_memberGroupId", fields: [memberGroupId], references: [id], onDelete: Cascade)
+  user                                  user?   @relation(fields: [memberUserId], references: [id], onDelete: Cascade)
 
-  @@unique([groupId, memberGroupId, memberUserId], map: "uq_groupmembership")
+  @@unique([groupId, memberGroupId, memberUserId], map: "uq_membership")
 }
