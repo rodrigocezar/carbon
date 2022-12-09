@@ -21,7 +21,7 @@ It includes:
 
 ## Codebase
 
-The monorepo follows the Turborepo covention of triaging packages into one of two folders.
+The monorepo follows the Turborepo covention of grouping packages into one of two folders.
 
 1. `/apps` for applications
 2. `/packages` for shared code
@@ -90,6 +90,12 @@ To kill the database containers, you can run, but fair warning that this will de
 
 ```bash
 $ yarn db:kill   # stop and delete all database containers
+```
+
+To restart and reseed the database, you can run:
+
+```bash
+$ yarn db:rebuild # runs db:kill, db:start, and setup
 ```
 
 To run a particular application, use the `yarn workspace` command.

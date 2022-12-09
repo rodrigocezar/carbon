@@ -213,16 +213,33 @@ export interface Database {
       }
     }
     Views: {
-      groupWithMember: {
+      group_member: {
         Row: {
-          id: string | null
+          id: number | null
           name: string | null
           isIdentityGroup: boolean | null
           isEmployeeTypeGroup: boolean | null
           groupId: string | null
           memberGroupId: string | null
           memberUserId: string | null
-          member: Json | null
+          user: Json | null
+        }
+      }
+      groups_recursive: {
+        Row: {
+          groupId: string | null
+          name: string | null
+          parentId: string | null
+          isIdentityGroup: boolean | null
+          user: Json | null
+        }
+      }
+      groups_view: {
+        Row: {
+          id: string | null
+          name: string | null
+          parentId: string | null
+          users: Json | null
         }
       }
     }
@@ -247,6 +264,10 @@ export interface Database {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      groups_for_user: {
+        Args: { uid: string }
+        Returns: Json
+      }
       is_claims_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -254,6 +275,10 @@ export interface Database {
       set_claim: {
         Args: { uid: string; claim: string; value: Json }
         Returns: string
+      }
+      users_for_groups: {
+        Args: { groups: unknown }
+        Returns: Json
       }
     }
     Enums: {
