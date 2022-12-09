@@ -1,29 +1,39 @@
 # Carbon ERP
 
-Carbon is a high permformance, open-source, single tenant (incomplete) ERP written in Typescript.
+Carbon is a high permformance, open-source, single tenant (incomplete) ERP written in Typescript. It allows customers, suppliers, and employees to share a common platform for manufacturing.
 
 It includes:
 
+- Magic link authentication
 - Role-based access control (RBAC)
 - Row-level security (RLS)
-- Full-stack type safety (DB➡FE)
-- Nested, file-based routing
+- Realtime database subscriptions
+- Composable user groups
+- Full-stack type safety (Datbase → UI)
 
 ## Project Status
 
-- [ ] Alpha: Under heavy development
-- [ ] Public Alpha: Ready for use. But go easy on us, there may be a few kinks.
-- [ ] Public Beta: Stable enough for most non-enterprise use-cases
+- [x] Pre-Alpha: Developing foundation
+- [ ] Alpha: Heavy feature development
+- [ ] Public Alpha: Ready for use. But go easy on us, there'll be bugs.
+- [ ] Public Beta: Stable enough for most non-enterprise use-cases.
 - [ ] Public: Production-ready
 
-### Apps
+## Codebase
+
+The monorepo follows the Turborepo covention of triaging packages into one of two folders.
+
+1. `/apps` for applications
+2. `/packages` for shared code
+
+### `/apps`
 
 | Package Name | Description     |
 | ------------ | --------------- |
 | `carbon`     | ERP Application |
 | `docs`       | Documentation   |
 
-### Packages
+### `/packages`
 
 | Package Name           | Description                                                             |
 | ---------------------- | ----------------------------------------------------------------------- |
