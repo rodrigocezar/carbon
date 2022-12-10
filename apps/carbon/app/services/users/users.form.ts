@@ -25,12 +25,32 @@ export const employeeTypeValidator = withZod(
   })
 );
 
+export const employeeTypePermissionsValidator = z.array(
+  z.object({
+    id: z.string(),
+    permission: z.object({
+      view: z.boolean(),
+      create: z.boolean(),
+      update: z.boolean(),
+      delete: z.boolean(),
+    }),
+  })
+);
+
 export const employeeValidator = withZod(
   z.object({
     id: z.string(),
+    employeeType: z.string().min(36, { message: "Employee type is required" }),
     data: z
       .string()
       .startsWith("{", { message: "Invalid JSON" })
       .endsWith("}", { message: "Invalid JSON" }),
   })
 );
+
+export const employeePermissionsValidator = z.object({
+  view: z.boolean(),
+  create: z.boolean(),
+  update: z.boolean(),
+  delete: z.boolean(),
+});

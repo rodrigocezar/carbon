@@ -81,11 +81,13 @@ async function seed() {
     .neq("id", 0);
   if (deleteEmployeeTypes.error) throw deleteEmployeeTypes.error;
 
-  const insertGroups = await supabaseAdmin
-    .from("group")
-    .insert([
-      { id: "00000000-0000-0000-0000-000000000000", name: "All Employees" },
-    ]);
+  const insertGroups = await supabaseAdmin.from("group").insert([
+    {
+      id: "00000000-0000-0000-0000-000000000000",
+      name: "All Employees",
+      isEmployeeTypeGroup: true,
+    },
+  ]);
   if (insertGroups.error) throw insertGroups.error;
 
   const insertEmployeeTypes = await supabaseAdmin

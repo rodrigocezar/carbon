@@ -31,6 +31,10 @@ CREATE TABLE "membership" (
     )
 );
 
+CREATE INDEX index_membership_groupId ON "membership" ("groupId");
+CREATE INDEX index_membership_memberGroupId ON "membership" ("memberGroupId");
+CREATE INDEX index_membership_memberUserId ON "membership" ("memberUserId");
+
 CREATE FUNCTION public.create_employee_type_group()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -174,6 +178,7 @@ CREATE RECURSIVE VIEW groups_recursive
   "name",
   "parentId",
   "isIdentityGroup",
+  "isEmployeeTypeGroup",
   "user"
 ) AS 
   SELECT 
@@ -181,22 +186,25 @@ CREATE RECURSIVE VIEW groups_recursive
     "name", 
     NULL AS "parentId", 
     "isIdentityGroup", 
+    "isEmployeeTypeGroup",
     "user"
   FROM group_member
   UNION ALL 
-  SELECT g2."groupId", g2.name, g1."groupId" AS "parentId", g1."isIdentityGroup",  g2."user"
+  SELECT g2."groupId", g2.name, g1."groupId" AS "parentId", g1."isIdentityGroup", g2."isEmployeeTypeGroup",  g2."user"
   FROM group_member g1 
   INNER JOIN group_member g2 ON g1."memberGroupId" = g2."groupId";
 
 CREATE VIEW groups_view AS
   SELECT 
     "groupId" as "id", 
+    "isEmployeeTypeGroup",
     "name", 
     "parentId", 
     coalesce(jsonb_agg("user") filter (where "user" is not null), '[]') as users
   FROM groups_recursive 
   WHERE "isIdentityGroup" = false
-  GROUP BY "groupId", "name", "parentId";
+  GROUP BY "groupId", "name", "parentId", "isEmployeeTypeGroup"
+  ORDER BY "isEmployeeTypeGroup" DESC;
 
 
 CREATE OR REPLACE FUNCTION groups_for_user(uid text) RETURNS "jsonb"

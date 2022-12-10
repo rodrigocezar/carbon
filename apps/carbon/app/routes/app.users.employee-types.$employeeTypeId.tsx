@@ -10,6 +10,7 @@ import {
   getEmployeeType,
   getPermissionsByEmployeeType,
   makePermissionsFromEmployeeType,
+  employeeTypePermissionsValidator,
   upsertEmployeeType,
   upsertEmployeeTypePermissions,
 } from "~/services/users";
@@ -56,8 +57,19 @@ export async function action({ request }: ActionArgs) {
   }
 
   const { id, name, color, data } = validation.data;
-  // TODO: parse with io-ts
+
   const permissions = JSON.parse(data);
+  const jsonValidation =
+    employeeTypePermissionsValidator.safeParse(permissions);
+  if (jsonValidation.success === false) {
+    return json(
+      {},
+      await setSessionFlash(request, {
+        success: false,
+        message: "Failed to parse permissions",
+      })
+    );
+  }
 
   const updateEmployeeType = await upsertEmployeeType(client, {
     id,

@@ -9,8 +9,6 @@ CREATE TABLE "employee" (
 
 ALTER TABLE "employee" ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Anyone can view employees" ON "employee" FOR SELECT USING (true);
-CREATE POLICY "Only claims admin can insert employees" ON "employee" FOR INSERT WITH CHECK (is_claims_admin());
-CREATE POLICY "Only claims admin can update employees" ON "employee" FOR UPDATE WITH CHECK (is_claims_admin());
-CREATE POLICY "Only claims admin can delete employees" ON "employee" FOR DELETE USING (is_claims_admin());
+CREATE POLICY "Only claims admin can view/modify employees" ON "employee" FOR ALL USING (is_claims_admin());
+CREATE POLICY "Anyone that's authenticated can view employees" ON "employee" FOR SELECT USING (auth.role() = 'authenticated');
 

@@ -1,9 +1,10 @@
-import { ActionMenu, Table } from "@carbon/react";
+import { ActionMenu } from "@carbon/react";
 import { Flex, MenuItem, VisuallyHidden } from "@chakra-ui/react";
 import { useNavigate } from "@remix-run/react";
 import { memo } from "react";
 import { BsPencilSquare } from "react-icons/bs";
 import { IoMdTrash } from "react-icons/io";
+import { Table } from "~/components/Data";
 import { usePermissions } from "~/hooks";
 import type { Employee } from "../types";
 
@@ -34,7 +35,12 @@ const EmployeesTable = memo(({ data }: EmployeesTableProps) => {
           {(permissions.can("update", "users") ||
             permissions.can("delete", "users")) && (
             <ActionMenu>
-              <MenuItem icon={<BsPencilSquare />}>Edit Permissions</MenuItem>
+              <MenuItem
+                icon={<BsPencilSquare />}
+                onClick={() => navigate(`/app/users/employees/${user.id}`)}
+              >
+                Edit Employee
+              </MenuItem>
               <MenuItem
                 icon={<IoMdTrash />}
                 onClick={(e) => {
@@ -53,7 +59,7 @@ const EmployeesTable = memo(({ data }: EmployeesTableProps) => {
 
   return (
     <Table
-      rows={rows}
+      data={rows}
       columns={[
         {
           Header: "First Name",
@@ -76,9 +82,8 @@ const EmployeesTable = memo(({ data }: EmployeesTableProps) => {
           accessor: "actions",
         },
       ]}
-      onRowClick={(row) => {
-        navigate(`/app/users/employees/${row.id}`);
-      }}
+      selectableRows
+      onSelectedRowsChange={(x) => console.log(x)}
     />
   );
 });

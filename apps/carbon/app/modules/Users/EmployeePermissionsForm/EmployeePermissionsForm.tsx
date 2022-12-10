@@ -11,18 +11,21 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { useNavigate } from "@remix-run/react";
-import { useState } from "react";
+import { useFetcher, useNavigate } from "@remix-run/react";
+import type { PostgrestResponse } from "@supabase/supabase-js";
+import { useEffect, useState } from "react";
 import { ValidatedForm } from "remix-validated-form";
-import { Hidden, Submit } from "~/components/Form";
+import { Hidden, Select, Submit } from "~/components/Form";
 import { employeeValidator } from "~/services/users";
+import { mapRowsToOptions } from "~/utils/form";
 import PermissionCheckboxes from "../Permission";
-import type { Permission } from "../types";
+import type { EmployeeType, Permission } from "../types";
 
 type EmployeePermissionsFormProps = {
   name: string;
   initialValues: {
     id: string;
+    employeeType: string;
     permissions: Record<string, Permission>;
   };
 };
@@ -35,6 +38,19 @@ const EmployeePermissionsForm = ({
   const onClose = () => {
     navigate("/app/users/employees");
   };
+
+  const employeeTypeFetcher = useFetcher<PostgrestResponse<EmployeeType>>();
+
+  useEffect(() => {
+    employeeTypeFetcher.load("/resource/users/employee-types");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const employeeTypeOptions = mapRowsToOptions({
+    data: employeeTypeFetcher.data?.data,
+    value: "id",
+    label: "name",
+  });
 
   const [permissions, setPermissions] = useState(initialValues.permissions);
   const updatePermissions = (module: string, permission: Permission) => {
@@ -57,6 +73,13 @@ const EmployeePermissionsForm = ({
             defaultValues={initialValues}
           >
             <VStack spacing={4} alignItems="start">
+              <Select
+                name="employeeType"
+                label="Employee Type"
+                isLoading={employeeTypeFetcher.state === "loading"}
+                options={employeeTypeOptions}
+                placeholder="Select Employee Type"
+              />
               <Text fontSize="md" fontWeight="medium">
                 Permissions
               </Text>

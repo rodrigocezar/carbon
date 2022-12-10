@@ -57,126 +57,126 @@ export interface Database {
       }
       employeeType: {
         Row: {
-          id: string
           name: string
+          updatedAt: string | null
+          id: string
           color: string | null
           protected: boolean
           createdAt: string
-          updatedAt: string | null
         }
         Insert: {
-          id?: string
           name: string
+          updatedAt?: string | null
+          id?: string
           color?: string | null
           protected?: boolean
           createdAt?: string
-          updatedAt?: string | null
         }
         Update: {
-          id?: string
           name?: string
+          updatedAt?: string | null
+          id?: string
           color?: string | null
           protected?: boolean
           createdAt?: string
-          updatedAt?: string | null
         }
       }
       employeeTypePermission: {
         Row: {
           employeeTypeId: string
           featureId: string
+          updatedAt: string | null
           create: boolean
           delete: boolean
           update: boolean
           view: boolean
           createdAt: string
-          updatedAt: string | null
         }
         Insert: {
           employeeTypeId: string
           featureId: string
+          updatedAt?: string | null
           create?: boolean
           delete?: boolean
           update?: boolean
           view?: boolean
           createdAt?: string
-          updatedAt?: string | null
         }
         Update: {
           employeeTypeId?: string
           featureId?: string
+          updatedAt?: string | null
           create?: boolean
           delete?: boolean
           update?: boolean
           view?: boolean
           createdAt?: string
-          updatedAt?: string | null
         }
       }
       feature: {
         Row: {
-          id: string
           name: string
-          createdAt: string
           updatedAt: string | null
+          id: string
+          createdAt: string
         }
         Insert: {
-          id?: string
           name: string
-          createdAt?: string
           updatedAt?: string | null
+          id?: string
+          createdAt?: string
         }
         Update: {
-          id?: string
           name?: string
-          createdAt?: string
           updatedAt?: string | null
+          id?: string
+          createdAt?: string
         }
       }
       group: {
         Row: {
-          id: string
           name: string
+          updatedAt: string | null
+          id: string
           isIdentityGroup: boolean
           isEmployeeTypeGroup: boolean
           createdAt: string
-          updatedAt: string | null
         }
         Insert: {
-          id?: string
           name: string
+          updatedAt?: string | null
+          id?: string
           isIdentityGroup?: boolean
           isEmployeeTypeGroup?: boolean
           createdAt?: string
-          updatedAt?: string | null
         }
         Update: {
-          id?: string
           name?: string
+          updatedAt?: string | null
+          id?: string
           isIdentityGroup?: boolean
           isEmployeeTypeGroup?: boolean
           createdAt?: string
-          updatedAt?: string | null
         }
       }
       membership: {
         Row: {
-          id: number
           groupId: string
           memberGroupId: string | null
           memberUserId: string | null
+          id: number
         }
         Insert: {
-          id?: number
           groupId: string
           memberGroupId?: string | null
           memberUserId?: string | null
+          id?: number
         }
         Update: {
-          id?: number
           groupId?: string
           memberGroupId?: string | null
           memberUserId?: string | null
+          id?: number
         }
       }
       user: {
@@ -185,30 +185,30 @@ export interface Database {
           email: string
           firstName: string
           lastName: string
-          fullName: string | null
           emailVerified: string | null
-          createdAt: string
           updatedAt: string | null
+          fullName: string | null
+          createdAt: string
         }
         Insert: {
           id: string
           email: string
           firstName: string
           lastName: string
-          fullName?: string | null
           emailVerified?: string | null
-          createdAt?: string
           updatedAt?: string | null
+          fullName?: string | null
+          createdAt?: string
         }
         Update: {
           id?: string
           email?: string
           firstName?: string
           lastName?: string
-          fullName?: string | null
           emailVerified?: string | null
-          createdAt?: string
           updatedAt?: string | null
+          fullName?: string | null
+          createdAt?: string
         }
       }
     }
@@ -231,12 +231,14 @@ export interface Database {
           name: string | null
           parentId: string | null
           isIdentityGroup: boolean | null
+          isEmployeeTypeGroup: boolean | null
           user: Json | null
         }
       }
       groups_view: {
         Row: {
           id: string | null
+          isEmployeeTypeGroup: boolean | null
           name: string | null
           parentId: string | null
           users: Json | null
@@ -277,7 +279,7 @@ export interface Database {
         Returns: string
       }
       users_for_groups: {
-        Args: { groups: unknown }
+        Args: { groups: string[] }
         Returns: Json
       }
     }

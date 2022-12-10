@@ -123,6 +123,17 @@ export async function getClaimsById(
   return client.rpc("get_claims", { uid });
 }
 
+export async function getEmployeeById(
+  client: SupabaseClient<Database>,
+  id: string
+) {
+  return client
+    .from("employee")
+    .select("id, user(id, firstName, lastName, email), employeeType(id)")
+    .eq("id", id)
+    .single();
+}
+
 export async function getEmployees(
   client: SupabaseClient<Database>,
   args: {
@@ -162,11 +173,18 @@ export async function getEmployeeType(
     .single();
 }
 
-export async function getEmployeeTypes(client: SupabaseClient<Database>) {
-  return client
-    .from("employeeType")
-    .select("id, name, color, protected")
-    .order("name");
+export async function getEmployeeTypes(
+  client: SupabaseClient<Database>,
+  args?: { name?: string | null }
+) {
+  let query = client.from("employeeType").select("id, name, color, protected");
+
+  if (args?.name) {
+    query = query.ilike("name", `%${args.name}%`);
+  }
+
+  query = query.order("name");
+  return query;
 }
 
 export async function getFeatures(client: SupabaseClient<Database>) {
@@ -415,6 +433,32 @@ async function setUserClaims(userId: string, claims: Record<string, boolean>) {
   return getSupabaseAdmin().auth.admin.updateUserById(userId, {
     app_metadata: claims,
   });
+}
+
+export async function updateEmployee(
+  client: SupabaseClient<Database>,
+  {
+    id,
+    employeeType,
+    permissions,
+  }: {
+    id: string;
+    employeeType: string;
+    permissions: Record<string, Permission>;
+  }
+): Promise<Result> {
+  const updateEmployeeEmployeeType = await client
+    .from("employee")
+    .upsert([{ id, employeeTypeId: employeeType }]);
+
+  if (updateEmployeeEmployeeType.error) {
+    return {
+      success: false,
+      message: "Failed to update employee type",
+    };
+  }
+
+  return updatePermissions(client, { id, permissions });
 }
 
 export async function updatePermissions(

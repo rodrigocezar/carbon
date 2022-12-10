@@ -1,4 +1,3 @@
-import { Table } from "./Data";
 import type { OptionBase, GroupBase } from "./Inputs";
 import { Select } from "./Inputs";
 import { ActionMenu } from "./Overlay";
@@ -13,7 +12,6 @@ export {
   ActionMenu,
   ClientOnly,
   Select,
-  Table,
   ThemeProvider,
   theme,
   useDebounce,

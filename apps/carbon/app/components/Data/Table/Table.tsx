@@ -1,5 +1,6 @@
-import { Fragment } from "react";
-import type { ThemeTypings } from "@chakra-ui/react";
+import { forwardRef, Fragment, useEffect, useRef } from "react";
+import type { CheckboxProps, ThemeTypings } from "@chakra-ui/react";
+import { Checkbox } from "@chakra-ui/react";
 import { useColorModeValue } from "@chakra-ui/react";
 import {
   Box,
@@ -13,7 +14,7 @@ import {
   chakra,
 } from "@chakra-ui/react";
 import type { Column } from "react-table";
-import { useTable, useSortBy, usePagination } from "react-table";
+import { useTable, useSortBy, usePagination, useRowSelect } from "react-table";
 
 import { AiFillCaretUp, AiFillCaretDown } from "react-icons/ai";
 
@@ -25,18 +26,22 @@ type EmptyMessage = Partial<EmptyProps>;
 
 interface TableProps<Data extends object> {
   columns: Column<Data>[];
-  rows: Data[];
+  data: Data[];
   colorScheme?: ThemeTypings["colorSchemes"];
   emptyData?: EmptyMessage;
+  selectableRows?: boolean;
   onRowClick?: (row: Data) => void;
+  onSelectedRowsChange?: (rows: Data[]) => void;
 }
 
 const Table = <Data extends object>({
-  rows,
+  data,
   columns,
   colorScheme = "brand",
+  selectableRows,
   emptyData,
   onRowClick,
+  onSelectedRowsChange,
 }: TableProps<Data>) => {
   const {
     canPreviousPage,
@@ -45,6 +50,8 @@ const Table = <Data extends object>({
     page,
     pageOptions,
     pageCount,
+    rows,
+    selectedFlatRows,
     state: { pageIndex, pageSize },
     getTableProps,
     getTableBodyProps,
@@ -56,7 +63,7 @@ const Table = <Data extends object>({
   } = useTable(
     {
       columns,
-      data: rows,
+      data,
       initalState: {
         pageIndex: 0,
         pageSize: 10,
@@ -64,10 +71,40 @@ const Table = <Data extends object>({
       },
     },
     useSortBy,
-    usePagination
+    usePagination,
+    useRowSelect,
+    (hooks) => {
+      selectableRows &&
+        hooks.visibleColumns.push((columns) => [
+          // Let's make a column for selection
+          {
+            id: "selection",
+            // The header can use the table's getToggleAllRowsSelectedProps method
+            // to render a checkbox
+            Header: ({ getToggleAllRowsSelectedProps }) => (
+              <div>
+                <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
+              </div>
+            ),
+            // The cell can use the individual row's getToggleRowSelectedProps method
+            // to the render a checkbox
+            Cell: ({ row }) => (
+              <div>
+                <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+              </div>
+            ),
+          },
+          ...columns,
+        ]);
+    }
   );
 
   const rowBackground = useColorModeValue("gray.50", "whiteAlpha.100");
+  useEffect(() => {
+    if (typeof onSelectedRowsChange === "function") {
+      onSelectedRowsChange(selectedFlatRows.map((row) => row.original));
+    }
+  }, [selectedFlatRows, onSelectedRowsChange]);
 
   return (
     <Box w="full">
@@ -121,9 +158,10 @@ const Table = <Data extends object>({
               <Tr
                 {...row.getRowProps()}
                 key={`${row.id}-${rowIndex}`}
-                onClick={() => {
-                  if (typeof onRowClick === "function")
+                onClick={(row) => {
+                  if (typeof onRowClick === "function") {
                     onRowClick(row.original);
+                  }
                 }}
                 _hover={{
                   cursor:
@@ -162,5 +200,28 @@ const Table = <Data extends object>({
     </Box>
   );
 };
+
+type IndeterminateCheckboxProps = {
+  checked: boolean;
+  indeterminate: boolean;
+  [key: string]: any;
+};
+
+const IndeterminateCheckbox = forwardRef<
+  HTMLInputElement,
+  IndeterminateCheckboxProps
+>(({ indeterminate, checked, ...rest }, ref) => {
+  return (
+    <Checkbox
+      ref={ref}
+      colorScheme="blackAlpha"
+      isChecked={checked}
+      isIndeterminate={indeterminate}
+      {...rest}
+    />
+  );
+});
+
+IndeterminateCheckbox.displayName = "IndeterminateCheckbox";
 
 export default Table;

@@ -15,7 +15,11 @@ import { ValidatedForm, validationError } from "remix-validated-form";
 
 import { Input, Password, Submit } from "~/components/Form";
 import { createAuthSession, getAuthSession } from "~/services/session";
-import { signInWithEmail, loginValidator } from "~/services/auth";
+import {
+  signInWithEmail,
+  loginValidator,
+  verifyAuthSession,
+} from "~/services/auth";
 import type { FormActionData, Result } from "~/types";
 import { assertIsPost } from "~/utils/http";
 
@@ -25,7 +29,10 @@ export const meta: MetaFunction = () => ({
 
 export async function loader({ request }: LoaderArgs) {
   const authSession = await getAuthSession(request);
-  if (authSession) return redirect("/app");
+  if (authSession && (await verifyAuthSession(authSession))) {
+    if (authSession) return redirect("/app");
+  }
+
   return null;
 }
 

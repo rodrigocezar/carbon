@@ -10,6 +10,7 @@ import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Link, Outlet, useLoaderData } from "@remix-run/react";
 import { IoMdAdd } from "react-icons/io";
+import { DebouncedInput } from "~/components/Search";
 import { usePermissions } from "~/hooks";
 import { EmployeeTypesTable } from "~/modules/Users";
 import { requirePermissions } from "~/services/auth";
@@ -20,7 +21,11 @@ export async function loader({ request }: LoaderArgs) {
     view: "users",
   });
 
-  return json(await getEmployeeTypes(client));
+  const url = new URL(request.url);
+  const searchParams = new URLSearchParams(url.search);
+  const name = searchParams.get("name");
+
+  return json(await getEmployeeTypes(client, { name }));
 }
 
 export default function EmployeeTypesRoute() {
@@ -40,10 +45,12 @@ export default function EmployeeTypesRoute() {
           borderBottomWidth={1}
         >
           <HStack spacing={2}>
-            <Input size="sm" borderRadius="md" placeholder="Search by name" />
-            <Select size="sm" borderRadius="md">
-              <option>Filter</option>
-            </Select>
+            <DebouncedInput
+              param="name"
+              size="sm"
+              minW={180}
+              placeholder="Search by name"
+            />
           </HStack>
           <HStack spacing={2}>
             {permissions.can("create", "users") && (

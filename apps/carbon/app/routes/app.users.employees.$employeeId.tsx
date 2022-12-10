@@ -7,11 +7,12 @@ import { EmployeePermissionsForm } from "~/modules/Users";
 import { requirePermissions } from "~/services/auth";
 import { setSessionFlash } from "~/services/session";
 import {
+  employeePermissionsValidator,
   employeeValidator,
   getClaimsById,
-  getUserById,
+  getEmployeeById,
   makePermissionsFromClaims,
-  updatePermissions,
+  updateEmployee,
 } from "~/services/users";
 import { assertIsPost } from "~/utils/http";
 
@@ -25,7 +26,7 @@ export async function loader({ request, params }: LoaderArgs) {
 
   const [claims, employee] = await Promise.all([
     getClaimsById(client, employeeId),
-    getUserById(client, employeeId),
+    getEmployeeById(client, employeeId),
   ]);
 
   if (claims.error || employee.error || claims.data === null) {
@@ -67,12 +68,25 @@ export async function action({ request }: ActionArgs) {
     return validationError(validation.error);
   }
 
-  const { id, data } = validation.data;
-  // TODO: io-ts validation on permissions
+  const { id, employeeType, data } = validation.data;
   const permissions = JSON.parse(data);
+  if (
+    !Object.values(permissions).every(
+      (permission) => employeePermissionsValidator.safeParse(permission).success
+    )
+  ) {
+    return json(
+      {},
+      await setSessionFlash(request, {
+        success: false,
+        message: "Failed to parse permissions",
+      })
+    );
+  }
 
-  const result = await updatePermissions(client, {
+  const result = await updateEmployee(client, {
     id,
+    employeeType,
     permissions,
   });
 
@@ -85,14 +99,19 @@ export async function action({ request }: ActionArgs) {
 export default function UsersEmployeeRoute() {
   const { permissions, employee } = useLoaderData<typeof loader>();
 
+  if (Array.isArray(employee?.user) || Array.isArray(employee?.employeeType)) {
+    throw new Error("Expected single user and employee type");
+  }
+
   const initialValues = {
     id: employee?.id || "",
+    employeeType: employee?.employeeType?.id || "",
     permissions: permissions || {},
   };
 
   return (
     <EmployeePermissionsForm
-      name={`${employee?.firstName} ${employee?.lastName}`}
+      name={`${employee?.user?.firstName} ${employee?.user?.lastName}`}
       initialValues={initialValues}
     />
   );

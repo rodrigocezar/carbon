@@ -9394,6 +9394,13 @@ minipass@^3.0.0, minipass@^3.1.1:
   dependencies:
     yallist "^4.0.0"
 
+minipass@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/minipass/-/minipass-4.0.0.tgz#7cebb0f9fa7d56f0c5b17853cbe28838a8dbbd3b"
+  integrity sha512-g2Uuh2jEKoht+zvO6vJqXmYpflPqzRBT+Th2h01DKh5z7wbY/AZ2gCQ78cP70YoHPyFdY30YBV5WxgLOEwOykw==
+  dependencies:
+    yallist "^4.0.0"
+
 minizlib@^2.1.1:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/minizlib/-/minizlib-2.1.2.tgz#e90d3466ba209b932451508a11ce3d3632145931"
@@ -11670,14 +11677,6 @@ sucrase@^3.20.3:
     pirates "^4.0.1"
     ts-interface-checker "^0.1.9"
 
-supabase@^1.16.1:
-  version "1.16.1"
-  resolved "https://registry.yarnpkg.com/supabase/-/supabase-1.16.1.tgz#19480c83f3a03df66f05ed83a519e36bef8f5f35"
-  integrity sha512-iGkNG3SBFszI4h0kPUbZhs+qLsfHMNJujvi7f3NFmznP/m9FSR4vIGRk9T9uVgQFngj3Wvoy1vZvV4szmUswiA==
-  dependencies:
-    node-fetch "^3.2.10"
-    tar "6.1.12"
-
 supabase@^1.18.2:
   version "1.18.2"
   resolved "https://registry.yarnpkg.com/supabase/-/supabase-1.18.2.tgz#26128723e503091921eda9941ca4f9c5c57a9382"
@@ -11685,6 +11684,14 @@ supabase@^1.18.2:
   dependencies:
     node-fetch "^3.2.10"
     tar "6.1.12"
+
+supabase@^1.22.1:
+  version "1.22.1"
+  resolved "https://registry.yarnpkg.com/supabase/-/supabase-1.22.1.tgz#7900c635af50b6fc3107125f2673a107dd17a6d2"
+  integrity sha512-IxeWP4zUwc17tbmPJbDOTtD8zkimRcTvwIUrpR7ISJeIGASKOLsxXq7zCj0bqLXtxUQyldcU/I/bAxk/fGG8OQ==
+  dependencies:
+    node-fetch "^3.2.10"
+    tar "6.1.13"
 
 supports-color@^4.0.0:
   version "4.5.0"
@@ -11778,6 +11785,18 @@ tar@6.1.12:
     chownr "^2.0.0"
     fs-minipass "^2.0.0"
     minipass "^3.0.0"
+    minizlib "^2.1.1"
+    mkdirp "^1.0.3"
+    yallist "^4.0.0"
+
+tar@6.1.13:
+  version "6.1.13"
+  resolved "https://registry.yarnpkg.com/tar/-/tar-6.1.13.tgz#46e22529000f612180601a6fe0680e7da508847b"
+  integrity sha512-jdIBIN6LTIe2jqzay/2vtYLlBHa3JF42ot3h1dW8Q0PaAG4v8rm0cvpVePtau5C6OKXGGcgO9q2AMNSWxiLqKw==
+  dependencies:
+    chownr "^2.0.0"
+    fs-minipass "^2.0.0"
+    minipass "^4.0.0"
     minizlib "^2.1.1"
     mkdirp "^1.0.3"
     yallist "^4.0.0"

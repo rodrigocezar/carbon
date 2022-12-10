@@ -1,9 +1,10 @@
-import { ActionMenu, Table } from "@carbon/react";
+import { ActionMenu } from "@carbon/react";
 import { Box, Flex, MenuItem, VisuallyHidden } from "@chakra-ui/react";
 import { useNavigate } from "@remix-run/react";
 import { memo } from "react";
 import { BsPencilSquare } from "react-icons/bs";
 import { IoMdTrash } from "react-icons/io";
+import { Table } from "~/components/Data";
 import { usePermissions } from "~/hooks";
 import type { EmployeeType } from "~/modules/Users/types";
 
@@ -58,7 +59,7 @@ const EmployeeTypesTable = memo(({ data }: EmployeeTypesTableProps) => {
   }));
   return (
     <Table
-      rows={rows}
+      data={rows}
       columns={[
         {
           Header: "Employee Type",

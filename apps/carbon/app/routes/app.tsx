@@ -6,7 +6,12 @@ import { Outlet, useLoaderData } from "@remix-run/react";
 import { useEffect } from "react";
 import { IconSidebar, Topbar } from "~/components/Navigation";
 import { getSupabase, SupabaseProvider } from "~/lib/supabase";
-import { getPermissions, getUser } from "~/services/users";
+import {
+  getEmployees,
+  getPermissions,
+  getUser,
+  getUsers,
+} from "~/services/users";
 import {
   destroyAuthSession,
   getSessionFlash,
@@ -15,7 +20,8 @@ import {
 
 export async function loader({ request }: LoaderArgs) {
   const { accessToken, expiresAt, expiresIn } = await requireAuthSession(
-    request
+    request,
+    { verify: true }
   );
 
   // share a client between requests
