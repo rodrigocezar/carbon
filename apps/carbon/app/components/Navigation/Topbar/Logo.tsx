@@ -1,4 +1,5 @@
-import { Box, IconButton, useColorModeValue } from "@chakra-ui/react";
+import { useColor } from "@carbon/react";
+import { Box, IconButton } from "@chakra-ui/react";
 import { Link } from "@remix-run/react";
 import { AiOutlineCodeSandbox } from "react-icons/ai";
 
@@ -6,7 +7,7 @@ const Logo = () => {
   return (
     <Box
       borderRight={1}
-      borderRightColor={useColorModeValue("gray.200", "gray.700")}
+      borderRightColor={useColor("gray.200")}
       borderRightStyle="solid"
     >
       <IconButton

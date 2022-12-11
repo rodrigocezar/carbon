@@ -1,3 +1,4 @@
+import { useColor } from "@carbon/react";
 import {
   Alert,
   AlertDescription,
@@ -6,8 +7,8 @@ import {
   Box,
   Image,
   Text,
-  VStack,
   useColorModeValue,
+  VStack,
 } from "@chakra-ui/react";
 import { json, redirect } from "@remix-run/node";
 import type { ActionArgs, LoaderArgs, MetaFunction } from "@remix-run/node";
@@ -59,14 +60,10 @@ export async function action({ request }: ActionArgs): FormActionData {
 
 export default function ForgotPasswordRoute() {
   const actionData = useActionData<Result>();
-  const boxBackground = useColorModeValue("white", "gray.700");
+  const boxBackground = useColor("white");
 
   return (
-    <Box
-      minW="100vw"
-      minH="100vh"
-      bg={useColorModeValue("gray.50", "gray.800")}
-    >
+    <Box minW="100vw" minH="100vh" bg={useColor("gray.50")}>
       <VStack spacing={8} mx="auto" maxW="lg" pt={24} px={6}>
         <Image
           src={useColorModeValue("/logo-dark.png", "/logo-light.png")}

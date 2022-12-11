@@ -1,16 +1,15 @@
+import { useColor } from "@carbon/react";
 import {
   Box,
   IconButton,
   Tooltip,
   VStack,
-  useColorModeValue,
   useDisclosure,
   useOutsideClick,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import type { ReactElement } from "react";
-import { useRef } from "react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 const MotionBox = motion(Box);
 
@@ -104,9 +103,9 @@ const MultiTabSidebar = ({
         ref={ref}
         h="full"
         w="20rem"
-        bg={useColorModeValue("white", "black")}
+        bg={useColor("white")}
         borderRight={1}
-        borderRightColor={useColorModeValue("gray.300", "gray.700")}
+        borderRightColor={useColor("gray.300")}
         borderRightStyle="solid"
       >
         <VStack h="full" alignItems="start">
@@ -120,9 +119,9 @@ const MultiTabSidebar = ({
       <Box
         position="absolute"
         h="full"
-        bg={useColorModeValue("white", "black")}
+        bg={useColor("white")}
         borderRight={1}
-        borderRightColor={useColorModeValue("gray.200", "gray.700")}
+        borderRightColor={useColor("gray.200")}
         borderRightStyle="solid"
       >
         <VStack spacing={0}>

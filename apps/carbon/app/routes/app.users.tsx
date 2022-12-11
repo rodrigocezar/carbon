@@ -1,11 +1,5 @@
-import {
-  Box,
-  Button,
-  Grid,
-  Text,
-  useColorModeValue,
-  VStack,
-} from "@chakra-ui/react";
+import { useColor } from "@carbon/react";
+import { Box, Button, Grid, Text, VStack } from "@chakra-ui/react";
 import { SkipNavContent } from "@chakra-ui/skip-nav";
 import type { MetaFunction } from "@remix-run/node";
 import { Link, Outlet, useMatches } from "@remix-run/react";
@@ -18,9 +12,9 @@ export const meta: MetaFunction = () => ({
 
 export default function UsersRoute() {
   const { links } = useUsersSidebar();
-  const borderColor = useColorModeValue("gray.200", "gray.800");
-  const labelColor = useColorModeValue("gray.500", "gray.400");
   const matches = useMatches();
+  const borderColor = useColor("gray.200");
+  const labelColor = useColor("gray.500");
 
   return (
     <Grid w="full" h="full" templateColumns="auto 1fr" overflow="auto">

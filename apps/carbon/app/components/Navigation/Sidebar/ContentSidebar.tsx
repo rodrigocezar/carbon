@@ -1,13 +1,14 @@
-import { Box, VStack, useColorModeValue } from "@chakra-ui/react";
+import { useColor } from "@carbon/react";
+import { Box, VStack } from "@chakra-ui/react";
 import type { PropsWithChildren } from "react";
 
 const ContentSidebar = ({ children }: PropsWithChildren<{}>) => (
   <Box
     h="full"
     w="15rem"
-    bg={useColorModeValue("white", "black")}
+    bg={useColor("white")}
     borderRight={1}
-    borderRightColor={useColorModeValue("gray.300", "gray.700")}
+    borderRightColor={useColor("gray.300")}
     borderRightStyle="solid"
   >
     <VStack h="full" alignItems="start">

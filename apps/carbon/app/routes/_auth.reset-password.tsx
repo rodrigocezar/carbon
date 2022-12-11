@@ -1,3 +1,4 @@
+import { useColor } from "@carbon/react";
 import {
   Box,
   Image,
@@ -15,11 +16,7 @@ import { ValidatedForm, validationError } from "remix-validated-form";
 import { Password, Submit } from "~/components/Form";
 import { getSupabaseAdmin } from "~/lib/supabase";
 import { resetPasswordValidator } from "~/services/auth/auth.form";
-import {
-  getAuthSession,
-  requireAuthSession,
-  setSessionFlash,
-} from "~/services/session";
+import { requireAuthSession, setSessionFlash } from "~/services/session";
 import { assertIsPost } from "~/utils/http";
 
 export async function loader({ request }: LoaderArgs) {
@@ -39,13 +36,7 @@ export async function action({ request }: ActionArgs) {
 
   const { password } = validation.data;
 
-  const authSession = await getAuthSession(request);
-
-  if (!authSession) {
-    return redirect("/");
-  }
-
-  const { userId } = authSession;
+  const { userId } = await requireAuthSession(request, { verify: true });
   const { error } = await getSupabaseAdmin().auth.admin.updateUserById(userId, {
     password,
   });
@@ -70,15 +61,11 @@ export async function action({ request }: ActionArgs) {
 }
 
 export default function ResetPasswordRoute() {
-  const boxBackground = useColorModeValue("white", "gray.700");
+  const boxBackground = useColor("white");
   const navigate = useNavigate();
 
   return (
-    <Box
-      minW="100vw"
-      minH="100vh"
-      bg={useColorModeValue("gray.50", "gray.800")}
-    >
+    <Box minW="100vw" minH="100vh" bg={useColor("gray.50")}>
       <VStack spacing={8} mx="auto" maxW="lg" pt={24} px={6}>
         <Image
           src={useColorModeValue("/logo-dark.png", "/logo-light.png")}

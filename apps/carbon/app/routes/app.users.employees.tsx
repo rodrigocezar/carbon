@@ -1,5 +1,5 @@
-import { ActionMenu, Select } from "@carbon/react";
-import { Button, HStack, MenuItem, useColorModeValue } from "@chakra-ui/react";
+import { ActionMenu, Select, useColor } from "@carbon/react";
+import { Button, HStack, MenuItem } from "@chakra-ui/react";
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Outlet, useLoaderData, useNavigate } from "@remix-run/react";
@@ -40,7 +40,6 @@ export default function UsersEmployeesRoute() {
   const navigate = useNavigate();
   const permissions = usePermissions();
 
-  const borderColor = useColorModeValue("gray.200", "gray.800");
   const [selectedRows, setSelectedRows] = useState<User[]>([]);
 
   const employeeTypeOptions = mapRowsToOptions({
@@ -48,6 +47,8 @@ export default function UsersEmployeesRoute() {
     value: "id",
     label: "name",
   });
+
+  const borderColor = useColor("gray.200");
 
   return (
     <>

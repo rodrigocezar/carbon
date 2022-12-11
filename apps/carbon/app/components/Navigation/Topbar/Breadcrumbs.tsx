@@ -1,9 +1,9 @@
+import { useColor } from "@carbon/react";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   HStack,
-  useColorModeValue,
 } from "@chakra-ui/react";
 import { Link } from "@remix-run/react";
 import type { Route } from "~/types";
@@ -13,7 +13,7 @@ type BreadcrumbProps = {
 };
 
 const Breadcrumbs = ({ links = [] }: BreadcrumbProps) => {
-  const linkColor = useColorModeValue("gray.800", "gray.200");
+  const linkColor = useColor("gray.800");
 
   return (
     <HStack>

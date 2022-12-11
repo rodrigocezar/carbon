@@ -1,3 +1,4 @@
+import { useColor } from "@carbon/react";
 import {
   Box,
   FormControl,
@@ -5,7 +6,6 @@ import {
   HStack,
   useDisclosure,
   Button,
-  useColorModeValue,
   useOutsideClick,
   FormErrorMessage,
 } from "@chakra-ui/react";
@@ -30,10 +30,7 @@ const ColorPicker = ({ name, label }: ColorFieldProps) => {
     handler: () => disclosure.onClose(),
   });
 
-  const borderColor = useColorModeValue(
-    "var(--chakra-colors-gray-200)",
-    "var(--chakra-colors-gray-700)"
-  );
+  const borderColor = useColor("var(--chakra-colors-gray-200)");
 
   return (
     <FormControl>

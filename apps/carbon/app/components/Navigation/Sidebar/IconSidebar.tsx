@@ -1,10 +1,5 @@
-import {
-  Box,
-  IconButton,
-  Tooltip,
-  VStack,
-  useColorModeValue,
-} from "@chakra-ui/react";
+import { useColor } from "@carbon/react";
+import { Box, IconButton, Tooltip, VStack } from "@chakra-ui/react";
 import { Link, useMatches } from "@remix-run/react";
 import { useSidebar } from "./useSidebar";
 
@@ -15,9 +10,9 @@ const IconSidebar = () => {
   return (
     <Box
       h="full"
-      bg={useColorModeValue("white", "black")}
+      bg={useColor("white")}
       borderRight={1}
-      borderRightColor={useColorModeValue("gray.200", "gray.700")}
+      borderRightColor={useColor("gray.200")}
       borderRightStyle="solid"
       position="sticky"
     >

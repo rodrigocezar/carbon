@@ -1,4 +1,5 @@
-import { Box, Button, HStack, useColorModeValue } from "@chakra-ui/react";
+import { useColor } from "@carbon/react";
+import { Box, Button, HStack } from "@chakra-ui/react";
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Link, Outlet, useLoaderData } from "@remix-run/react";
@@ -26,7 +27,7 @@ export async function loader({ request }: LoaderArgs) {
 export default function EmployeeTypesRoute() {
   const { data, count } = useLoaderData<typeof loader>();
   const permissions = usePermissions();
-  const borderColor = useColorModeValue("gray.200", "gray.800");
+  const borderColor = useColor("gray.200");
 
   return (
     <>

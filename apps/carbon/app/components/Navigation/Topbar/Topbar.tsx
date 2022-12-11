@@ -1,4 +1,5 @@
-import { Button, GridItem, HStack, useColorModeValue } from "@chakra-ui/react";
+import { useColor } from "@carbon/react";
+import { Button, GridItem, HStack } from "@chakra-ui/react";
 import { BiHelpCircle } from "react-icons/bi";
 import { FaSearch } from "react-icons/fa";
 import AvatarMenu from "./AvatarMenu";
@@ -8,13 +9,14 @@ import useBreadcrumbs from "./useBreadcrumbs";
 
 const Topbar = () => {
   const breadcrumbLinks = useBreadcrumbs();
-  const borderColor = useColorModeValue("gray.200", "gray.800");
+  const borderColor = useColor("gray.200");
+
   return (
     <GridItem
       display="grid"
       gap={4}
       gridTemplateColumns="auto 1fr auto 1fr"
-      bg={useColorModeValue("white", "black")}
+      bg={useColor("white")}
       borderBottom={1}
       borderBottomColor={borderColor}
       borderBottomStyle="solid"

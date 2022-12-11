@@ -1,7 +1,7 @@
 import { forwardRef, Fragment, useEffect } from "react";
+import { useColor } from "@carbon/react";
 import type { ThemeTypings } from "@chakra-ui/react";
 import { Checkbox } from "@chakra-ui/react";
-import { useColorModeValue } from "@chakra-ui/react";
 import {
   Box,
   Flex,
@@ -76,7 +76,7 @@ const Table = <T extends object>({
     }
   );
 
-  const rowBackground = useColorModeValue("gray.50", "whiteAlpha.100");
+  const rowBackground = useColor("gray.50");
 
   const [params, setParams] = useUrlParams();
   const limit = parseNumberFromUrlParam(params, "limit", 10);
@@ -110,10 +110,10 @@ const Table = <T extends object>({
   };
 
   useEffect(() => {
-    if (typeof onSelectedRowsChange === "function") {
+    if (selectableRows && typeof onSelectedRowsChange === "function") {
       onSelectedRowsChange(selectedFlatRows.map((row) => row.original));
     }
-  }, [selectedFlatRows, onSelectedRowsChange]);
+  }, [selectableRows, selectedFlatRows, onSelectedRowsChange]);
 
   return (
     <Box w="full">

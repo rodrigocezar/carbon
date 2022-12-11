@@ -1,3 +1,4 @@
+import { useColor } from "@carbon/react";
 import {
   Alert,
   AlertIcon,
@@ -68,11 +69,7 @@ export default function LoginRoute() {
   const redirectTo = searchParams.get("redirectTo") ?? undefined;
 
   return (
-    <Flex
-      minW="100vw"
-      minH="100vh"
-      bg={useColorModeValue("gray.50", "gray.800")}
-    >
+    <Flex minW="100vw" minH="100vh" bg={useColor("gray.50")}>
       <VStack spacing={8} mx="auto" maxW="lg" pt={24} px={6}>
         <Image
           src={useColorModeValue("/logo-dark.png", "/logo-light.png")}
@@ -81,13 +78,7 @@ export default function LoginRoute() {
           marginBottom={3}
         />
 
-        <Box
-          rounded="lg"
-          bg={useColorModeValue("white", "gray.700")}
-          boxShadow="lg"
-          w={380}
-          p={8}
-        >
+        <Box rounded="lg" bg={useColor("white")} boxShadow="lg" w={380} p={8}>
           <ValidatedForm
             validator={loginValidator}
             defaultValues={{ redirectTo }}
@@ -104,10 +95,7 @@ export default function LoginRoute() {
               <Password name="password" label="Password" type="password" />
               <Input name="redirectTo" value={redirectTo} type="hidden" />
               <Submit w="full">Sign in</Submit>
-              <Link
-                to="/forgot-password"
-                color={useColorModeValue("black", "white")}
-              >
+              <Link to="/forgot-password" color={useColor("black")}>
                 Forgot password?
               </Link>
             </VStack>
