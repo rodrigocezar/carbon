@@ -57,126 +57,126 @@ export interface Database {
       }
       employeeType: {
         Row: {
-          name: string
-          updatedAt: string | null
           id: string
+          name: string
           color: string | null
           protected: boolean
           createdAt: string
+          updatedAt: string | null
         }
         Insert: {
-          name: string
-          updatedAt?: string | null
           id?: string
+          name: string
           color?: string | null
           protected?: boolean
           createdAt?: string
+          updatedAt?: string | null
         }
         Update: {
-          name?: string
-          updatedAt?: string | null
           id?: string
+          name?: string
           color?: string | null
           protected?: boolean
           createdAt?: string
+          updatedAt?: string | null
         }
       }
       employeeTypePermission: {
         Row: {
           employeeTypeId: string
           featureId: string
-          updatedAt: string | null
           create: boolean
           delete: boolean
           update: boolean
           view: boolean
           createdAt: string
+          updatedAt: string | null
         }
         Insert: {
           employeeTypeId: string
           featureId: string
-          updatedAt?: string | null
           create?: boolean
           delete?: boolean
           update?: boolean
           view?: boolean
           createdAt?: string
+          updatedAt?: string | null
         }
         Update: {
           employeeTypeId?: string
           featureId?: string
-          updatedAt?: string | null
           create?: boolean
           delete?: boolean
           update?: boolean
           view?: boolean
           createdAt?: string
+          updatedAt?: string | null
         }
       }
       feature: {
         Row: {
-          name: string
-          updatedAt: string | null
           id: string
+          name: string
           createdAt: string
+          updatedAt: string | null
         }
         Insert: {
-          name: string
-          updatedAt?: string | null
           id?: string
+          name: string
           createdAt?: string
+          updatedAt?: string | null
         }
         Update: {
-          name?: string
-          updatedAt?: string | null
           id?: string
+          name?: string
           createdAt?: string
+          updatedAt?: string | null
         }
       }
       group: {
         Row: {
-          name: string
-          updatedAt: string | null
           id: string
+          name: string
           isIdentityGroup: boolean
           isEmployeeTypeGroup: boolean
           createdAt: string
+          updatedAt: string | null
         }
         Insert: {
-          name: string
-          updatedAt?: string | null
           id?: string
+          name: string
           isIdentityGroup?: boolean
           isEmployeeTypeGroup?: boolean
           createdAt?: string
+          updatedAt?: string | null
         }
         Update: {
-          name?: string
-          updatedAt?: string | null
           id?: string
+          name?: string
           isIdentityGroup?: boolean
           isEmployeeTypeGroup?: boolean
           createdAt?: string
+          updatedAt?: string | null
         }
       }
       membership: {
         Row: {
+          id: number
           groupId: string
           memberGroupId: string | null
           memberUserId: string | null
-          id: number
         }
         Insert: {
+          id?: number
           groupId: string
           memberGroupId?: string | null
           memberUserId?: string | null
-          id?: number
         }
         Update: {
+          id?: number
           groupId?: string
           memberGroupId?: string | null
           memberUserId?: string | null
-          id?: number
         }
       }
       user: {
@@ -185,30 +185,30 @@ export interface Database {
           email: string
           firstName: string
           lastName: string
-          emailVerified: string | null
-          updatedAt: string | null
           fullName: string | null
+          emailVerified: string | null
           createdAt: string
+          updatedAt: string | null
         }
         Insert: {
           id: string
           email: string
           firstName: string
           lastName: string
-          emailVerified?: string | null
-          updatedAt?: string | null
           fullName?: string | null
+          emailVerified?: string | null
           createdAt?: string
+          updatedAt?: string | null
         }
         Update: {
           id?: string
           email?: string
           firstName?: string
           lastName?: string
-          emailVerified?: string | null
-          updatedAt?: string | null
           fullName?: string | null
+          emailVerified?: string | null
           createdAt?: string
+          updatedAt?: string | null
         }
       }
     }

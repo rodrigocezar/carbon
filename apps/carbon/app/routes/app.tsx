@@ -6,12 +6,7 @@ import { Outlet, useLoaderData } from "@remix-run/react";
 import { useEffect } from "react";
 import { IconSidebar, Topbar } from "~/components/Navigation";
 import { getSupabase, SupabaseProvider } from "~/lib/supabase";
-import {
-  getEmployees,
-  getPermissions,
-  getUser,
-  getUsers,
-} from "~/services/users";
+import { getPermissions, getUser } from "~/services/users";
 import {
   destroyAuthSession,
   getSessionFlash,

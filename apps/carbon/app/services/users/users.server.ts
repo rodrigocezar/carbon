@@ -139,12 +139,15 @@ export async function getEmployees(
   args: {
     name: string | null;
     type: string | null;
+    offset: number;
+    limit: number;
   }
 ) {
   let query = client
     .from("employee")
     .select(
-      "user!inner(id, firstName, lastName, email), employeeType!inner(name)"
+      "user!inner(id, firstName, lastName, email), employeeType!inner(name)",
+      { count: "exact" }
     );
 
   if (args.name) {
@@ -156,7 +159,7 @@ export async function getEmployees(
   }
 
   query = query
-    .range(0, 9)
+    .range(args.offset, args.offset + args.limit - 1)
     .order("lastName", { foreignTable: "user", ascending: true });
 
   return query;
@@ -175,15 +178,22 @@ export async function getEmployeeType(
 
 export async function getEmployeeTypes(
   client: SupabaseClient<Database>,
-  args?: { name?: string | null }
+  args?: { name?: string | null; limit: number; offset: number }
 ) {
-  let query = client.from("employeeType").select("id, name, color, protected");
+  let query = client
+    .from("employeeType")
+    .select("id, name, color, protected", { count: "exact" });
 
   if (args?.name) {
     query = query.ilike("name", `%${args.name}%`);
   }
 
+  if (args?.limit && args?.offset) {
+    query = query.range(args.offset, args.offset + args.limit - 1);
+  }
+
   query = query.order("name");
+
   return query;
 }
 
@@ -286,7 +296,6 @@ export async function getUsers(client: SupabaseClient<Database>) {
   return client
     .from("user")
     .select("id, firstName, lastName, email")
-    .range(0, 9)
     .order("lastName");
 }
 

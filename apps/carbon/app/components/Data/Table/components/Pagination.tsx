@@ -1,19 +1,21 @@
 import type { ThemeTypings } from "@chakra-ui/react";
 import {
   Button,
-  Stack,
+  Flex,
   Menu,
   MenuButton,
   MenuList,
   MenuItem,
+  Stack,
 } from "@chakra-ui/react";
 
 type PaginationProps = {
+  count: number;
+  offset: number;
   pageIndex: number;
   pageSize: number;
   canPreviousPage: boolean;
   canNextPage: boolean;
-  pageOptions: number[];
   pageCount: number;
   gotoPage: (page: number) => void;
   nextPage: () => void;
@@ -23,18 +25,19 @@ type PaginationProps = {
 };
 
 export function Pagination({
+  count,
+  offset,
   pageIndex,
   pageSize,
   canPreviousPage,
   canNextPage,
-  pageOptions,
   pageCount,
   gotoPage,
   nextPage,
   previousPage,
   setPageSize,
 }: PaginationProps) {
-  const pageSizes = [10, 25, 50];
+  const pageSizes = [10, 25, 50, 100];
   if (!pageSizes.includes(pageSize)) {
     pageSizes.push(pageSize);
     pageSizes.sort();
@@ -66,6 +69,9 @@ export function Pagination({
         </Menu>
       </Stack>
       <Stack direction="row" spacing={2}>
+        <Flex fontSize="sm" h={8} fontWeight="medium" alignItems="center">
+          {offset + 1} - {Math.min(offset + pageSize, count)} of {count}
+        </Flex>
         <Button disabled={!canPreviousPage} onClick={previousPage}>
           Previous
         </Button>

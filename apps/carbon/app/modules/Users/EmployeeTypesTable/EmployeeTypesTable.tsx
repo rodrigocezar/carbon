@@ -10,9 +10,10 @@ import type { EmployeeType } from "~/modules/Users/types";
 
 type EmployeeTypesTableProps = {
   data: EmployeeType[];
+  count: number;
 };
 
-const EmployeeTypesTable = memo(({ data }: EmployeeTypesTableProps) => {
+const EmployeeTypesTable = memo(({ data, count }: EmployeeTypesTableProps) => {
   const navigate = useNavigate();
   const permissions = usePermissions();
 
@@ -74,6 +75,7 @@ const EmployeeTypesTable = memo(({ data }: EmployeeTypesTableProps) => {
           accessor: "actions",
         },
       ]}
+      count={count}
       onRowClick={(row) => {
         if (!row.protected) navigate(`/app/users/employee-types/${row.id}`);
       }}

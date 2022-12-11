@@ -14,7 +14,7 @@ const DebouncedInput = ({ param, ...props }: DebounceInputProps) => {
   const [debouncedQuery] = useDebounce(query, 500);
 
   useEffect(() => {
-    setParams(param, debouncedQuery);
+    setParams({ [param]: debouncedQuery, limit: undefined, offset: undefined });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedQuery]);
 

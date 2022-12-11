@@ -3,18 +3,21 @@ import { useCallback } from "react";
 
 export function useUrlParams(): [
   URLSearchParams,
-  (name: string, value?: string | number) => void
+  (params: Record<string, string | number | undefined | null>) => void
 ] {
   const submit = useSubmit();
   const [searchParams] = useSearchParams();
 
   const setSearchParams = useCallback(
-    (name: string, value?: string | number) => {
-      if (value) {
-        searchParams.set(name, value.toString());
-      } else {
-        searchParams.delete(name);
-      }
+    (params: Record<string, string | number | undefined | null>) => {
+      Object.entries(params).forEach(([name, value]) => {
+        if (value) {
+          searchParams.set(name, value.toString());
+        } else {
+          searchParams.delete(name);
+        }
+      });
+
       submit(searchParams);
     },
     [submit, searchParams]

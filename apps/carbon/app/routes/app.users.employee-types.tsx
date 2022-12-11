@@ -1,11 +1,4 @@
-import {
-  Box,
-  Button,
-  HStack,
-  Input,
-  Select,
-  useColorModeValue,
-} from "@chakra-ui/react";
+import { Box, Button, HStack, useColorModeValue } from "@chakra-ui/react";
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Link, Outlet, useLoaderData } from "@remix-run/react";
@@ -15,6 +8,7 @@ import { usePermissions } from "~/hooks";
 import { EmployeeTypesTable } from "~/modules/Users";
 import { requirePermissions } from "~/services/auth";
 import { getEmployeeTypes } from "~/services/users";
+import { getPaginationParams } from "~/utils/http";
 
 export async function loader({ request }: LoaderArgs) {
   const { client } = await requirePermissions(request, {
@@ -24,12 +18,13 @@ export async function loader({ request }: LoaderArgs) {
   const url = new URL(request.url);
   const searchParams = new URLSearchParams(url.search);
   const name = searchParams.get("name");
+  const { limit, offset } = getPaginationParams(searchParams);
 
-  return json(await getEmployeeTypes(client, { name }));
+  return json(await getEmployeeTypes(client, { name, limit, offset }));
 }
 
 export default function EmployeeTypesRoute() {
-  const { data } = useLoaderData<typeof loader>();
+  const { data, count } = useLoaderData<typeof loader>();
   const permissions = usePermissions();
   const borderColor = useColorModeValue("gray.200", "gray.800");
 
@@ -65,7 +60,7 @@ export default function EmployeeTypesRoute() {
             )}
           </HStack>
         </HStack>
-        <EmployeeTypesTable data={data ?? []} />
+        <EmployeeTypesTable data={data ?? []} count={count ?? 0} />
       </Box>
       <Outlet />
     </>

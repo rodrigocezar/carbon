@@ -85,3 +85,31 @@ export function safeRedirect(
 
   return to;
 }
+
+export function parseNumberFromUrlParam(
+  params: URLSearchParams,
+  key: string,
+  defaultValue: number
+): number {
+  const value = params.get(key);
+  if (!value) {
+    return defaultValue;
+  }
+
+  const parsed = parseInt(value, 10);
+  if (isNaN(parsed)) {
+    return defaultValue;
+  }
+
+  return parsed;
+}
+
+export function getPaginationParams(params: URLSearchParams): {
+  limit: number;
+  offset: number;
+} {
+  const limit = parseNumberFromUrlParam(params, "limit", 10);
+  const offset = parseNumberFromUrlParam(params, "offset", 0);
+
+  return { limit, offset };
+}

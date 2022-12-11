@@ -1,5 +1,5 @@
-import { forwardRef, Fragment, useEffect, useRef } from "react";
-import type { CheckboxProps, ThemeTypings } from "@chakra-ui/react";
+import { forwardRef, Fragment, useEffect } from "react";
+import type { ThemeTypings } from "@chakra-ui/react";
 import { Checkbox } from "@chakra-ui/react";
 import { useColorModeValue } from "@chakra-ui/react";
 import {
@@ -14,80 +14,57 @@ import {
   chakra,
 } from "@chakra-ui/react";
 import type { Column } from "react-table";
-import { useTable, useSortBy, usePagination, useRowSelect } from "react-table";
+import { useTable, useSortBy, useRowSelect } from "react-table";
 
 import { AiFillCaretUp, AiFillCaretDown } from "react-icons/ai";
-
-import type { EmptyProps } from "../Empty";
-// import Empty from "../Empty";
 import { Pagination } from "./components/Pagination";
+import { useUrlParams } from "~/hooks";
+import { parseNumberFromUrlParam } from "~/utils/http";
 
-type EmptyMessage = Partial<EmptyProps>;
-
-interface TableProps<Data extends object> {
-  columns: Column<Data>[];
-  data: Data[];
+interface TableProps<T extends object> {
+  columns: Column<T>[];
+  data: T[];
+  count: number;
   colorScheme?: ThemeTypings["colorSchemes"];
-  emptyData?: EmptyMessage;
   selectableRows?: boolean;
-  onRowClick?: (row: Data) => void;
-  onSelectedRowsChange?: (rows: Data[]) => void;
+  onRowClick?: (row: T) => void;
+  onSelectedRowsChange?: (rows: T[]) => void;
 }
 
-const Table = <Data extends object>({
+const Table = <T extends object>({
   data,
   columns,
-  colorScheme = "brand",
+  count,
+  colorScheme = "blackAlpha",
   selectableRows,
-  emptyData,
   onRowClick,
   onSelectedRowsChange,
-}: TableProps<Data>) => {
+}: TableProps<T>) => {
   const {
-    canPreviousPage,
-    canNextPage,
     headerGroups,
-    page,
-    pageOptions,
-    pageCount,
     rows,
     selectedFlatRows,
-    state: { pageIndex, pageSize },
     getTableProps,
     getTableBodyProps,
-    gotoPage,
-    nextPage,
     prepareRow,
-    previousPage,
-    setPageSize,
   } = useTable(
     {
       columns,
       data,
-      initalState: {
-        pageIndex: 0,
-        pageSize: 10,
-        sortBy: [{ id: "label", desc: true }],
-      },
     },
     useSortBy,
-    usePagination,
     useRowSelect,
     (hooks) => {
       selectableRows &&
         hooks.visibleColumns.push((columns) => [
-          // Let's make a column for selection
           {
             id: "selection",
-            // The header can use the table's getToggleAllRowsSelectedProps method
-            // to render a checkbox
             Header: ({ getToggleAllRowsSelectedProps }) => (
               <div>
                 <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
               </div>
             ),
-            // The cell can use the individual row's getToggleRowSelectedProps method
-            // to the render a checkbox
+            // @ts-ignore
             Cell: ({ row }) => (
               <div>
                 <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
@@ -100,6 +77,38 @@ const Table = <Data extends object>({
   );
 
   const rowBackground = useColorModeValue("gray.50", "whiteAlpha.100");
+
+  const [params, setParams] = useUrlParams();
+  const limit = parseNumberFromUrlParam(params, "limit", 10);
+  const offset = parseNumberFromUrlParam(params, "offset", 0);
+
+  const pageIndex = Math.floor(offset / limit) + 1;
+  const pageCount = Math.ceil(count / limit);
+  const canPreviousPage = pageIndex > 1;
+  const canNextPage = pageIndex < Math.ceil(count / limit);
+
+  const gotoPage = (page: number) => {
+    setParams({
+      offset: (page - 1) * limit,
+      limit,
+    });
+  };
+
+  const previousPage = () => {
+    gotoPage(pageIndex - 1);
+  };
+
+  const nextPage = () => {
+    gotoPage(pageIndex + 1);
+  };
+
+  const setPageSize = (pageSize: number) => {
+    setParams({
+      offset: 0,
+      limit: pageSize,
+    });
+  };
+
   useEffect(() => {
     if (typeof onSelectedRowsChange === "function") {
       onSelectedRowsChange(selectedFlatRows.map((row) => row.original));
@@ -152,13 +161,13 @@ const Table = <Data extends object>({
           </Box>
         ) : ( */}
         <Tbody {...getTableBodyProps()}>
-          {page.map((row, rowIndex) => {
+          {rows.map((row, rowIndex) => {
             prepareRow(row);
             return (
               <Tr
                 {...row.getRowProps()}
                 key={`${row.id}-${rowIndex}`}
-                onClick={(row) => {
+                onClick={() => {
                   if (typeof onRowClick === "function") {
                     onRowClick(row.original);
                   }
@@ -184,11 +193,12 @@ const Table = <Data extends object>({
       </ChakraTable>
       {rows.length > 0 && (
         <Pagination
+          count={count}
+          offset={offset}
           pageIndex={pageIndex}
-          pageSize={pageSize}
+          pageSize={limit}
           canPreviousPage={canPreviousPage}
           canNextPage={canNextPage}
-          pageOptions={pageOptions}
           pageCount={pageCount}
           gotoPage={gotoPage}
           nextPage={nextPage}
@@ -217,6 +227,7 @@ const IndeterminateCheckbox = forwardRef<
       colorScheme="blackAlpha"
       isChecked={checked}
       isIndeterminate={indeterminate}
+      ml={2}
       {...rest}
     />
   );
