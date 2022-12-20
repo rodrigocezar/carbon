@@ -3,7 +3,6 @@ import { redirect } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { validationError } from "remix-validated-form";
-import { getSupabase } from "~/lib/supabase";
 import { EmployeeTypeForm } from "~/modules/Users/EmployeeTypes";
 import { requirePermissions } from "~/services/auth";
 import {
@@ -11,16 +10,17 @@ import {
   getFeatures,
   makeEmptyPermissionsFromFeatures,
   employeeTypePermissionsValidator,
-  upsertEmployeeType,
   upsertEmployeeTypePermissions,
+  createEmployeeType,
 } from "~/services/users";
-import { requireAuthSession, flash } from "~/services/session";
+import { flash } from "~/services/session";
 import { assertIsPost } from "~/utils/http";
 import { error, success } from "~/utils/result";
 
 export async function loader({ request }: LoaderArgs) {
-  const { accessToken } = await requireAuthSession(request);
-  const client = getSupabase(accessToken);
+  const { client } = await requirePermissions(request, {
+    create: "users",
+  });
 
   const features = await getFeatures(client);
   if (features.error || features.data === null) {
@@ -64,7 +64,7 @@ export async function action({ request }: ActionArgs) {
     );
   }
 
-  const insertEmployeeType = await upsertEmployeeType(client, {
+  const insertEmployeeType = await createEmployeeType(client, {
     name,
     color: color || null,
   });

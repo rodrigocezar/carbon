@@ -1,4 +1,4 @@
-import { Pagination } from "./Pagination";
+import Pagination, { PaginationButtons } from "./Pagination";
 import { usePagination } from "./usePagination";
 
-export { Pagination, usePagination };
+export { Pagination, PaginationButtons, usePagination };

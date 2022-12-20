@@ -54,3 +54,13 @@ export const employeePermissionsValidator = z.object({
   update: z.boolean(),
   delete: z.boolean(),
 });
+
+export const groupValidator = withZod(
+  z.object({
+    id: z.string(),
+    name: z.string().min(1, { message: "Name is required" }),
+    selections: z
+      .array(z.string().min(36, { message: "Invalid selection" }))
+      .min(1, { message: "Group members are required" }),
+  })
+);

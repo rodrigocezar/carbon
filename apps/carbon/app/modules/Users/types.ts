@@ -28,6 +28,7 @@ export type Feature = NonNullable<
 export type Group = {
   data: {
     id: string;
+    isEmployeeTypeGroup: boolean;
     name: string;
     users: User[];
   };

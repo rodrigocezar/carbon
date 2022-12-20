@@ -1,7 +1,12 @@
+import type { RowSelectionState } from "@tanstack/react-table";
+import type { Dispatch, SetStateAction } from "react";
 import { useUrlParams } from "~/hooks";
 import { parseNumberFromUrlParam } from "~/utils/http";
 
-export function usePagination(count: number) {
+export function usePagination(
+  count: number,
+  setRowSelections: Dispatch<SetStateAction<RowSelectionState>>
+) {
   const [params, setParams] = useUrlParams();
   const pageSize = parseNumberFromUrlParam(params, "limit", 15);
   const offset = parseNumberFromUrlParam(params, "offset", 0);
@@ -12,7 +17,9 @@ export function usePagination(count: number) {
   const canNextPage = pageIndex < Math.ceil(count / pageSize);
 
   const gotoPage = (page: number) => {
+    setRowSelections({});
     setParams({
+      ...Object.fromEntries(params),
       offset: (page - 1) * pageSize,
       limit: pageSize,
     });

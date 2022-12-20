@@ -1,4 +1,5 @@
-import EmployeeTypesTable from "./EmployeeTypesTable";
 import EmployeeTypeForm from "./EmployeeTypeForm";
+import EmployeeTypesTable from "./EmployeeTypesTable";
+import EmployeeTypesTableFilters from "./EmployeeTypesTableFilters";
 
-export { EmployeeTypesTable, EmployeeTypeForm };
+export { EmployeeTypeForm, EmployeeTypesTable, EmployeeTypesTableFilters };

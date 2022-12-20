@@ -29,7 +29,7 @@ const defaultProps = {
   readOnly: false,
   resetAfterSelection: false,
   selections: [] as SelectionItemInterface[],
-  selectionsMaxHeight: "auto",
+  selectionsMaxHeight: 400,
   showAvatars: false,
   testID: "UserSelect",
   usersOnly: false,
@@ -515,7 +515,7 @@ export default function useUserSelect(props: UserSelectProps) {
         return nextSelections;
       });
     },
-    []
+    [onCheckedChange]
   );
 
   const removeSelections = useCallback(() => {

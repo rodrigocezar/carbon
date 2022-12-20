@@ -13,6 +13,8 @@ import type {
 import { deleteAuthAccount, sendInviteByEmail } from "~/services/auth";
 import { requireAuthSession, flash } from "~/services/session";
 import type { Result } from "~/types";
+import type { PaginationParams } from "~/utils/http";
+import { setPaginationParams } from "~/utils/http";
 import { error, success } from "~/utils/result";
 
 export async function createEmployeeAccount(
@@ -78,6 +80,20 @@ export async function createEmployeeAccount(
   return success("Employee account created");
 }
 
+export async function createEmployeeType(
+  client: SupabaseClient<Database>,
+  employeeType: { id?: string; name: string; color: string | null }
+) {
+  return client.from("employeeType").insert([employeeType]).select("id");
+}
+
+export async function createGroup(
+  client: SupabaseClient<Database>,
+  group: { name: string }
+) {
+  return client.from("group").insert(group).select("id");
+}
+
 async function createUser(
   client: SupabaseClient<Database>,
   user: Omit<User, "fullName">
@@ -96,6 +112,13 @@ export async function deleteEmployeeType(
   employeeTypeId: string
 ) {
   return client.from("employeeType").delete().eq("id", employeeTypeId);
+}
+
+export async function deleteGroup(
+  client: SupabaseClient<Database>,
+  groupId: string
+) {
+  return client.from("group").delete().eq("id", groupId);
 }
 
 export async function getClaimsById(
@@ -118,11 +141,9 @@ export async function getEmployeeById(
 
 export async function getEmployees(
   client: SupabaseClient<Database>,
-  args: {
+  args: PaginationParams & {
     name: string | null;
     type: string | null;
-    offset: number;
-    limit: number;
   }
 ) {
   let query = client
@@ -140,10 +161,7 @@ export async function getEmployees(
     query = query.eq("employeeTypeId", args.type);
   }
 
-  query = query
-    .range(args.offset, args.offset + args.limit - 1)
-    .order("lastName", { foreignTable: "user", ascending: true });
-
+  query = setPaginationParams(query, args, "user(lastName)");
   return query;
 }
 
@@ -160,7 +178,7 @@ export async function getEmployeeType(
 
 export async function getEmployeeTypes(
   client: SupabaseClient<Database>,
-  args?: { name?: string | null; limit: number; offset: number }
+  args?: PaginationParams & { name: string | null }
 ) {
   let query = client
     .from("employeeType")
@@ -170,17 +188,42 @@ export async function getEmployeeTypes(
     query = query.ilike("name", `%${args.name}%`);
   }
 
-  if (args?.limit && args?.offset) {
-    query = query.range(args.offset, args.offset + args.limit - 1);
+  if (args) {
+    query = setPaginationParams(query, args, "name");
   }
-
-  query = query.order("name");
 
   return query;
 }
 
 export async function getFeatures(client: SupabaseClient<Database>) {
   return client.from("feature").select("id, name").order("name");
+}
+
+export async function getGroupMembersById(
+  client: SupabaseClient<Database>,
+  groupId: string
+) {
+  return client
+    .from("group_member") // group_member is a view
+    .select("name, groupId, memberGroupId, memberUserId")
+    .eq("groupId", groupId);
+}
+
+export async function getGroups(
+  client: SupabaseClient<Database>,
+  args?: {
+    name: string | null;
+    limit: number;
+    offset: number;
+    uid: string | null;
+  }
+) {
+  return client.rpc("groups_query", {
+    _limit: args?.limit ?? 15,
+    _offset: args?.offset ?? 0,
+    _name: args?.name ?? "",
+    uid: args?.uid ?? "",
+  });
 }
 
 export async function getPermissionsByEmployeeType(
@@ -507,4 +550,47 @@ export async function upsertEmployeeTypePermissions(
   }));
 
   return client.from("employeeTypePermission").upsert(employeeTypePermissions);
+}
+
+export async function upsertGroup(
+  client: SupabaseClient<Database>,
+  {
+    id,
+    name,
+  }: {
+    id: string;
+    name: string;
+  }
+) {
+  return client.from("group").upsert([{ id, name }]);
+}
+
+export async function upsertGroupMembers(
+  client: SupabaseClient<Database>,
+  groupId: string,
+  selections: string[]
+) {
+  const deleteExisting = await client
+    .from("membership")
+    .delete()
+    .eq("groupId", groupId);
+
+  if (deleteExisting.error) return deleteExisting;
+
+  // separate each id according to whether it is a group or a user
+  const memberGroups = selections
+    .filter((id) => id.startsWith("group_"))
+    .map((id) => ({
+      groupId,
+      memberGroupId: id.slice(6),
+    }));
+
+  const memberUsers = selections
+    .filter((id) => id.startsWith("user_"))
+    .map((id) => ({
+      groupId,
+      memberUserId: id.slice(5),
+    }));
+
+  return client.from("membership").insert([...memberGroups, ...memberUsers]);
 }

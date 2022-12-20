@@ -1,5 +1,5 @@
 import { useColor } from "@carbon/react";
-import { Box, Button, Grid, Text, VStack } from "@chakra-ui/react";
+import { Button, Grid, Text, VStack } from "@chakra-ui/react";
 import type { MetaFunction } from "@remix-run/node";
 import { Link, Outlet, useMatches } from "@remix-run/react";
 import { ContentSidebar } from "~/components/Navigation/Sidebar";
@@ -58,9 +58,9 @@ export default function UsersRoute() {
           )}
         </VStack>
       </ContentSidebar>
-      <Box flexGrow={1}>
+      <VStack w="full" h="full" spacing={0}>
         <Outlet />
-      </Box>
+      </VStack>
     </Grid>
   );
 }

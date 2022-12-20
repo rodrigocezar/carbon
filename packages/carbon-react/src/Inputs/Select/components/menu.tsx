@@ -361,7 +361,7 @@ export const Option = <
       isMulti,
       hideSelectedOptions,
       selectedOptionStyle,
-      selectedOptionColor,
+      // selectedOptionColor,
       chakraStyles,
     },
   } = props;

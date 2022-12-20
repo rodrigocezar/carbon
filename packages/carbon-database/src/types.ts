@@ -270,6 +270,16 @@ export interface Database {
         Args: { uid: string }
         Returns: Json
       }
+      groups_query: {
+        Args: { _limit: number; _offset: number; _name: string; uid: string }
+        Returns: {
+          id: string
+          name: string
+          parentId: string
+          isEmployeeTypeGroup: boolean
+          users: Json
+        }[]
+      }
       is_claims_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean

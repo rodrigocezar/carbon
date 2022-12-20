@@ -6,7 +6,8 @@ CREATE TABLE "group" (
   "createdAt" TIMESTAMP(3) DEFAULT now() NOT NULL,
   "updatedAt" TIMESTAMP(3),
   
-  CONSTRAINT "group_pkey" PRIMARY KEY ("id")
+  CONSTRAINT "group_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "uq_group_name" UNIQUE ("name")
 );
 
 CREATE TABLE "membership" (
@@ -207,7 +208,44 @@ CREATE VIEW groups_view AS
   ORDER BY "isEmployeeTypeGroup" DESC, "name" ASC;
 
 
-CREATE OR REPLACE FUNCTION groups_for_user(uid text) RETURNS "jsonb"
+CREATE OR REPLACE FUNCTION groups_query(
+  _limit INTEGER DEFAULT 15, 
+  _offset INTEGER DEFAULT 0, 
+  _name TEXT DEFAULT '',
+  uid TEXT DEFAULT NULL
+) 
+RETURNS TABLE (
+  "id" TEXT,
+  "name" TEXT,
+  "parentId" TEXT,
+  "isEmployeeTypeGroup" BOOLEAN,
+  "users" JSONB
+) LANGUAGE "plpgsql" SECURITY DEFINER SET search_path = public
+AS $$
+  BEGIN
+    RETURN QUERY
+      WITH group_ids AS (
+        SELECT g."id" 
+        FROM "group" g
+        WHERE g."isIdentityGroup" = false
+          AND g."name" ILIKE '%' || _name || '%'
+        LIMIT _limit
+        OFFSET _offset
+      )
+      SELECT 
+      g."id",
+      g."name",
+      g."parentId",
+      g."isEmployeeTypeGroup",
+      g."users"
+      FROM groups_view g
+      WHERE g."id" IN (SELECT * FROM group_ids)
+        OR g."parentId" IN (SELECT * FROM group_ids);
+  END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION groups_for_user(uid text) RETURNS "jsonb" -- TODO: return setof string
   LANGUAGE "plpgsql" SECURITY DEFINER SET search_path = public
   AS $$
   DECLARE retval jsonb;

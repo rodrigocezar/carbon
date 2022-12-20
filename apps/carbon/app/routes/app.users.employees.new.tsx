@@ -13,7 +13,7 @@ import { CreateEmployeeModal } from "~/modules/Users/Employees";
 export async function action({ request }: ActionArgs) {
   assertIsPost(request);
   const { client } = await requirePermissions(request, {
-    create: "users",
+    view: "users",
   });
 
   const validation = await createEmployeeValidator.validate(

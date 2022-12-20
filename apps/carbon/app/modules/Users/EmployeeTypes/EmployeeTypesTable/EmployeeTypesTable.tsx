@@ -1,8 +1,9 @@
 import { ActionMenu } from "@carbon/react";
 import { Box, Flex, MenuItem, VisuallyHidden } from "@chakra-ui/react";
 import { useNavigate } from "@remix-run/react";
-import { memo } from "react";
-import { BsPencilSquare } from "react-icons/bs";
+import type { ColumnDef } from "@tanstack/react-table";
+import { memo, useMemo } from "react";
+import { BsPencilSquare, BsPeopleFill } from "react-icons/bs";
 import { IoMdTrash } from "react-icons/io";
 import { Table } from "~/components/Data";
 import { usePermissions } from "~/hooks";
@@ -17,77 +18,75 @@ const EmployeeTypesTable = memo(({ data, count }: EmployeeTypesTableProps) => {
   const navigate = useNavigate();
   const permissions = usePermissions();
 
-  const rows = data.map((row) => ({
-    id: row.id,
-    protected: row.protected,
-    name: row.name,
-    color: row.color,
-  }));
+  const columns = useMemo<ColumnDef<typeof data[number]>[]>(() => {
+    return [
+      {
+        accessorKey: "name",
+        header: "Employee Type",
+        cell: (item) => item.getValue(),
+      },
+      {
+        accessorKey: "color",
+        header: "Color",
+        cell: (item) => (
+          <Box
+            aria-label="Color"
+            w={6}
+            h={6}
+            borderRadius="md"
+            bg={item.getValue() ?? "#000000"}
+            role="img"
+          />
+        ),
+      },
+      {
+        accessorKey: "id",
+        header: () => <VisuallyHidden>Actions</VisuallyHidden>,
+        cell: ({ row }) => (
+          <Flex justifyContent="end">
+            <ActionMenu>
+              <MenuItem
+                icon={<BsPeopleFill />}
+                onClick={() => {
+                  navigate(`/app/users/employees?type=${row.original.id}`);
+                }}
+              >
+                View Employees
+              </MenuItem>
+              <MenuItem
+                isDisabled={
+                  row.original.protected || !permissions.can("update", "users")
+                }
+                icon={<BsPencilSquare />}
+                onClick={() => {
+                  navigate(`/app/users/employee-types/${row.original.id}`);
+                }}
+              >
+                Edit Employee Type
+              </MenuItem>
+              <MenuItem
+                isDisabled={
+                  row.original.protected || !permissions.can("delete", "users")
+                }
+                icon={<IoMdTrash />}
+                onClick={() => {
+                  navigate(
+                    `/app/users/employee-types/delete/${row.original.id}`
+                  );
+                }}
+              >
+                Delete Employee Type
+              </MenuItem>
+            </ActionMenu>
+          </Flex>
+        ),
+      },
+    ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
-    <Table<typeof rows[number]>
-      data={rows}
-      columns={[
-        {
-          accessorKey: "name",
-          header: "Employee Type",
-          cell: (item) => item.getValue(),
-        },
-        {
-          accessorKey: "color",
-          header: "Color",
-          cell: (item) => (
-            <Box
-              aria-label="Color"
-              w={6}
-              h={6}
-              borderRadius="md"
-              bg={item.getValue() ?? "#000000"}
-              role="img"
-            />
-          ),
-        },
-        {
-          accessorKey: "id",
-          header: () => <VisuallyHidden>Actions</VisuallyHidden>,
-          cell: ({ row }) => (
-            <Flex justifyContent="end">
-              {!row.original.protected &&
-                (permissions.can("update", "users") ||
-                  permissions.can("delete", "users")) && (
-                  <ActionMenu>
-                    {permissions.can("update", "users") && (
-                      <MenuItem
-                        icon={<BsPencilSquare />}
-                        onClick={() => {
-                          navigate(
-                            `/app/users/employee-types/${row.original.id}`
-                          );
-                        }}
-                      >
-                        Edit Employee Type
-                      </MenuItem>
-                    )}
-                    {permissions.can("delete", "users") && (
-                      <MenuItem
-                        icon={<IoMdTrash />}
-                        onClick={() => {
-                          navigate(
-                            `/app/users/employee-types/delete/${row.original.id}`
-                          );
-                        }}
-                      >
-                        Delete Employee Type
-                      </MenuItem>
-                    )}
-                  </ActionMenu>
-                )}
-            </Flex>
-          ),
-        },
-      ]}
-      count={count}
-    />
+    <Table<typeof data[number]> data={data} columns={columns} count={count} />
   );
 });
 

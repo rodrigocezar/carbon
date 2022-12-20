@@ -7,6 +7,7 @@ export default function AppRoute() {
       <UserSelect
         isMulti
         placeholder="Select users"
+        selectionsMaxHeight={"calc(100vh - 120px)"}
         value={"00000000-0000-0000-0000-000000000000"}
       />
     </Box>

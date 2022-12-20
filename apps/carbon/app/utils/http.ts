@@ -1,3 +1,6 @@
+import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
+import type { GenericSchema } from "@supabase/supabase-js/dist/module/lib/types";
+
 export function getCurrentPath(request: Request) {
   return new URL(request.url).pathname;
 }
@@ -104,12 +107,52 @@ export function parseNumberFromUrlParam(
   return parsed;
 }
 
-export function getPaginationParams(params: URLSearchParams): {
+export interface PaginationParams {
   limit: number;
   offset: number;
-} {
+  sortBy: string | null;
+  sortAsc: boolean;
+}
+
+export function getPaginationParams(params: URLSearchParams): PaginationParams {
   const limit = parseNumberFromUrlParam(params, "limit", 15);
   const offset = parseNumberFromUrlParam(params, "offset", 0);
 
-  return { limit, offset };
+  let sortBy = null;
+  let sortDirection = "asc";
+
+  const sort = params.get("sort");
+  if (sort) {
+    [sortBy, sortDirection] = sort.split(":");
+  }
+  const sortAsc = sortDirection === "asc";
+
+  return { limit, offset, sortBy, sortAsc };
+}
+
+export function setPaginationParams<
+  T extends GenericSchema,
+  U extends Record<string, unknown>,
+  V
+>(
+  query: PostgrestFilterBuilder<T, U, V>,
+  args: PaginationParams,
+  defaultSort?: string
+): PostgrestFilterBuilder<T, U, V> {
+  if (args.sortBy) {
+    if (args.sortBy.includes(".")) {
+      const [table, column] = args.sortBy.split(".");
+      query = query.order(`${table}(${column})`, {
+        ascending: args.sortAsc,
+      });
+    } else {
+      query = query.order(args.sortBy, { ascending: args.sortAsc });
+    }
+  } else if (defaultSort) {
+    query = query.order(defaultSort, {
+      ascending: true,
+    });
+  }
+
+  return query.range(args.offset, args.offset + args.limit - 1);
 }

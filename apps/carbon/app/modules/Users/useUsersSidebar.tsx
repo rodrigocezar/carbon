@@ -15,6 +15,10 @@ const usersRoutes: Record<string, Route[]>[] = [
         name: "Suppliers",
         to: "/app/users/suppliers",
       },
+      {
+        name: "Groups",
+        to: "/app/users/groups",
+      },
     ],
   },
   {
@@ -22,10 +26,6 @@ const usersRoutes: Record<string, Route[]>[] = [
       {
         name: "Employee Types",
         to: "/app/users/employee-types",
-      },
-      {
-        name: "Groups",
-        to: "/app/users/groups",
       },
     ],
   },

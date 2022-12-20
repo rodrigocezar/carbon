@@ -14,9 +14,8 @@ const IconSidebar = () => {
       borderRight={1}
       borderRightColor={useColor("gray.200")}
       borderRightStyle="solid"
-      position="sticky"
     >
-      <VStack spacing={0}>
+      <VStack spacing={0} top={50} position="sticky">
         {links.map((link) => {
           const isActive = matchedPaths.includes(link.to);
           return (
