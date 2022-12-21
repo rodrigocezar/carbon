@@ -14,7 +14,7 @@ import { deleteAuthAccount, sendInviteByEmail } from "~/services/auth";
 import { requireAuthSession, flash } from "~/services/session";
 import type { Result } from "~/types";
 import type { PaginationParams } from "~/utils/http";
-import { setPaginationParams } from "~/utils/http";
+import { setQueryFilters } from "~/utils/http";
 import { error, success } from "~/utils/result";
 
 export async function createEmployeeAccount(
@@ -161,7 +161,7 @@ export async function getEmployees(
     query = query.eq("employeeTypeId", args.type);
   }
 
-  query = setPaginationParams(query, args, "user(lastName)");
+  query = setQueryFilters(query, args, "user(lastName)");
   return query;
 }
 
@@ -189,7 +189,7 @@ export async function getEmployeeTypes(
   }
 
   if (args) {
-    query = setPaginationParams(query, args, "name");
+    query = setQueryFilters(query, args, "name");
   }
 
   return query;

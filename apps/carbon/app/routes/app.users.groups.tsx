@@ -7,7 +7,7 @@ import type { Group } from "~/modules/Users/types";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
 import { getGroups } from "~/services/users";
-import { getPaginationParams } from "~/utils/http";
+import { getQueryFilters } from "~/utils/http";
 import { error } from "~/utils/result";
 
 export async function loader({ request }: LoaderArgs) {
@@ -19,7 +19,7 @@ export async function loader({ request }: LoaderArgs) {
   const searchParams = new URLSearchParams(url.search);
   const name = searchParams.get("name");
   const uid = searchParams.get("uid");
-  const { limit, offset } = getPaginationParams(searchParams);
+  const { limit, offset } = getQueryFilters(searchParams);
 
   const groups = await getGroups(client, { name, uid, limit, offset });
 

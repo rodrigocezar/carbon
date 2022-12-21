@@ -7,7 +7,7 @@ import {
 } from "~/modules/Users/EmployeeTypes";
 import { requirePermissions } from "~/services/auth";
 import { getEmployeeTypes } from "~/services/users";
-import { getPaginationParams } from "~/utils/http";
+import { getQueryFilters } from "~/utils/http";
 
 export async function loader({ request }: LoaderArgs) {
   const { client } = await requirePermissions(request, {
@@ -17,7 +17,7 @@ export async function loader({ request }: LoaderArgs) {
   const url = new URL(request.url);
   const searchParams = new URLSearchParams(url.search);
   const name = searchParams.get("name");
-  const { limit, offset } = getPaginationParams(searchParams);
+  const { limit, offset } = getQueryFilters(searchParams);
 
   return json(await getEmployeeTypes(client, { name, limit, offset }));
 }

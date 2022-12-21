@@ -107,30 +107,42 @@ export function parseNumberFromUrlParam(
   return parsed;
 }
 
+export type Sort = {
+  sortBy: string;
+  sortAsc: boolean;
+};
+
 export interface PaginationParams {
   limit: number;
   offset: number;
-  sortBy: string | null;
-  sortAsc: boolean;
+  sorts?: Sort[];
 }
 
-export function getPaginationParams(params: URLSearchParams): PaginationParams {
+export function getQueryFilters(params: URLSearchParams): PaginationParams {
   const limit = parseNumberFromUrlParam(params, "limit", 15);
   const offset = parseNumberFromUrlParam(params, "offset", 0);
 
-  let sortBy = null;
-  let sortDirection = "asc";
+  const sortParams = params.getAll("sort");
+  const sorts: Sort[] =
+    sortParams.length > 0
+      ? (sortParams
+          .map((sort) => {
+            const [sortBy, sortDirection] = sort.split(":");
+            if (
+              !sortBy ||
+              !sortDirection ||
+              !["asc", "desc"].includes(sortDirection)
+            )
+              return undefined;
+            return { sortBy, sortAsc: sortDirection === "asc" };
+          })
+          .filter((sort) => sort !== undefined) as Sort[])
+      : [];
 
-  const sort = params.get("sort");
-  if (sort) {
-    [sortBy, sortDirection] = sort.split(":");
-  }
-  const sortAsc = sortDirection === "asc";
-
-  return { limit, offset, sortBy, sortAsc };
+  return { limit, offset, sorts };
 }
 
-export function setPaginationParams<
+export function setQueryFilters<
   T extends GenericSchema,
   U extends Record<string, unknown>,
   V
@@ -139,15 +151,17 @@ export function setPaginationParams<
   args: PaginationParams,
   defaultSort?: string
 ): PostgrestFilterBuilder<T, U, V> {
-  if (args.sortBy) {
-    if (args.sortBy.includes(".")) {
-      const [table, column] = args.sortBy.split(".");
-      query = query.order(`${table}(${column})`, {
-        ascending: args.sortAsc,
-      });
-    } else {
-      query = query.order(args.sortBy, { ascending: args.sortAsc });
-    }
+  if (args.sorts && args.sorts.length > 0) {
+    args.sorts.forEach((sort) => {
+      if (sort.sortBy.includes(".")) {
+        const [table, column] = sort.sortBy.split(".");
+        query = query.order(`${table}(${column})`, {
+          ascending: sort.sortAsc,
+        });
+      } else {
+        query = query.order(sort.sortBy, { ascending: sort.sortAsc });
+      }
+    });
   } else if (defaultSort) {
     query = query.order(defaultSort, {
       ascending: true,

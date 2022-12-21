@@ -92,22 +92,28 @@ const Table = <T extends object>({
   onSelectedRowsChange,
 }: TableProps<T>) => {
   const [params, setParams] = useUrlParams();
+
   const toggleSortBy = (columnId: string) => {
-    const sort = params.getAll("sort");
+    const existingSort = params.getAll("sort");
     const sortAsc = `${columnId}:asc`;
     const sortDesc = `${columnId}:desc`;
 
-    if (sort.includes(sortAsc)) {
-      setParams({ ...Object.fromEntries(params), sort: sortDesc });
-    } else if (sort.includes(sortDesc)) {
-      setParams({ ...Object.fromEntries(params), sort: undefined });
+    if (existingSort.includes(sortAsc)) {
+      setParams({
+        sort: existingSort.filter((s) => s !== sortAsc).concat(sortDesc),
+      });
+    } else if (existingSort.includes(sortDesc)) {
+      setParams({ sort: existingSort.filter((s) => s !== sortDesc) });
     } else {
-      setParams({ ...Object.fromEntries(params), sort: sortAsc });
+      setParams({ sort: existingSort.concat(sortAsc) });
     }
   };
+
   const isSorted = (columnId: string): -1 | null | 1 => {
-    if (params.get("sort") === `${columnId}:asc`) return 1;
-    if (params.get("sort") === `${columnId}:desc`) return -1;
+    const existingSort = params.getAll("sort");
+
+    if (existingSort.includes(`${columnId}:asc`)) return 1;
+    if (existingSort.includes(`${columnId}:desc`)) return -1;
     return null;
   };
 
