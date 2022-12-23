@@ -199,6 +199,13 @@ export async function getFeatures(client: SupabaseClient<Database>) {
   return client.from("feature").select("id, name").order("name");
 }
 
+export async function getGroup(
+  client: SupabaseClient<Database>,
+  groupId: string
+) {
+  return client.from("group").select("id, name").eq("id", groupId).single();
+}
+
 export async function getGroupMembersById(
   client: SupabaseClient<Database>,
   groupId: string
