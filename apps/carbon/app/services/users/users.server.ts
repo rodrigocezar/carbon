@@ -13,8 +13,8 @@ import type {
 import { deleteAuthAccount, sendInviteByEmail } from "~/services/auth";
 import { requireAuthSession, flash } from "~/services/session";
 import type { Result } from "~/types";
-import type { PaginationParams } from "~/utils/http";
-import { setQueryFilters } from "~/utils/http";
+import type { GenericQueryFilters } from "~/utils/query";
+import { setGenericQueryFilters } from "~/utils/query";
 import { error, success } from "~/utils/result";
 
 export async function createEmployeeAccount(
@@ -141,7 +141,7 @@ export async function getEmployeeById(
 
 export async function getEmployees(
   client: SupabaseClient<Database>,
-  args: PaginationParams & {
+  args: GenericQueryFilters & {
     name: string | null;
     type: string | null;
   }
@@ -149,7 +149,7 @@ export async function getEmployees(
   let query = client
     .from("employee")
     .select(
-      "user!inner(id, firstName, lastName, email), employeeType!inner(name)",
+      "user!inner(id, fullName, firstName, lastName, email), employeeType!inner(name)",
       { count: "exact" }
     );
 
@@ -161,7 +161,7 @@ export async function getEmployees(
     query = query.eq("employeeTypeId", args.type);
   }
 
-  query = setQueryFilters(query, args, "user(lastName)");
+  query = setGenericQueryFilters(query, args, "user(lastName)");
   return query;
 }
 
@@ -178,7 +178,7 @@ export async function getEmployeeType(
 
 export async function getEmployeeTypes(
   client: SupabaseClient<Database>,
-  args?: PaginationParams & { name: string | null }
+  args?: GenericQueryFilters & { name: string | null }
 ) {
   let query = client
     .from("employeeType")
@@ -189,7 +189,7 @@ export async function getEmployeeTypes(
   }
 
   if (args) {
-    query = setQueryFilters(query, args, "name");
+    query = setGenericQueryFilters(query, args, "name");
   }
 
   return query;
@@ -211,19 +211,19 @@ export async function getGroupMembersById(
 
 export async function getGroups(
   client: SupabaseClient<Database>,
-  args?: {
+  args?: GenericQueryFilters & {
     name: string | null;
-    limit: number;
-    offset: number;
     uid: string | null;
   }
 ) {
-  return client.rpc("groups_query", {
-    _limit: args?.limit ?? 15,
-    _offset: args?.offset ?? 0,
+  let query = client.rpc("groups_query", {
+    _uid: args?.uid ?? "",
     _name: args?.name ?? "",
-    uid: args?.uid ?? "",
   });
+
+  if (args) query = setGenericQueryFilters(query, args);
+
+  return query;
 }
 
 export async function getPermissionsByEmployeeType(

@@ -1,6 +1,3 @@
-import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
-import type { GenericSchema } from "@supabase/supabase-js/dist/module/lib/types";
-
 export function getCurrentPath(request: Request) {
   return new URL(request.url).pathname;
 }
@@ -34,7 +31,7 @@ function notAllowedMethod(message: string) {
   return new Response(message, { status: 405 });
 }
 
-function badRequest(message: string) {
+export function badRequest(message: string) {
   return new Response(message, { status: 400 });
 }
 
@@ -105,68 +102,4 @@ export function parseNumberFromUrlParam(
   }
 
   return parsed;
-}
-
-export type Sort = {
-  sortBy: string;
-  sortAsc: boolean;
-};
-
-export interface PaginationParams {
-  limit: number;
-  offset: number;
-  sorts?: Sort[];
-}
-
-export function getQueryFilters(params: URLSearchParams): PaginationParams {
-  const limit = parseNumberFromUrlParam(params, "limit", 15);
-  const offset = parseNumberFromUrlParam(params, "offset", 0);
-
-  const sortParams = params.getAll("sort");
-  const sorts: Sort[] =
-    sortParams.length > 0
-      ? (sortParams
-          .map((sort) => {
-            const [sortBy, sortDirection] = sort.split(":");
-            if (
-              !sortBy ||
-              !sortDirection ||
-              !["asc", "desc"].includes(sortDirection)
-            )
-              return undefined;
-            return { sortBy, sortAsc: sortDirection === "asc" };
-          })
-          .filter((sort) => sort !== undefined) as Sort[])
-      : [];
-
-  return { limit, offset, sorts };
-}
-
-export function setQueryFilters<
-  T extends GenericSchema,
-  U extends Record<string, unknown>,
-  V
->(
-  query: PostgrestFilterBuilder<T, U, V>,
-  args: PaginationParams,
-  defaultSort?: string
-): PostgrestFilterBuilder<T, U, V> {
-  if (args.sorts && args.sorts.length > 0) {
-    args.sorts.forEach((sort) => {
-      if (sort.sortBy.includes(".")) {
-        const [table, column] = sort.sortBy.split(".");
-        query = query.order(`${table}(${column})`, {
-          ascending: sort.sortAsc,
-        });
-      } else {
-        query = query.order(sort.sortBy, { ascending: sort.sortAsc });
-      }
-    });
-  } else if (defaultSort) {
-    query = query.order(defaultSort, {
-      ascending: true,
-    });
-  }
-
-  return query.range(args.offset, args.offset + args.limit - 1);
 }

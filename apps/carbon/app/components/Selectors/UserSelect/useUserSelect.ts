@@ -11,7 +11,7 @@ import type {
   OptionGroup,
   SelectionItemsById,
   SelectionItemInterface,
-  UserSelectionQueryFilters,
+  UserSelectionGenericQueryFilters,
   UserSelectProps,
   TreeNode,
 } from "./types";
@@ -25,7 +25,7 @@ const defaultProps = {
   innerInputRender: null,
   isMulti: false,
   placeholder: "",
-  queryFilters: {} as UserSelectionQueryFilters,
+  queryFilters: {} as UserSelectionGenericQueryFilters,
   readOnly: false,
   resetAfterSelection: false,
   selections: [] as SelectionItemInterface[],

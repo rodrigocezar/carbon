@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 
-type PaginationProps = {
+export type PaginationProps = {
   count: number;
   offset: number;
   pageIndex: number;
@@ -53,7 +53,7 @@ const Pagination = (props: PaginationProps) => {
     >
       <HStack spacing={2}>
         <Menu>
-          <MenuButton as={Button}>
+          <MenuButton as={Button} variant="ghost">
             {pageSize} {pageSizeLabel}
           </MenuButton>
           <MenuList fontSize="sm" boxShadow="xl" minW={48}>

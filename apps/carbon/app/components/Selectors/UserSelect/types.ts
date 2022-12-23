@@ -33,7 +33,7 @@ export interface UserSelectProps {
   label?: string;
   placeholder?: string;
   showAvatars?: boolean;
-  queryFilters?: UserSelectionQueryFilters;
+  queryFilters?: UserSelectionGenericQueryFilters;
   readOnly?: boolean;
   renderInput?: ReactNode;
   resetAfterSelection?: boolean;
@@ -124,7 +124,7 @@ export interface UserTreeSelectProps {
   visible?: boolean;
 }
 
-export interface UserSelectionQueryFilters {
+export interface UserSelectionGenericQueryFilters {
   excludeSelf?: boolean;
   onlyEmployeeTypes?: string[];
   allowedIds?: string[];

@@ -1,38 +1,18 @@
 import { useColor } from "@carbon/react";
 import type { ThemeTypings } from "@chakra-ui/react";
-import { chakra } from "@chakra-ui/react";
-import { Button } from "@chakra-ui/react";
-import { MenuButton, MenuList } from "@chakra-ui/react";
-import { Menu } from "@chakra-ui/react";
-import { MenuItem } from "@chakra-ui/react";
-import { useDisclosure } from "@chakra-ui/react";
-import { Grid } from "@chakra-ui/react";
-import { IconButton } from "@chakra-ui/react";
-import { HStack } from "@chakra-ui/react";
-import { AnimatePresence, Reorder, motion } from "framer-motion";
-import { List, ListItem } from "@chakra-ui/react";
-import {
-  Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-  DrawerOverlay,
-  Text,
-} from "@chakra-ui/react";
-import { Checkbox } from "@chakra-ui/react";
 import {
   Box,
   Flex,
+  Grid,
   Table as ChakraTable,
   Thead,
   Tbody,
   Tr as ChakraTr,
   Th as ChakraTh,
   Td as ChakraTd,
+  chakra,
 } from "@chakra-ui/react";
 import type {
-  Column,
   ColumnDef,
   ColumnOrderState,
   ColumnPinningState,
@@ -43,31 +23,23 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
 
 import { AiFillCaretUp, AiFillCaretDown } from "react-icons/ai";
-import { Pagination, PaginationButtons, usePagination } from "./components";
-import { MdOutlineDragIndicator } from "react-icons/md";
 import {
-  BsChevronDown,
-  BsEyeFill,
-  BsEyeSlash,
-  BsLayoutThreeColumns,
-  BsPin,
-  BsPinFill,
-} from "react-icons/bs";
-import { useUrlParams } from "~/hooks";
+  Header,
+  IndeterminateCheckbox,
+  Pagination,
+  usePagination,
+  useSort,
+} from "./components";
+import type { TableAction } from "./types";
 
-interface Action<T> {
-  label: string;
-  onClick: (rows: T[]) => void;
-  disabled?: boolean;
-  icon?: JSX.Element;
-}
 interface TableProps<T extends object> {
   columns: ColumnDef<T>[];
   data: T[];
-  actions?: Action<T>[];
+  actions?: TableAction<T>[];
   count?: number;
   colorScheme?: ThemeTypings["colorSchemes"];
   defaultColumnVisibility?: Record<string, boolean>;
@@ -91,50 +63,41 @@ const Table = <T extends object>({
   onRowClick,
   onSelectedRowsChange,
 }: TableProps<T>) => {
-  const [params, setParams] = useUrlParams();
-
-  const toggleSortBy = (columnId: string) => {
-    const existingSort = params.getAll("sort");
-    const sortAsc = `${columnId}:asc`;
-    const sortDesc = `${columnId}:desc`;
-
-    if (existingSort.includes(sortAsc)) {
-      setParams({
-        sort: existingSort.filter((s) => s !== sortAsc).concat(sortDesc),
-      });
-    } else if (existingSort.includes(sortDesc)) {
-      setParams({ sort: existingSort.filter((s) => s !== sortDesc) });
-    } else {
-      setParams({ sort: existingSort.concat(sortAsc) });
-    }
-  };
-
-  const isSorted = (columnId: string): -1 | null | 1 => {
-    const existingSort = params.getAll("sort");
-
-    if (existingSort.includes(`${columnId}:asc`)) return 1;
-    if (existingSort.includes(`${columnId}:desc`)) return -1;
-    return null;
-  };
-
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  if (withSelectableRows) columns.unshift(getSelectableColumn<T>());
+  if (withSelectableRows) columns.unshift(getRowSelectionColumn<T>());
 
   const pagination = usePagination(count, setRowSelection);
 
-  const columnOrderingDrawer = useDisclosure();
   const [columnVisibility, setColumnVisibility] = useState(
     defaultColumnVisibility
   );
 
+  const { isSorted, toggleSortBy } = useSort();
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(
     withColumnOrdering
       ? {
           left: ["select"],
-          // right: ["id"],
         }
       : {}
+  );
+
+  const columnAccessors = useMemo(
+    () =>
+      columns.reduce<Record<string, string>>((acc, column) => {
+        if (
+          column.header &&
+          typeof column.header === "string" &&
+          "accessorKey" in column
+        ) {
+          return {
+            ...acc,
+            [column.accessorKey.toString()]: column.header,
+          };
+        }
+        return acc;
+      }, {}),
+    [columns]
   );
 
   const table = useReactTable({
@@ -176,58 +139,21 @@ const Table = <T extends object>({
 
   return (
     <>
-      {(withColumnOrdering || withSelectableRows) && (
-        <HStack
-          px={4}
-          py={3}
-          justifyContent="space-between"
-          borderBottomColor={borderColor}
-          borderBottomStyle="solid"
-          borderBottomWidth={1}
-          w="full"
-        >
-          <HStack spacing={2}>
-            {withSelectableRows && actions.length > 0 && (
-              <Menu isLazy>
-                <MenuButton
-                  as={Button}
-                  rightIcon={<BsChevronDown />}
-                  disabled={selectedRows.length === 0}
-                  colorScheme="gray"
-                  variant="outline"
-                >
-                  Actions
-                </MenuButton>
-                <MenuList fontSize="sm" boxShadow="xl">
-                  {actions.map((action) => (
-                    <MenuItem
-                      key={action.label}
-                      onClick={() => action.onClick(selectedRows)}
-                      disabled={action.disabled}
-                      icon={action.icon}
-                    >
-                      {action.label}
-                    </MenuItem>
-                  ))}
-                </MenuList>
-              </Menu>
-            )}
-          </HStack>
-          <HStack spacing={2}>
-            {withColumnOrdering && (
-              <Button
-                onClick={columnOrderingDrawer.onOpen}
-                variant="ghost"
-                leftIcon={<BsLayoutThreeColumns />}
-              >
-                Columns
-              </Button>
-            )}
-            {withPagination && <PaginationButtons {...pagination} condensed />}
-          </HStack>
-        </HStack>
-      )}
       <Box w="full" h="full">
+        {(withColumnOrdering || withSelectableRows) && (
+          <Header
+            actions={actions}
+            columnAccessors={columnAccessors}
+            columnOrder={columnOrder}
+            columns={table.getAllLeafColumns()}
+            selectedRows={selectedRows}
+            setColumnOrder={setColumnOrder}
+            pagination={pagination}
+            withColumnOrdering={withColumnOrdering}
+            withPagination={withPagination}
+            withSelectableRows={withSelectableRows}
+          />
+        )}
         <Box h="full" overflow="scroll" style={{ contain: "strict" }}>
           <Grid
             w="full"
@@ -249,7 +175,8 @@ const Table = <T extends object>({
                       {headerGroup.headers.map((header) => {
                         // TODO: improve this
                         const sortable =
-                          "accessorKey" in header.column.columnDef;
+                          "accessorKey" in header.column.columnDef &&
+                          header.column.columnDef.enableSorting !== false;
                         const sorted = isSorted(
                           // @ts-ignore
                           header.column.columnDef?.accessorKey ?? ""
@@ -459,7 +386,7 @@ const Table = <T extends object>({
               </Tbody>
             </ChakraTable>
 
-            {/* Pinned right columns */}
+            {/* Pinned right columns
             {withColumnOrdering ? (
               <ChakraTable
                 bg={defaultBackground}
@@ -537,86 +464,12 @@ const Table = <T extends object>({
                   </AnimatePresence>
                 </Tbody>
               </ChakraTable>
-            ) : null}
+            ) : null} */}
           </Grid>
         </Box>
       </Box>
       {withPagination && (
         <Pagination {...pagination} colorScheme={colorScheme} />
-      )}
-      {withColumnOrdering && (
-        <Drawer
-          isOpen={columnOrderingDrawer.isOpen}
-          placement="right"
-          onClose={columnOrderingDrawer.onClose}
-        >
-          <DrawerOverlay />
-          <DrawerContent>
-            <DrawerCloseButton />
-            <DrawerHeader>Edit columns</DrawerHeader>
-
-            <DrawerBody>
-              <List
-                as={Reorder.Group}
-                axis="y"
-                values={columnOrder}
-                onReorder={(newOrder: ColumnOrderState) => {
-                  if (withSelectableRows) newOrder.unshift("select");
-                  setColumnOrder(newOrder);
-                }}
-                spacing={2}
-              >
-                {/* TODO: list undraggable pinned columns first */}
-                {table
-                  .getAllLeafColumns()
-                  .reduce<JSX.Element[]>((acc, column) => {
-                    if (isColumnToggable(column))
-                      acc.push(
-                        <ListItem
-                          key={column.id}
-                          as={Reorder.Item}
-                          value={column.id}
-                          rounded="lg"
-                        >
-                          <HStack>
-                            <IconButton
-                              aria-label="Drag handle"
-                              icon={<MdOutlineDragIndicator />}
-                            />
-                            <Text fontSize="small" flexGrow={1}>
-                              <>{column.columnDef.header}</>
-                            </Text>
-                            <IconButton
-                              aria-label="Toggle column"
-                              icon={
-                                column.getIsPinned() ? <BsPinFill /> : <BsPin />
-                              }
-                              onClick={() =>
-                                column.getIsPinned()
-                                  ? column.pin(false)
-                                  : column.pin("left")
-                              }
-                            />
-                            <IconButton
-                              aria-label="Toggle column"
-                              icon={
-                                column.getIsVisible() ? (
-                                  <BsEyeFill />
-                                ) : (
-                                  <BsEyeSlash />
-                                )
-                              }
-                              onClick={column.getToggleVisibilityHandler()}
-                            />
-                          </HStack>
-                        </ListItem>
-                      );
-                    return acc;
-                  }, [])}
-              </List>
-            </DrawerBody>
-          </DrawerContent>
-        </Drawer>
       )}
     </>
   );
@@ -632,31 +485,7 @@ const spring = {
   stiffness: 30,
 };
 
-type IndeterminateCheckboxProps = {
-  checked: boolean;
-  indeterminate: boolean;
-  [key: string]: any;
-};
-
-const IndeterminateCheckbox = ({
-  indeterminate,
-  checked,
-  ...rest
-}: IndeterminateCheckboxProps) => {
-  return (
-    <Checkbox
-      colorScheme="blackAlpha"
-      isChecked={checked}
-      isIndeterminate={indeterminate}
-      ml={2}
-      {...rest}
-    />
-  );
-};
-
-IndeterminateCheckbox.displayName = "IndeterminateCheckbox";
-
-function getSelectableColumn<T>(): ColumnDef<T> {
+function getRowSelectionColumn<T>(): ColumnDef<T> {
   return {
     id: "select",
     header: ({ table }) => (
@@ -678,14 +507,6 @@ function getSelectableColumn<T>(): ColumnDef<T> {
       />
     ),
   };
-}
-
-function isColumnToggable<T>(column: Column<T, unknown>): boolean {
-  return (
-    column.columnDef.id !== "select" &&
-    typeof column.columnDef.header === "string" &&
-    column.columnDef.header !== ""
-  );
 }
 
 export default Table;

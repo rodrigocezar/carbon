@@ -10,12 +10,13 @@ const GroupsTableFilters = () => {
   const borderColor = useColor("gray.200");
   return (
     <HStack
-      px={4}
-      py={3}
-      justifyContent="space-between"
       borderBottomColor={borderColor}
       borderBottomStyle="solid"
       borderBottomWidth={1}
+      justifyContent="space-between"
+      px={4}
+      py={3}
+      w="full"
     >
       <HStack spacing={2}>
         <DebouncedInput

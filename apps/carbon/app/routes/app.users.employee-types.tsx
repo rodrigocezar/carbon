@@ -7,7 +7,7 @@ import {
 } from "~/modules/Users/EmployeeTypes";
 import { requirePermissions } from "~/services/auth";
 import { getEmployeeTypes } from "~/services/users";
-import { getQueryFilters } from "~/utils/http";
+import { getGenericQueryFilters } from "~/utils/query";
 
 export async function loader({ request }: LoaderArgs) {
   const { client } = await requirePermissions(request, {
@@ -17,9 +17,9 @@ export async function loader({ request }: LoaderArgs) {
   const url = new URL(request.url);
   const searchParams = new URLSearchParams(url.search);
   const name = searchParams.get("name");
-  const { limit, offset } = getQueryFilters(searchParams);
+  const { limit, offset, sorts } = getGenericQueryFilters(searchParams);
 
-  return json(await getEmployeeTypes(client, { name, limit, offset }));
+  return json(await getEmployeeTypes(client, { name, limit, offset, sorts }));
 }
 
 export default function EmployeeTypesRoute() {

@@ -43,8 +43,8 @@ const GroupsTable = memo(({ data, count }: GroupsTableProps) => {
           cell: (item) => item.getValue(),
         },
         {
-          accessorKey: "members",
           header: "Members",
+          // accessorKey: undefined, // makes the column unsortable
           cell: ({ row }) => (
             <AvatarGroup max={5} size="sm" spacing={-2}>
               {row.original.members.map((name: string, index: number) => (

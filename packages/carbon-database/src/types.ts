@@ -271,7 +271,7 @@ export interface Database {
         Returns: Json
       }
       groups_query: {
-        Args: { _limit: number; _offset: number; _name: string; uid: string }
+        Args: { _name: string; _uid: string }
         Returns: {
           id: string
           name: string

@@ -15,27 +15,41 @@ type EmployeesTableProps = {
   withSelectableRows?: boolean;
 };
 
+const defaultColumnVisibility = {
+  user_firstName: false,
+  user_lastName: false,
+};
+
 const EmployeesTable = memo(
   ({ data, count, withSelectableRows = false }: EmployeesTableProps) => {
     const navigate = useNavigate();
     const permissions = usePermissions();
 
-    const rows = data.map((d) => {
-      // we should only have one user and employee per employee id
-      if (
-        d.user === null ||
-        d.employeeType === null ||
-        Array.isArray(d.user) ||
-        Array.isArray(d.employeeType)
-      ) {
-        throw new Error("Expected user and employee type to be objects");
-      }
+    const rows = useMemo(
+      () =>
+        data.map((d) => {
+          // we should only have one user and employee per employee id
+          if (
+            d.user === null ||
+            d.employeeType === null ||
+            Array.isArray(d.user) ||
+            Array.isArray(d.employeeType)
+          ) {
+            throw new Error("Expected user and employee type to be objects");
+          }
 
-      return d;
-    });
+          return d;
+        }),
+      [data]
+    );
 
     const columns = useMemo<ColumnDef<typeof rows[number]>[]>(() => {
       return [
+        {
+          accessorKey: "user.fullName",
+          header: "Full Name",
+          cell: (item) => item.getValue(),
+        },
         {
           accessorKey: "user.firstName",
           header: "First Name",
@@ -108,8 +122,9 @@ const EmployeesTable = memo(
       <Table<typeof rows[number]>
         actions={actions}
         count={count}
-        data={rows}
         columns={columns}
+        data={rows}
+        defaultColumnVisibility={defaultColumnVisibility}
         withColumnOrdering
         withPagination
         withSelectableRows={withSelectableRows}

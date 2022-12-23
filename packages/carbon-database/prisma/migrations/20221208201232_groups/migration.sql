@@ -209,10 +209,8 @@ CREATE VIEW groups_view AS
 
 
 CREATE OR REPLACE FUNCTION groups_query(
-  _limit INTEGER DEFAULT 15, 
-  _offset INTEGER DEFAULT 0, 
   _name TEXT DEFAULT '',
-  uid TEXT DEFAULT NULL
+  _uid TEXT DEFAULT NULL
 ) 
 RETURNS TABLE (
   "id" TEXT,
@@ -228,9 +226,7 @@ AS $$
         SELECT g."id" 
         FROM "group" g
         WHERE g."isIdentityGroup" = false
-          AND g."name" ILIKE '%' || _name || '%'
-        LIMIT _limit
-        OFFSET _offset
+          AND g."name" ILIKE '%' || _name || '%'          
       )
       SELECT 
       g."id",
@@ -243,7 +239,6 @@ AS $$
         OR g."parentId" IN (SELECT * FROM group_ids);
   END;
 $$;
-
 
 CREATE OR REPLACE FUNCTION groups_for_user(uid text) RETURNS "jsonb" -- TODO: return setof string
   LANGUAGE "plpgsql" SECURITY DEFINER SET search_path = public

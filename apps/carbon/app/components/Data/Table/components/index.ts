@@ -1,4 +1,6 @@
-import Pagination, { PaginationButtons } from "./Pagination";
-import { usePagination } from "./usePagination";
+import Header from "./Header";
+import IndeterminateCheckbox from "./IndeterminateCheckbox";
+import { Pagination, usePagination } from "./Pagination";
+import { useSort } from "./Sort";
 
-export { Pagination, PaginationButtons, usePagination };
+export { Header, IndeterminateCheckbox, Pagination, usePagination, useSort };
