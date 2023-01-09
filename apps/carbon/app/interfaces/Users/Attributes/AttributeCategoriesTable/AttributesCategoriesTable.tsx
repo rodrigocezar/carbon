@@ -1,10 +1,11 @@
 import { ActionMenu } from "@carbon/react";
 import {
+  Badge,
   Button,
+  ButtonGroup,
   Flex,
+  IconButton,
   MenuItem,
-  Tag,
-  TagLabel,
   useDisclosure,
   VisuallyHidden,
 } from "@chakra-ui/react";
@@ -12,7 +13,7 @@ import { Link, useNavigate } from "@remix-run/react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { memo, useMemo, useState } from "react";
 import { BiAddToQueue } from "react-icons/bi";
-import { BsPencilSquare, BsListUl } from "react-icons/bs";
+import { BsPencilSquare, BsListUl, BsPlus } from "react-icons/bs";
 import { IoMdTrash } from "react-icons/io";
 import { Table } from "~/components";
 import { usePermissions } from "~/hooks";
@@ -53,15 +54,25 @@ const AttributeCategoriesTable = memo(
         {
           header: "Attributes",
           cell: ({ row }) => (
-            <Button
-              as={Link}
-              to={`/app/users/attributes/list/${row.original.id}`}
-            >
-              {Array.isArray(row.original.userAttribute)
-                ? row.original.userAttribute?.length ?? 0
-                : 0}{" "}
-              Attributes
-            </Button>
+            <ButtonGroup size="sm" isAttached variant="outline">
+              <Button
+                onClick={() => {
+                  navigate(`/app/users/attributes/list/${row.original.id}`);
+                }}
+              >
+                {Array.isArray(row.original.userAttribute)
+                  ? row.original.userAttribute?.length ?? 0
+                  : 0}{" "}
+                Attributes
+              </Button>
+              <IconButton
+                aria-label="Add to friends"
+                icon={<BsPlus />}
+                onClick={() => {
+                  navigate(`/app/users/attributes/list/${row.original.id}/new`);
+                }}
+              />
+            </ButtonGroup>
           ),
         },
         {
@@ -70,14 +81,13 @@ const AttributeCategoriesTable = memo(
           cell: (item) => {
             const isPublic = item.getValue<boolean>().toString() === "true";
             return (
-              <Tag
-                size="md"
-                borderRadius="full"
-                variant={isPublic ? "solid" : "outline"}
+              <Badge
+                size="sm"
+                variant={isPublic ? undefined : "outline"}
                 colorScheme={isPublic ? "green" : "gray "}
               >
-                <TagLabel>{isPublic ? "Public" : "Private"}</TagLabel>
-              </Tag>
+                {isPublic ? "Public" : "Private"}
+              </Badge>
             );
           },
         },

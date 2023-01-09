@@ -37,7 +37,7 @@ const Columns = <T extends object>({
   setColumnOrder,
 }: ColumnsProps<T>) => {
   return (
-    <Popover placement="bottom">
+    <Popover placement="bottom" closeOnBlur>
       <PopoverTrigger>
         <Button variant="ghost" leftIcon={<BsLayoutThreeColumns />}>
           Columns
@@ -83,11 +83,17 @@ const Columns = <T extends object>({
                       <IconButton
                         aria-label="Toggle column"
                         icon={column.getIsPinned() ? <BsPinFill /> : <BsPin />}
-                        onClick={() =>
-                          column.getIsPinned()
-                            ? column.pin(false)
-                            : column.pin("left")
-                        }
+                        onClick={(e) => {
+                          if (column.getIsPinned()) {
+                            column.pin(false);
+                          } else {
+                            column.pin("left");
+                            // when a column is pinned, we assure that it's visible
+                            if (!column.getIsVisible()) {
+                              column.getToggleVisibilityHandler()(e);
+                            }
+                          }
+                        }}
                         variant="ghost"
                       />
                       <IconButton
