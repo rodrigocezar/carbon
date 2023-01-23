@@ -55,6 +55,8 @@ interface TableProps<T extends object> {
   actions?: TableAction<T>[];
   count?: number;
   colorScheme?: ThemeTypings["colorSchemes"];
+  defaultColumnOrder?: string[];
+  defaultColumnPinning?: ColumnPinningState;
   defaultColumnVisibility?: Record<string, boolean>;
   editableComponents?: Record<string, EditableTableCellComponent<T>>;
   withColumnOrdering?: boolean;
@@ -74,6 +76,10 @@ const Table = <T extends object>({
   count = 0,
   colorScheme = "blackAlpha",
   editableComponents = {},
+  defaultColumnOrder = [],
+  defaultColumnPinning = {
+    left: ["select"],
+  },
   defaultColumnVisibility = {},
   withFilters = false,
   withInlineEditing = false,
@@ -86,29 +92,32 @@ const Table = <T extends object>({
 }: TableProps<T>) => {
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
+  /* Data for Optimistic Updates */
   const [internalData, setInternalData] = useState<T[]>(data);
   useEffect(() => {
     setInternalData(data);
   }, [data]);
 
+  /* Seletable Rows */
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  if (withSelectableRows) columns.unshift(getRowSelectionColumn<T>());
 
+  /* Pagination */
   const pagination = usePagination(count, setRowSelection);
 
+  /* Column Visibility */
   const [columnVisibility, setColumnVisibility] = useState(
     defaultColumnVisibility
   );
 
-  const { isSorted, toggleSortBy } = useSort();
-  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
+  /* Column Ordering */
+  const [columnOrder, setColumnOrder] =
+    useState<ColumnOrderState>(defaultColumnOrder);
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(
-    withColumnOrdering
-      ? {
-          left: ["select"],
-        }
-      : {}
+    withColumnOrdering ? defaultColumnPinning : {}
   );
+
+  /* Sorting */
+  const { isSorted, toggleSortBy } = useSort();
 
   const columnAccessors = useMemo(
     () =>
@@ -131,12 +140,14 @@ const Table = <T extends object>({
 
   const table = useReactTable({
     data: internalData,
-    columns,
+    columns: withSelectableRows
+      ? getRowSelectionColumn<T>().concat(columns)
+      : columns,
     state: {
-      rowSelection,
       columnVisibility,
       columnOrder,
       columnPinning,
+      rowSelection,
     },
     onColumnVisibilityChange: setColumnVisibility,
     onColumnOrderChange: setColumnOrder,
@@ -170,6 +181,13 @@ const Table = <T extends object>({
   const selectedRows = withSelectableRows
     ? table.getSelectedRowModel().flatRows.map((row) => row.original)
     : [];
+
+  useEffect(() => {
+    if (typeof onSelectedRowsChange === "function") {
+      onSelectedRowsChange(selectedRows);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rowSelection, onSelectedRowsChange]);
 
   const [editMode, setEditMode] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -320,12 +338,13 @@ const Table = <T extends object>({
           row: y1,
           column: x1,
         });
+        // any other key activates editing
+        // if the column is editable and a cell is selected
       } else if (
         !isEditing &&
         selectedCell &&
         isColumnEditable(selectedCell.column)
       ) {
-        // any other key activates editing if the column is editable and a cell is selected
         setIsEditing(true);
       }
     },
@@ -356,13 +375,6 @@ const Table = <T extends object>({
     setColumnOrder(table.getAllLeafColumns().map((column) => column.id));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    if (typeof onSelectedRowsChange === "function") {
-      onSelectedRowsChange(selectedRows);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rowSelection, onSelectedRowsChange]);
 
   const rows = table.getRowModel().rows;
   const rowsAreClickable = !editMode && typeof onRowClick === "function";
@@ -424,7 +436,7 @@ const Table = <T extends object>({
       >
         <Grid
           w="full"
-          gridTemplateColumns={withColumnOrdering ? "auto 1fr auto" : "1fr"}
+          gridTemplateColumns={withColumnOrdering ? "auto 1fr" : "1fr"}
         >
           {/* Pinned left columns */}
           {withColumnOrdering ? (
@@ -465,7 +477,7 @@ const Table = <T extends object>({
                           py={2}
                           whiteSpace="nowrap"
                         >
-                          {header.isPlaceholder ? null : (
+                          {!header.isPlaceholder ? null : (
                             <Flex
                               justify="flex-start"
                               align="center"
@@ -519,7 +531,9 @@ const Table = <T extends object>({
                       onCellClick={onCellClick}
                       onCellUpdate={onCellEditUpdate}
                       onRowClick={
-                        onRowClick ? () => onRowClick(row.original) : undefined
+                        rowsAreClickable
+                          ? () => onRowClick(row.original)
+                          : undefined
                       }
                     />
                   );
@@ -655,28 +669,31 @@ const Table = <T extends object>({
   );
 };
 
-function getRowSelectionColumn<T>(): ColumnDef<T> {
-  return {
-    id: "select",
-    header: ({ table }) => (
-      <IndeterminateCheckbox
-        {...{
-          checked: table.getIsAllRowsSelected(),
-          indeterminate: table.getIsSomeRowsSelected(),
-          onChange: table.getToggleAllRowsSelectedHandler(),
-        }}
-      />
-    ),
-    cell: ({ row }) => (
-      <IndeterminateCheckbox
-        {...{
-          checked: row.getIsSelected(),
-          indeterminate: row.getIsSomeSelected(),
-          onChange: row.getToggleSelectedHandler(),
-        }}
-      />
-    ),
-  };
+function getRowSelectionColumn<T>(): ColumnDef<T>[] {
+  return [
+    {
+      id: "select",
+      size: 40,
+      header: ({ table }) => (
+        <IndeterminateCheckbox
+          {...{
+            checked: table.getIsAllRowsSelected(),
+            indeterminate: table.getIsSomeRowsSelected(),
+            onChange: table.getToggleAllRowsSelectedHandler(),
+          }}
+        />
+      ),
+      cell: ({ row }) => (
+        <IndeterminateCheckbox
+          {...{
+            checked: row.getIsSelected(),
+            indeterminate: row.getIsSomeSelected(),
+            onChange: row.getToggleSelectedHandler(),
+          }}
+        />
+      ),
+    },
+  ];
 }
 
 export default Table;

@@ -1,19 +1,20 @@
 import { Select, useColor } from "@carbon/react";
 import { Button, HStack } from "@chakra-ui/react";
-import { useNavigate } from "@remix-run/react";
+import { Link } from "@remix-run/react";
 import { IoMdAdd } from "react-icons/io";
 import { DebouncedInput } from "~/components/Search";
 import { usePermissions, useUrlParams } from "~/hooks";
 import type { EmployeeType } from "~/interfaces/Users/types";
 import { mapRowsToOptions } from "~/utils/form";
 
-type EmployeeTypeFiltersProps = {
+type EmployeesTableFiltersProps = {
   employeeTypes: Partial<EmployeeType>[];
 };
 
-const EmployeesTableFilters = ({ employeeTypes }: EmployeeTypeFiltersProps) => {
+const EmployeesTableFilters = ({
+  employeeTypes,
+}: EmployeesTableFiltersProps) => {
   const [params, setParams] = useUrlParams();
-  const navigate = useNavigate();
   const permissions = usePermissions();
   const employeeTypeOptions = mapRowsToOptions({
     data: employeeTypes,
@@ -83,10 +84,9 @@ const EmployeesTableFilters = ({ employeeTypes }: EmployeeTypeFiltersProps) => {
       <HStack spacing={2}>
         {permissions.can("create", "users") && (
           <Button
+            as={Link}
+            to={`new?${params.toString()}`}
             colorScheme="brand"
-            onClick={() => {
-              navigate("new");
-            }}
             leftIcon={<IoMdAdd />}
           >
             New Employee

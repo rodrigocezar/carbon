@@ -17,9 +17,7 @@ export const theme = {
   components: {
     Button: {
       baseStyle: {},
-      // styles for different sizes ("sm", "md", "lg")
       sizes: {},
-      // styles for different visual variants ("outline", "solid")
       variants: {
         solid: (props: { colorScheme: string }) => {
           const { colorScheme: c } = props;
@@ -49,6 +47,19 @@ export const theme = {
         colorScheme: "blackAlpha",
       },
     },
+    Drawer: {
+      baseStyle: {
+        overlay: {
+          backdropFilter: "blur(3px)",
+        },
+        footer: {
+          borderColor: "gray.200",
+          borderTopWidth: "1px",
+          borderTopStyle: "solid",
+        },
+      },
+      defaultProps: {},
+    },
     Input: {
       defaultProps: {
         borderRadius: "md",
@@ -57,6 +68,13 @@ export const theme = {
         outline: focusRingOutlined,
         filled: focusRingFilled,
         flushed: focusRingFlushed,
+      },
+    },
+    Modal: {
+      baseStyle: {
+        overlay: {
+          backdropFilter: "blur(3px)",
+        },
       },
     },
     Radio: {
@@ -79,7 +97,7 @@ export const theme = {
         colorScheme: "green",
       },
     },
-    TextArea: {
+    Textarea: {
       variants: {
         outline: () => focusRingOutlined().field,
         filled: () => focusRingFilled().field,

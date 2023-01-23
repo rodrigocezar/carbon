@@ -41,10 +41,45 @@ export interface Database {
           applied_steps_count?: number
         }
       }
+      address: {
+        Row: {
+          addressLine1: string | null
+          addressLine2: string | null
+          city: string | null
+          state: string | null
+          postalCode: string | null
+          countryId: number | null
+          phone: string | null
+          fax: string | null
+          id: number
+        }
+        Insert: {
+          addressLine1?: string | null
+          addressLine2?: string | null
+          city?: string | null
+          state?: string | null
+          postalCode?: string | null
+          countryId?: number | null
+          phone?: string | null
+          fax?: string | null
+          id?: number
+        }
+        Update: {
+          addressLine1?: string | null
+          addressLine2?: string | null
+          city?: string | null
+          state?: string | null
+          postalCode?: string | null
+          countryId?: number | null
+          phone?: string | null
+          fax?: string | null
+          id?: number
+        }
+      }
       attributeDataType: {
         Row: {
-          id: number
           label: string
+          id: number
           isBoolean: boolean
           isDate: boolean
           isList: boolean
@@ -53,8 +88,8 @@ export interface Database {
           isUser: boolean
         }
         Insert: {
-          id?: number
           label: string
+          id?: number
           isBoolean?: boolean
           isDate?: boolean
           isList?: boolean
@@ -63,14 +98,234 @@ export interface Database {
           isUser?: boolean
         }
         Update: {
-          id?: number
           label?: string
+          id?: number
           isBoolean?: boolean
           isDate?: boolean
           isList?: boolean
           isNumeric?: boolean
           isText?: boolean
           isUser?: boolean
+        }
+      }
+      contact: {
+        Row: {
+          firstName: string
+          lastName: string
+          email: string
+          title: string | null
+          mobilePhone: string | null
+          homePhone: string | null
+          workPhone: string | null
+          fax: string | null
+          addressLine1: string | null
+          addressLine2: string | null
+          city: string | null
+          state: string | null
+          postalCode: string | null
+          countryId: number | null
+          birthday: string | null
+          notes: string | null
+          id: string
+        }
+        Insert: {
+          firstName: string
+          lastName: string
+          email: string
+          title?: string | null
+          mobilePhone?: string | null
+          homePhone?: string | null
+          workPhone?: string | null
+          fax?: string | null
+          addressLine1?: string | null
+          addressLine2?: string | null
+          city?: string | null
+          state?: string | null
+          postalCode?: string | null
+          countryId?: number | null
+          birthday?: string | null
+          notes?: string | null
+          id?: string
+        }
+        Update: {
+          firstName?: string
+          lastName?: string
+          email?: string
+          title?: string | null
+          mobilePhone?: string | null
+          homePhone?: string | null
+          workPhone?: string | null
+          fax?: string | null
+          addressLine1?: string | null
+          addressLine2?: string | null
+          city?: string | null
+          state?: string | null
+          postalCode?: string | null
+          countryId?: number | null
+          birthday?: string | null
+          notes?: string | null
+          id?: string
+        }
+      }
+      country: {
+        Row: {
+          name: string
+          code: string
+          id: number
+        }
+        Insert: {
+          name: string
+          code: string
+          id?: number
+        }
+        Update: {
+          name?: string
+          code?: string
+          id?: number
+        }
+      }
+      customer: {
+        Row: {
+          name: string
+          description: string | null
+          customerTypeId: string | null
+          customerStatusId: number | null
+          taxId: string | null
+          accountManagerId: string | null
+          logo: string | null
+          createdBy: string | null
+          updatedAt: string | null
+          updatedBy: string | null
+          id: string
+          createdAt: string
+        }
+        Insert: {
+          name: string
+          description?: string | null
+          customerTypeId?: string | null
+          customerStatusId?: number | null
+          taxId?: string | null
+          accountManagerId?: string | null
+          logo?: string | null
+          createdBy?: string | null
+          updatedAt?: string | null
+          updatedBy?: string | null
+          id?: string
+          createdAt?: string
+        }
+        Update: {
+          name?: string
+          description?: string | null
+          customerTypeId?: string | null
+          customerStatusId?: number | null
+          taxId?: string | null
+          accountManagerId?: string | null
+          logo?: string | null
+          createdBy?: string | null
+          updatedAt?: string | null
+          updatedBy?: string | null
+          id?: string
+          createdAt?: string
+        }
+      }
+      customerAccount: {
+        Row: {
+          id: string
+          customerId: string
+        }
+        Insert: {
+          id: string
+          customerId: string
+        }
+        Update: {
+          id?: string
+          customerId?: string
+        }
+      }
+      customerContact: {
+        Row: {
+          customerId: string
+          contactId: string
+          customerLocationId: number | null
+          userId: string | null
+          id: string
+        }
+        Insert: {
+          customerId: string
+          contactId: string
+          customerLocationId?: number | null
+          userId?: string | null
+          id?: string
+        }
+        Update: {
+          customerId?: string
+          contactId?: string
+          customerLocationId?: number | null
+          userId?: string | null
+          id?: string
+        }
+      }
+      customerLocation: {
+        Row: {
+          customerId: string
+          addressId: number
+          id: number
+        }
+        Insert: {
+          customerId: string
+          addressId: number
+          id?: number
+        }
+        Update: {
+          customerId?: string
+          addressId?: number
+          id?: number
+        }
+      }
+      customerStatus: {
+        Row: {
+          name: string
+          updatedAt: string | null
+          id: number
+          createdAt: string
+        }
+        Insert: {
+          name: string
+          updatedAt?: string | null
+          id?: number
+          createdAt?: string
+        }
+        Update: {
+          name?: string
+          updatedAt?: string | null
+          id?: number
+          createdAt?: string
+        }
+      }
+      customerType: {
+        Row: {
+          name: string
+          updatedAt: string | null
+          id: string
+          color: string | null
+          protected: boolean
+          createdAt: string
+        }
+        Insert: {
+          name: string
+          updatedAt?: string | null
+          id?: string
+          color?: string | null
+          protected?: boolean
+          createdAt?: string
+        }
+        Update: {
+          name?: string
+          updatedAt?: string | null
+          id?: string
+          color?: string | null
+          protected?: boolean
+          createdAt?: string
         }
       }
       employee: {
@@ -89,126 +344,282 @@ export interface Database {
       }
       employeeType: {
         Row: {
-          id: string
           name: string
+          updatedAt: string | null
+          id: string
           color: string | null
           protected: boolean
           createdAt: string
-          updatedAt: string | null
         }
         Insert: {
-          id?: string
           name: string
+          updatedAt?: string | null
+          id?: string
           color?: string | null
           protected?: boolean
           createdAt?: string
-          updatedAt?: string | null
         }
         Update: {
-          id?: string
           name?: string
+          updatedAt?: string | null
+          id?: string
           color?: string | null
           protected?: boolean
           createdAt?: string
-          updatedAt?: string | null
         }
       }
       employeeTypePermission: {
         Row: {
           employeeTypeId: string
           featureId: string
+          updatedAt: string | null
           create: boolean
           delete: boolean
           update: boolean
           view: boolean
           createdAt: string
-          updatedAt: string | null
         }
         Insert: {
           employeeTypeId: string
           featureId: string
+          updatedAt?: string | null
           create?: boolean
           delete?: boolean
           update?: boolean
           view?: boolean
           createdAt?: string
-          updatedAt?: string | null
         }
         Update: {
           employeeTypeId?: string
           featureId?: string
+          updatedAt?: string | null
           create?: boolean
           delete?: boolean
           update?: boolean
           view?: boolean
           createdAt?: string
-          updatedAt?: string | null
         }
       }
       feature: {
         Row: {
-          id: string
           name: string
-          createdAt: string
           updatedAt: string | null
+          id: string
+          createdAt: string
         }
         Insert: {
-          id?: string
           name: string
-          createdAt?: string
           updatedAt?: string | null
+          id?: string
+          createdAt?: string
         }
         Update: {
-          id?: string
           name?: string
-          createdAt?: string
           updatedAt?: string | null
+          id?: string
+          createdAt?: string
         }
       }
       group: {
         Row: {
-          id: string
           name: string
+          updatedAt: string | null
+          id: string
           isIdentityGroup: boolean
           isEmployeeTypeGroup: boolean
+          isCustomerOrgGroup: boolean
+          isCustomerTypeGroup: boolean
+          isSupplierTypeGroup: boolean
+          isSupplierOrgGroup: boolean
           createdAt: string
-          updatedAt: string | null
         }
         Insert: {
-          id?: string
           name: string
+          updatedAt?: string | null
+          id?: string
           isIdentityGroup?: boolean
           isEmployeeTypeGroup?: boolean
+          isCustomerOrgGroup?: boolean
+          isCustomerTypeGroup?: boolean
+          isSupplierTypeGroup?: boolean
+          isSupplierOrgGroup?: boolean
           createdAt?: string
-          updatedAt?: string | null
         }
         Update: {
-          id?: string
           name?: string
+          updatedAt?: string | null
+          id?: string
           isIdentityGroup?: boolean
           isEmployeeTypeGroup?: boolean
+          isCustomerOrgGroup?: boolean
+          isCustomerTypeGroup?: boolean
+          isSupplierTypeGroup?: boolean
+          isSupplierOrgGroup?: boolean
           createdAt?: string
-          updatedAt?: string | null
         }
       }
       membership: {
         Row: {
-          id: number
           groupId: string
           memberGroupId: string | null
           memberUserId: string | null
+          id: number
         }
         Insert: {
-          id?: number
           groupId: string
           memberGroupId?: string | null
           memberUserId?: string | null
+          id?: number
         }
         Update: {
-          id?: number
           groupId?: string
           memberGroupId?: string | null
           memberUserId?: string | null
+          id?: number
+        }
+      }
+      supplier: {
+        Row: {
+          name: string
+          description: string | null
+          supplierTypeId: string | null
+          supplierStatusId: number | null
+          taxId: string | null
+          accountManagerId: string | null
+          logo: string | null
+          createdBy: string | null
+          updatedAt: string | null
+          updatedBy: string | null
+          id: string
+          createdAt: string
+        }
+        Insert: {
+          name: string
+          description?: string | null
+          supplierTypeId?: string | null
+          supplierStatusId?: number | null
+          taxId?: string | null
+          accountManagerId?: string | null
+          logo?: string | null
+          createdBy?: string | null
+          updatedAt?: string | null
+          updatedBy?: string | null
+          id?: string
+          createdAt?: string
+        }
+        Update: {
+          name?: string
+          description?: string | null
+          supplierTypeId?: string | null
+          supplierStatusId?: number | null
+          taxId?: string | null
+          accountManagerId?: string | null
+          logo?: string | null
+          createdBy?: string | null
+          updatedAt?: string | null
+          updatedBy?: string | null
+          id?: string
+          createdAt?: string
+        }
+      }
+      supplierAccount: {
+        Row: {
+          id: string
+          supplierId: string
+        }
+        Insert: {
+          id: string
+          supplierId: string
+        }
+        Update: {
+          id?: string
+          supplierId?: string
+        }
+      }
+      supplierContact: {
+        Row: {
+          supplierId: string
+          contactId: string
+          supplierLocationId: number | null
+          userId: string | null
+          id: string
+        }
+        Insert: {
+          supplierId: string
+          contactId: string
+          supplierLocationId?: number | null
+          userId?: string | null
+          id?: string
+        }
+        Update: {
+          supplierId?: string
+          contactId?: string
+          supplierLocationId?: number | null
+          userId?: string | null
+          id?: string
+        }
+      }
+      supplierLocation: {
+        Row: {
+          supplierId: string
+          addressId: number
+          id: number
+        }
+        Insert: {
+          supplierId: string
+          addressId: number
+          id?: number
+        }
+        Update: {
+          supplierId?: string
+          addressId?: number
+          id?: number
+        }
+      }
+      supplierStatus: {
+        Row: {
+          name: string
+          updatedAt: string | null
+          id: number
+          createdAt: string
+        }
+        Insert: {
+          name: string
+          updatedAt?: string | null
+          id?: number
+          createdAt?: string
+        }
+        Update: {
+          name?: string
+          updatedAt?: string | null
+          id?: number
+          createdAt?: string
+        }
+      }
+      supplierType: {
+        Row: {
+          name: string
+          updatedAt: string | null
+          id: string
+          color: string | null
+          protected: boolean
+          createdAt: string
+        }
+        Insert: {
+          name: string
+          updatedAt?: string | null
+          id?: string
+          color?: string | null
+          protected?: boolean
+          createdAt?: string
+        }
+        Update: {
+          name?: string
+          updatedAt?: string | null
+          id?: string
+          color?: string | null
+          protected?: boolean
+          createdAt?: string
         }
       }
       user: {
@@ -217,123 +628,122 @@ export interface Database {
           email: string
           firstName: string
           lastName: string
+          avatarUrl: string | null
+          emailVerified: string | null
+          updatedAt: string | null
           fullName: string | null
           about: string
-          avatarUrl: string | null
           active: boolean | null
-          emailVerified: string | null
           createdAt: string
-          updatedAt: string | null
         }
         Insert: {
           id: string
           email: string
           firstName: string
           lastName: string
+          avatarUrl?: string | null
+          emailVerified?: string | null
+          updatedAt?: string | null
           fullName?: string | null
           about?: string
-          avatarUrl?: string | null
           active?: boolean | null
-          emailVerified?: string | null
           createdAt?: string
-          updatedAt?: string | null
         }
         Update: {
           id?: string
           email?: string
           firstName?: string
           lastName?: string
+          avatarUrl?: string | null
+          emailVerified?: string | null
+          updatedAt?: string | null
           fullName?: string | null
           about?: string
-          avatarUrl?: string | null
           active?: boolean | null
-          emailVerified?: string | null
           createdAt?: string
-          updatedAt?: string | null
         }
       }
       userAttribute: {
         Row: {
-          id: number
           name: string
-          sortOrder: number
           userAttributeCategoryId: number
           attributeDataTypeId: number
           listOptions: string[] | null
-          canSelfManage: boolean | null
-          active: boolean | null
-          createdAt: string
           createdBy: string
           updatedAt: string | null
           updatedBy: string | null
+          id: number
+          sortOrder: number
+          canSelfManage: boolean | null
+          active: boolean | null
+          createdAt: string
         }
         Insert: {
-          id?: number
           name: string
-          sortOrder?: number
           userAttributeCategoryId: number
           attributeDataTypeId: number
           listOptions?: string[] | null
-          canSelfManage?: boolean | null
-          active?: boolean | null
-          createdAt?: string
           createdBy: string
           updatedAt?: string | null
           updatedBy?: string | null
-        }
-        Update: {
           id?: number
-          name?: string
           sortOrder?: number
-          userAttributeCategoryId?: number
-          attributeDataTypeId?: number
-          listOptions?: string[] | null
           canSelfManage?: boolean | null
           active?: boolean | null
           createdAt?: string
+        }
+        Update: {
+          name?: string
+          userAttributeCategoryId?: number
+          attributeDataTypeId?: number
+          listOptions?: string[] | null
           createdBy?: string
           updatedAt?: string | null
           updatedBy?: string | null
+          id?: number
+          sortOrder?: number
+          canSelfManage?: boolean | null
+          active?: boolean | null
+          createdAt?: string
         }
       }
       userAttributeCategory: {
         Row: {
-          id: number
           name: string
+          createdBy: string
+          updatedAt: string | null
+          updatedBy: string | null
+          id: number
           public: boolean | null
           protected: boolean | null
           active: boolean | null
           createdAt: string
-          createdBy: string
-          updatedAt: string | null
-          updatedBy: string | null
         }
         Insert: {
-          id?: number
           name: string
-          public?: boolean | null
-          protected?: boolean | null
-          active?: boolean | null
-          createdAt?: string
           createdBy: string
           updatedAt?: string | null
           updatedBy?: string | null
-        }
-        Update: {
           id?: number
-          name?: string
           public?: boolean | null
           protected?: boolean | null
           active?: boolean | null
           createdAt?: string
+        }
+        Update: {
+          name?: string
           createdBy?: string
           updatedAt?: string | null
           updatedBy?: string | null
+          id?: number
+          public?: boolean | null
+          protected?: boolean | null
+          active?: boolean | null
+          createdAt?: string
         }
       }
       userAttributeValue: {
         Row: {
-          id: number
           userAttributeId: number
           userId: string
           valueBoolean: boolean | null
@@ -341,13 +751,13 @@ export interface Database {
           valueNumeric: number | null
           valueText: string | null
           valueUser: string | null
-          createdAt: string
           createdBy: string
           updatedAt: string | null
           updatedBy: string | null
+          id: number
+          createdAt: string
         }
         Insert: {
-          id?: number
           userAttributeId: number
           userId: string
           valueBoolean?: boolean | null
@@ -355,13 +765,13 @@ export interface Database {
           valueNumeric?: number | null
           valueText?: string | null
           valueUser?: string | null
-          createdAt?: string
           createdBy: string
           updatedAt?: string | null
           updatedBy?: string | null
+          id?: number
+          createdAt?: string
         }
         Update: {
-          id?: number
           userAttributeId?: number
           userId?: string
           valueBoolean?: boolean | null
@@ -369,10 +779,11 @@ export interface Database {
           valueNumeric?: number | null
           valueText?: string | null
           valueUser?: string | null
-          createdAt?: string
           createdBy?: string
           updatedAt?: string | null
           updatedBy?: string | null
+          id?: number
+          createdAt?: string
         }
       }
     }
@@ -383,6 +794,10 @@ export interface Database {
           name: string | null
           isIdentityGroup: boolean | null
           isEmployeeTypeGroup: boolean | null
+          isCustomerOrgGroup: boolean | null
+          isCustomerTypeGroup: boolean | null
+          isSupplierOrgGroup: boolean | null
+          isSupplierTypeGroup: boolean | null
           groupId: string | null
           memberGroupId: string | null
           memberUserId: string | null
@@ -396,6 +811,10 @@ export interface Database {
           parentId: string | null
           isIdentityGroup: boolean | null
           isEmployeeTypeGroup: boolean | null
+          isCustomerOrgGroup: boolean | null
+          isCustomerTypeGroup: boolean | null
+          isSupplierOrgGroup: boolean | null
+          isSupplierTypeGroup: boolean | null
           user: Json | null
         }
       }
@@ -403,6 +822,10 @@ export interface Database {
         Row: {
           id: string | null
           isEmployeeTypeGroup: boolean | null
+          isCustomerOrgGroup: boolean | null
+          isCustomerTypeGroup: boolean | null
+          isSupplierOrgGroup: boolean | null
+          isSupplierTypeGroup: boolean | null
           name: string | null
           parentId: string | null
           users: Json | null
@@ -441,6 +864,10 @@ export interface Database {
           name: string
           parentId: string
           isEmployeeTypeGroup: boolean
+          isCustomerOrgGroup: boolean
+          isCustomerTypeGroup: boolean
+          isSupplierOrgGroup: boolean
+          isSupplierTypeGroup: boolean
           users: Json
         }[]
       }

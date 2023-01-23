@@ -40,7 +40,7 @@ const CreateEmployeeModal = () => {
     <Modal
       initialFocusRef={initialFocusRef}
       isOpen={true}
-      onClose={() => navigate("/app/users/employees")}
+      onClose={() => navigate(-1)}
     >
       <ModalOverlay />
       <ModalContent>
@@ -54,7 +54,7 @@ const CreateEmployeeModal = () => {
             // @ts-ignore
             fetcher={formFetcher}
           >
-            <VStack spacing={4} alignItems="start">
+            <VStack spacing={4} alignItems="start" w="full">
               <Input ref={initialFocusRef} name="email" label="Email" />
               <Grid templateColumns="1fr 1fr" gap={4}>
                 <Input name="firstName" label="First Name" />

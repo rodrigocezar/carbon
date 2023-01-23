@@ -1,5 +1,6 @@
 import { Select as CarbonSelect } from "@carbon/react";
 import {
+  Box,
   FormControl,
   FormErrorMessage,
   FormHelperText,
@@ -8,7 +9,7 @@ import {
 import { useMemo } from "react";
 import { useField } from "remix-validated-form";
 
-type SelectProps = {
+export type SelectProps = {
   name: string;
   label?: string;
   options: { value: string | number; label: string }[];
@@ -36,7 +37,7 @@ const Select = ({
     [defaultValue, options]
   );
 
-  // hack for default value
+  // TODO: hack for default value
   return options.length > 0 ? (
     <FormControl isInvalid={!!error}>
       {label && <FormLabel htmlFor={name}>{label}</FormLabel>}
@@ -60,7 +61,12 @@ const Select = ({
         helperText && <FormHelperText>{helperText}</FormHelperText>
       )}
     </FormControl>
-  ) : null;
+  ) : (
+    <Box>
+      {label && <FormLabel>{label}</FormLabel>}
+      <CarbonSelect isDisabled isLoading={isLoading} options={[]} />
+    </Box>
+  );
 };
 
 Select.displayName = "Select";

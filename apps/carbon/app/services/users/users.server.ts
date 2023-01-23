@@ -11,12 +11,87 @@ import type {
   User,
 } from "~/interfaces/Users/types";
 import { deleteAuthAccount, sendInviteByEmail } from "~/services/auth";
+import { getSupplierContact } from "~/services/purchasing";
+import { getCustomerContact } from "~/services/sales";
 import { requireAuthSession, flash } from "~/services/session";
 import type { Result } from "~/types";
 import type { GenericQueryFilters } from "~/utils/query";
 import { setGenericQueryFilters } from "~/utils/query";
 import { error, success } from "~/utils/result";
-import logger from "~/lib/logger";
+
+export async function createCustomerAccount(
+  client: SupabaseClient<Database>,
+  {
+    id,
+    customerId,
+  }: {
+    id: string;
+    customerId: string;
+  }
+): Promise<Result> {
+  const customerContact = await getCustomerContact(client, id);
+  if (
+    customerContact.error ||
+    customerContact.data === null ||
+    Array.isArray(customerContact.data.contact) ||
+    customerContact.data.contact === null
+  ) {
+    return error(customerContact.error, "Failed to get customer contact");
+  }
+
+  const { email, firstName, lastName } = customerContact.data.contact;
+
+  // TODO: can we do this after we've done the other stuff?
+  const invitation = await sendInviteByEmail(email);
+
+  if (invitation.error)
+    return error(invitation.error.message, "Failed to send invitation email");
+
+  const userId = invitation.data.user.id;
+
+  const claims = makeCustomerClaims();
+  const claimsUpdate = await setUserClaims(userId, {
+    role: "customer",
+    ...claims,
+  });
+  if (claimsUpdate.error) {
+    await deleteAuthAccount(userId);
+    return error(claimsUpdate.error, "Failed to set user claims");
+  }
+
+  const insertUser = await createUser(client, {
+    id: userId,
+    email,
+    firstName,
+    lastName,
+    avatarUrl: null,
+  });
+
+  if (insertUser.error)
+    return error(insertUser.error, "Failed to create a new user");
+
+  if (!insertUser.data)
+    return error(insertUser, "No data returned from create user");
+
+  const updateContact = await client
+    .from("customerContact")
+    .update({ userId })
+    .eq("id", id);
+  if (updateContact.error) {
+    await deleteAuthAccount(userId);
+    return error(updateContact.error, "Failed to update customer contact");
+  }
+
+  const createCustomerAccount = await insertCustomerAccount(client, {
+    id: insertUser.data[0].id,
+    customerId,
+  });
+
+  if (createCustomerAccount.error)
+    return error(createCustomerAccount.error, "Failed to create an employee");
+
+  return success("Customer account created");
+}
 
 export async function createEmployeeAccount(
   client: SupabaseClient<Database>,
@@ -42,7 +117,7 @@ export async function createEmployeeAccount(
       "Failed to get employee type permissions"
     );
 
-  // TODO: we should only send this after we've done the other stuff
+  // TODO: can we do this after we've done the other stuff?
   const invitation = await sendInviteByEmail(email);
 
   if (invitation.error)
@@ -51,7 +126,10 @@ export async function createEmployeeAccount(
   const userId = invitation.data.user.id;
 
   const claims = makeClaimsFromEmployeeType(employeeTypePermissions);
-  const claimsUpdate = await setUserClaims(userId, claims);
+  const claimsUpdate = await setUserClaims(userId, {
+    role: "employee",
+    ...claims,
+  });
   if (claimsUpdate.error) {
     await deleteAuthAccount(userId);
     return error(claimsUpdate.error, "Failed to set user claims");
@@ -82,18 +160,78 @@ export async function createEmployeeAccount(
   return success("Employee account created");
 }
 
-export async function createEmployeeType(
+export async function createSupplierAccount(
   client: SupabaseClient<Database>,
-  employeeType: { id?: string; name: string; color: string | null }
-) {
-  return client.from("employeeType").insert([employeeType]).select("id");
-}
+  {
+    id,
+    supplierId,
+  }: {
+    id: string;
+    supplierId: string;
+  }
+): Promise<Result> {
+  const supplierContact = await getSupplierContact(client, id);
+  if (
+    supplierContact.error ||
+    supplierContact.data === null ||
+    Array.isArray(supplierContact.data.contact) ||
+    supplierContact.data.contact === null
+  ) {
+    return error(supplierContact.error, "Failed to get supplier contact");
+  }
 
-export async function createGroup(
-  client: SupabaseClient<Database>,
-  group: { name: string }
-) {
-  return client.from("group").insert(group).select("id");
+  const { email, firstName, lastName } = supplierContact.data.contact;
+
+  // TODO: can we do this after we've done the other stuff?
+  const invitation = await sendInviteByEmail(email);
+
+  if (invitation.error)
+    return error(invitation.error.message, "Failed to send invitation email");
+
+  const userId = invitation.data.user.id;
+
+  const claims = makeSupplierClaims();
+  const claimsUpdate = await setUserClaims(userId, {
+    role: "customer",
+    ...claims,
+  });
+  if (claimsUpdate.error) {
+    await deleteAuthAccount(userId);
+    return error(claimsUpdate.error, "Failed to set user claims");
+  }
+
+  const insertUser = await createUser(client, {
+    id: userId,
+    email,
+    firstName,
+    lastName,
+    avatarUrl: null,
+  });
+
+  if (insertUser.error)
+    return error(insertUser.error, "Failed to create a new user");
+
+  if (!insertUser.data)
+    return error(insertUser, "No data returned from create user");
+
+  const updateContact = await client
+    .from("supplierContact")
+    .update({ userId })
+    .eq("id", id);
+  if (updateContact.error) {
+    await deleteAuthAccount(userId);
+    return error(updateContact.error, "Failed to update supplier contact");
+  }
+
+  const createSupplierAccount = await insertSupplierAccount(client, {
+    id: insertUser.data[0].id,
+    supplierId,
+  });
+
+  if (createSupplierAccount.error)
+    return error(createSupplierAccount.error, "Failed to create an employee");
+
+  return success("Supplier account created");
 }
 
 async function createUser(
@@ -144,7 +282,6 @@ export async function deleteAttributeCategory(
   client: SupabaseClient<Database>,
   attributeCategoryId: string
 ) {
-  console.log("deleting attribute category", attributeCategoryId);
   return client
     .from("userAttributeCategory")
     .update({ active: false })
@@ -228,14 +365,11 @@ export async function getAttributeDataTypes(client: SupabaseClient<Database>) {
   return client.from("attributeDataType").select("*");
 }
 
-export async function getClaimsById(
-  client: SupabaseClient<Database>,
-  uid: string
-) {
+export async function getClaims(client: SupabaseClient<Database>, uid: string) {
   return client.rpc("get_claims", { uid });
 }
 
-export async function getEmployeeById(
+export async function getEmployee(
   client: SupabaseClient<Database>,
   id: string
 ) {
@@ -244,6 +378,36 @@ export async function getEmployeeById(
     .select("id, user(id, firstName, lastName, email), employeeType(id)")
     .eq("id", id)
     .single();
+}
+
+export async function getSuppliers(
+  client: SupabaseClient<Database>,
+  args: GenericQueryFilters & {
+    name: string | null;
+    type: string | null;
+    active: boolean | null;
+  }
+) {
+  let query = client.from("supplierAccount").select(
+    `user!inner(id, fullName, firstName, lastName, email, avatarUrl, active), 
+      supplier!inner(name, supplierType!left(name))`,
+    { count: "exact" }
+  );
+
+  if (args.name) {
+    query = query.ilike("user.fullName", `%${args.name}%`);
+  }
+
+  if (args.type) {
+    query = query.eq("supplier.supplierTypeId", args.type);
+  }
+
+  if (args.active !== null) {
+    query = query.eq("user.active", args.active);
+  }
+
+  query = setGenericQueryFilters(query, args, "user(lastName)");
+  return query;
 }
 
 export async function getEmployees(
@@ -267,6 +431,36 @@ export async function getEmployees(
 
   if (args.type) {
     query = query.eq("employeeTypeId", args.type);
+  }
+
+  if (args.active !== null) {
+    query = query.eq("user.active", args.active);
+  }
+
+  query = setGenericQueryFilters(query, args, "user(lastName)");
+  return query;
+}
+
+export async function getCustomers(
+  client: SupabaseClient<Database>,
+  args: GenericQueryFilters & {
+    name: string | null;
+    type: string | null;
+    active: boolean | null;
+  }
+) {
+  let query = client.from("customerAccount").select(
+    `user!inner(id, fullName, firstName, lastName, email, avatarUrl, active), 
+      customer!inner(name, customerType!left(name))`,
+    { count: "exact" }
+  );
+
+  if (args.name) {
+    query = query.ilike("user.fullName", `%${args.name}%`);
+  }
+
+  if (args.type) {
+    query = query.eq("customer.customerTypeId", args.type);
   }
 
   if (args.active !== null) {
@@ -318,7 +512,7 @@ export async function getGroup(
   return client.from("group").select("id, name").eq("id", groupId).single();
 }
 
-export async function getGroupMembersById(
+export async function getGroupMembers(
   client: SupabaseClient<Database>,
   groupId: string
 ) {
@@ -374,7 +568,7 @@ export async function getPermissions(
   } finally {
     // if we don't have permissions from redis, get them from the database
     if (!permissions) {
-      const claims = await getClaimsById(client, userId);
+      const claims = await getClaims(client, userId);
       if (claims.error || claims.data === null) {
         throw redirect(
           "/app",
@@ -489,11 +683,45 @@ export async function insertAttributeCategory(
     .select("id");
 }
 
+async function insertCustomerAccount(
+  client: SupabaseClient<Database>,
+  customerAccount: {
+    id: string;
+    customerId: string;
+  }
+) {
+  return client.from("customerAccount").insert(customerAccount).select("id");
+}
+
 export async function insertEmployee(
   client: SupabaseClient<Database>,
   employee: EmployeeRow
 ) {
   return client.from("employee").insert([employee]);
+}
+
+export async function insertEmployeeType(
+  client: SupabaseClient<Database>,
+  employeeType: { id?: string; name: string; color: string | null }
+) {
+  return client.from("employeeType").insert([employeeType]).select("id");
+}
+
+export async function insertGroup(
+  client: SupabaseClient<Database>,
+  group: { name: string }
+) {
+  return client.from("group").insert(group).select("id");
+}
+
+async function insertSupplierAccount(
+  client: SupabaseClient<Database>,
+  supplierAccount: {
+    id: string;
+    supplierId: string;
+  }
+) {
+  return client.from("supplierAccount").insert(supplierAccount).select("id");
 }
 
 async function insertUser(
@@ -548,6 +776,17 @@ function isClaimPermission(key: string, value: unknown) {
     ["view", "create", "update", "delete"].includes(action) &&
     typeof value === "boolean"
   );
+}
+
+function makeCustomerClaims() {
+  // TODO: this should be more dynamic
+  const claims: Record<string, boolean> = {
+    documents_view: true,
+    jobs_view: true,
+    sales_view: true,
+  };
+
+  return claims;
 }
 
 export function makeEmptyPermissionsFromFeatures(data: Feature[]) {
@@ -631,6 +870,17 @@ export function makePermissionsFromEmployeeType(
   return result;
 }
 
+function makeSupplierClaims() {
+  // TODO: this should be more dynamic
+  const claims: Record<string, boolean> = {
+    documents_view: true,
+    inventory_view: true,
+    purchasing_view: true,
+  };
+
+  return claims;
+}
+
 export async function resendInvite(
   client: SupabaseClient<Database>,
   userId: string
@@ -654,7 +904,10 @@ export async function resetPassword(userId: string, password: string) {
   });
 }
 
-async function setUserClaims(userId: string, claims: Record<string, boolean>) {
+async function setUserClaims(
+  userId: string,
+  claims: Record<string, boolean | string>
+) {
   return getSupabaseAdmin().auth.admin.updateUserById(userId, {
     app_metadata: claims,
   });
@@ -691,16 +944,16 @@ export async function updatePermissions(
   }: { id: string; permissions: Record<string, Permission>; addOnly?: boolean }
 ): Promise<Result> {
   if (await client.rpc("is_claims_admin")) {
-    const getClaims = await getClaimsById(client, id);
+    const claims = await getClaims(client, id);
 
-    if (getClaims.error) return error(getClaims.error, "Failed to get claims");
+    if (claims.error) return error(claims.error, "Failed to get claims");
 
     const currentClaims =
-      typeof getClaims.data !== "object" ||
-      Array.isArray(getClaims.data) ||
-      getClaims.data === null
+      typeof claims.data !== "object" ||
+      Array.isArray(claims.data) ||
+      claims.data === null
         ? {}
-        : getClaims.data;
+        : claims.data;
 
     const newClaims: Record<string, boolean> = {};
     Object.entries(permissions).forEach(([name, permission]) => {
