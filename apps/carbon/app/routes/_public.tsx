@@ -1,5 +1,5 @@
 import { Outlet } from "@remix-run/react";
 
-export default function AuthRoute() {
+export default function PublicRoute() {
   return <Outlet />;
 }
