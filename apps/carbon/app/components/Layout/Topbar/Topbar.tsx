@@ -1,10 +1,10 @@
 import { useColor } from "@carbon/react";
-import { Button, Flex, GridItem, HStack, Kbd } from "@chakra-ui/react";
+import { Button, GridItem, HStack } from "@chakra-ui/react";
 import { BiHelpCircle } from "react-icons/bi";
-import { FaSearch } from "react-icons/fa";
+import { BsChatSquare } from "react-icons/bs";
+import { SearchButton } from "~/components/Search";
 import AvatarMenu from "./AvatarMenu";
 import Breadcrumbs from "./Breadcrumbs";
-import Logo from "./Logo";
 import useBreadcrumbs from "./useBreadcrumbs";
 
 const Topbar = () => {
@@ -15,7 +15,7 @@ const Topbar = () => {
     <GridItem
       display="grid"
       gap={4}
-      gridTemplateColumns="auto 1fr auto 1fr"
+      gridTemplateColumns="1fr auto 1fr"
       // backdropFilter="auto"
       // backdropBlur="8px"
       bg={useColor("white")}
@@ -23,26 +23,13 @@ const Topbar = () => {
       borderBottomColor={borderColor}
       borderBottomStyle="solid"
       position="sticky"
+      px={4}
       top={0}
       zIndex={1}
     >
-      <Logo />
       <Breadcrumbs links={breadcrumbLinks} />
-      <Button
-        colorScheme="gray"
-        leftIcon={<FaSearch />}
-        variant="outline"
-        boxShadow="sm"
-        color="gray.500"
-        w={200}
-        mt={2}
-      >
-        <HStack w="full">
-          <Flex flexGrow={1}>Search</Flex>
-          <Kbd size="lg">/</Kbd>
-        </HStack>
-      </Button>
-      <HStack py={2} pr={4} justifyContent="end">
+      <SearchButton />
+      <HStack py={2} justifyContent="end">
         <Button
           colorScheme="gray"
           leftIcon={<BiHelpCircle />}
@@ -55,7 +42,7 @@ const Topbar = () => {
         </Button>
         <Button
           colorScheme="gray"
-          leftIcon={<FaSearch />}
+          leftIcon={<BsChatSquare />}
           variant="solid"
           border={1}
           borderColor={borderColor}
