@@ -1,6 +1,6 @@
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/router";
-import { requirePermissions } from "~/services/auth";
+import { requireResourcePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
 import {
   getFeatures,
@@ -9,8 +9,12 @@ import {
 import { error } from "~/utils/result";
 
 export async function loader({ request }: LoaderArgs) {
-  const { client } = await requirePermissions(request, {});
-  const features = await getFeatures(client);
+  const authorized = await requireResourcePermissions(request, {
+    view: "users",
+  });
+  if (!authorized) return json({ permissions: [] });
+
+  const features = await getFeatures(authorized.client);
   if (features.error || features.data === null) {
     return json(
       {

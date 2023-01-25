@@ -41,9 +41,10 @@ const EmployeePermissionsForm = ({
   const employeeTypeFetcher = useFetcher<PostgrestResponse<EmployeeType>>();
 
   useEffect(() => {
-    employeeTypeFetcher.load("/resource/users/employee-types");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (employeeTypeFetcher.type === "init") {
+      employeeTypeFetcher.load("/resource/users/employee-types");
+    }
+  }, [employeeTypeFetcher]);
 
   const employeeTypeOptions = mapRowsToOptions({
     data: employeeTypeFetcher.data?.data,

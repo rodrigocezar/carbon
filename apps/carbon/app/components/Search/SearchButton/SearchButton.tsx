@@ -70,7 +70,6 @@ const SearchModal = ({
 
   const onResultClick = () => {
     onClose();
-    console.log("clearing query");
     setQuery("");
   };
 

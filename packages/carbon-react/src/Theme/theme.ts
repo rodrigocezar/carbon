@@ -21,6 +21,7 @@ export const theme = {
       variants: {
         solid: (props: { colorScheme: string }) => {
           const { colorScheme: c } = props;
+
           if (c !== "brand") return {};
 
           return {

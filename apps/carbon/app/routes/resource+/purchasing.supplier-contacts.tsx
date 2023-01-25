@@ -1,14 +1,15 @@
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { requirePermissions } from "~/services/auth";
+import { requireResourcePermissions } from "~/services/auth";
 import { getSupplierContacts } from "~/services/purchasing";
 import { flash } from "~/services/session";
 import { error } from "~/utils/result";
 
 export async function loader({ request }: LoaderArgs) {
-  const { client } = await requirePermissions(request, {
+  const authorized = await requireResourcePermissions(request, {
     view: "purchasing",
   });
+  if (!authorized) return json({ data: [] });
 
   const url = new URL(request.url);
   const searchParams = new URLSearchParams(url.search);
@@ -19,7 +20,7 @@ export async function loader({ request }: LoaderArgs) {
       data: [],
     });
 
-  const contacts = await getSupplierContacts(client, supplierId);
+  const contacts = await getSupplierContacts(authorized.client, supplierId);
   if (contacts.error) {
     return json(
       contacts,

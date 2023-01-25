@@ -53,11 +53,10 @@ export default function useUserSelect(props: UserSelectProps) {
   }>();
 
   useEffect(() => {
-    const params: Record<string, string> = {};
-    const query = new URLSearchParams(params).toString();
-    groupsFetcher.load(`/resource/users/groups?${query}`);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (groupsFetcher.type === "init") {
+      groupsFetcher.load(`/resource/users/groups`);
+    }
+  }, [groupsFetcher]);
 
   /* Refs */
   const containerRef = useRef<HTMLDivElement>(null);

@@ -7,7 +7,7 @@ import type {
 import { SERVER_URL } from "~/config/env";
 import { REFRESH_ACCESS_TOKEN_THRESHOLD } from "~/config/env";
 import { getSupabase, getSupabaseAdmin } from "~/lib/supabase";
-import { requireAuthSession, flash } from "~/services/session";
+import { requireAuthSession, flash, getAuthSession } from "~/services/session";
 import { getPermissions } from "~/services/users";
 import { error } from "~/utils/result";
 import type { AuthSession } from "./types";
@@ -83,6 +83,7 @@ export async function requirePermissions(
   userId: string;
 }> {
   const { accessToken, email, userId } = await requireAuthSession(request);
+
   const client = getSupabase(accessToken);
   // early exit if no requiredPermissions are required
   if (Object.keys(requiredPermissions).length === 0)
@@ -116,6 +117,62 @@ export async function requirePermissions(
         error({ myPermissions, requirePermissions }, "Access Denied")
       )
     );
+  }
+
+  return { client, email, userId };
+}
+
+// When we redirect to login from resources (fetched with useFetcher)
+// we get a loop, so we have this function that does the same check
+// without redirecting -- it just returns null
+// TODO: find a better way to do this
+export async function requireResourcePermissions(
+  request: Request,
+  requiredPermissions: {
+    view?: string | string[];
+    create?: string | string[];
+    update?: string | string[];
+    delete?: string | string[];
+  }
+): Promise<{
+  client: SupabaseClient<Database>;
+  email: string;
+  userId: string;
+} | null> {
+  const authSession = await getAuthSession(request);
+  if (!authSession) {
+    return null;
+  }
+
+  const { accessToken, email, userId } = authSession;
+
+  const client = getSupabase(accessToken);
+  // early exit if no requiredPermissions are required
+  if (Object.keys(requiredPermissions).length === 0)
+    return { client, email, userId };
+
+  const myPermissions = await getPermissions(request, client);
+
+  const hasRequiredPermissions = Object.entries(requiredPermissions).every(
+    ([action, permission]) => {
+      if (typeof permission === "string") {
+        return myPermissions![permission][
+          action as "view" | "create" | "update" | "delete"
+        ];
+      } else if (Array.isArray(permission)) {
+        return permission.every((p) => {
+          return !myPermissions![p][
+            action as "view" | "create" | "update" | "delete"
+          ];
+        });
+      } else {
+        return false;
+      }
+    }
+  );
+
+  if (!hasRequiredPermissions) {
+    return null;
   }
 
   return { client, email, userId };

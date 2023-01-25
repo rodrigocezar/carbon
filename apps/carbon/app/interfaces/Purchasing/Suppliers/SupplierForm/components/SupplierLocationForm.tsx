@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { useParams } from "@remix-run/react";
 import { ValidatedForm } from "remix-validated-form";
-import { DatePicker, Hidden, Input, Submit, TextArea } from "~/components/Form";
+import { Hidden, Input, Submit } from "~/components/Form";
 import type { SupplierLocation } from "~/interfaces/Purchasing/types";
 import { supplierLocationValidator } from "~/services/purchasing";
 

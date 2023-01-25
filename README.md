@@ -76,7 +76,8 @@ $ cp ./.env.example ./.env
 After you've set the enviroment variables to the output of `db:start` you can run
 
 ```bash
-$ yarn setup     # run db migrations and seed script
+$ yarn db:rebuild     # run db migrations and seed script
+$ yarn build          # build the packages
 ```
 
 Finally, start the apps and packages:

@@ -16,9 +16,10 @@ const SupplierSelect = ({ value, onChange }: SupplierSelectProps) => {
     useFetcher<Awaited<ReturnType<typeof getSuppliersList>>>();
 
   useEffect(() => {
-    supplierFetcher.load("/resource/purchasing/suppliers");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (supplierFetcher.type === "init") {
+      supplierFetcher.load("/resource/purchasing/suppliers");
+    }
+  }, [supplierFetcher]);
 
   const options = mapRowsToOptions({
     data: supplierFetcher.data?.data,

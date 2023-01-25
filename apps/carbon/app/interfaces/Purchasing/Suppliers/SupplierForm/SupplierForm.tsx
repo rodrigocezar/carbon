@@ -8,11 +8,8 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
-  FormLabel,
   Grid,
   HStack,
-  Skeleton,
-  Stack,
   VStack,
 } from "@chakra-ui/react";
 import { useNavigate } from "@remix-run/react";
@@ -35,7 +32,6 @@ import type {
 import { mapRowsToOptions } from "~/utils/form";
 import { useRouteData } from "~/hooks";
 import { SupplierContacts, SupplierLocations } from "./components";
-import { IoMdAdd } from "react-icons/io";
 
 type SupplierFormProps = {
   initialValues: {

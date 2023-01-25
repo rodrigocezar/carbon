@@ -16,9 +16,10 @@ const CustomerSelect = ({ value, onChange }: CustomerSelectProps) => {
     useFetcher<Awaited<ReturnType<typeof getCustomersList>>>();
 
   useEffect(() => {
-    customerFetcher.load("/resource/sales/customers");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (customerFetcher.type === "init") {
+      customerFetcher.load("/resource/sales/customers");
+    }
+  }, [customerFetcher]);
 
   const options = mapRowsToOptions({
     data: customerFetcher.data?.data,

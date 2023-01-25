@@ -32,7 +32,6 @@ import type {
 import { mapRowsToOptions } from "~/utils/form";
 import { useRouteData } from "~/hooks";
 import { CustomerContacts, CustomerLocations } from "./components";
-import { IoMdAdd } from "react-icons/io";
 
 type CustomerFormProps = {
   initialValues: {

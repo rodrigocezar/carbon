@@ -26,15 +26,15 @@ async function assertAuthSession(
 ) {
   const authSession = await getAuthSession(request);
 
-  // If there is no user session, Fly, You Fools! 🧙‍♂️
   if (!authSession?.accessToken || !authSession?.refreshToken) {
     throw redirect(
       `${onFailRedirectTo || "/login"}?${makeRedirectToFromHere(request)}`,
       {
+        // TODO: convert this to await flash(request, error("No user session found"))
         headers: {
           "Set-Cookie": await commitAuthSession(request, {
             authSession: null,
-            flashErrorMessage: "No user session found", // TODO: handle this in UI
+            flashErrorMessage: "No user session found",
           }),
         },
       }
@@ -100,7 +100,7 @@ export async function commitAuthSession(
 export async function destroyAuthSession(request: Request) {
   const session = await getSession(request);
 
-  return redirect("/", {
+  return redirect("/login", {
     headers: {
       "Set-Cookie": await sessionStorage.destroySession(session),
     },
@@ -164,15 +164,12 @@ export async function requireAuthSession(
     onFailRedirectTo,
   });
 
-  // by default we don't verify the session to save time
   const isValidSession = verify ? await verifyAuthSession(authSession) : true;
 
-  // if not valid, we try to refresh the session
   if (!isValidSession || isExpiringSoon(authSession.expiresAt)) {
     return refreshAuthSession(request);
   }
 
-  // finally, we have a valid session, let's return it
   return authSession;
 }
 
@@ -185,8 +182,6 @@ export async function refreshAuthSession(
     authSession?.refreshToken
   );
 
-  // 👾 game over, log in again
-  // yes, arbitrary, but it's a good way to don't let an illegal user here with an expired token
   if (!refreshedAuthSession) {
     const redirectUrl = `/login?${makeRedirectToFromHere(request)}`;
 
