@@ -74,7 +74,6 @@ const SupplierContact = ({
       const contact = supplierContactFetcher.data?.data?.find(
         (c) => c.id === newValue
       );
-
       onChange(contact);
     }
   };
@@ -106,7 +105,6 @@ const SupplierContact = ({
         placeholder={placeholder}
         // @ts-ignore
         onChange={handleChange}
-        w="full"
       />
       {error ? (
         <FormErrorMessage>{error}</FormErrorMessage>
@@ -122,7 +120,6 @@ const SupplierContact = ({
         isLoading={isLoading}
         options={[]}
         //@ts-ignore
-        w="full"
       />
     </Box>
   );

@@ -17,7 +17,7 @@ import { useRef, useState } from "react";
 import { ValidatedForm } from "remix-validated-form";
 import { Supplier, Submit, SupplierContact } from "~/components/Form";
 import { useUrlParams } from "~/hooks";
-import { createSupplierValidator } from "~/services/users";
+import { createSupplierAccountValidator } from "~/services/users";
 import type { Result } from "~/types";
 
 const CreateSupplierModal = () => {
@@ -50,8 +50,8 @@ const CreateSupplierModal = () => {
         <ModalBody pb={6}>
           <ValidatedForm
             method="post"
-            action="/app/users/suppliers/new"
-            validator={createSupplierValidator}
+            action="/x/users/suppliers/new"
+            validator={createSupplierAccountValidator}
             defaultValues={{
               id: params.get("id") ?? "",
               supplier: params.get("supplier") ?? "",

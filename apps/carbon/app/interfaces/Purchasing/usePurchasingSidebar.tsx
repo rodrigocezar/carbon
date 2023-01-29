@@ -1,20 +1,52 @@
-import type { Route } from "~/types";
+import { usePermissions } from "~/hooks";
+import type { AuthenticatedRouteGroup } from "~/types";
 
-const purchasingRoutes: Record<string, Route[]>[] = [
+const purchasingRoutes: AuthenticatedRouteGroup[] = [
   {
-    Configuration: [
+    name: "Manage",
+    routes: [
       {
         name: "Suppliers",
-        to: "/app/purchasing/suppliers",
+        to: "/x/purchasing/suppliers",
       },
+    ],
+  },
+  {
+    name: "Configuration",
+    routes: [
       {
         name: "Supplier Types",
-        to: "/app/purchasing/supplier-types",
+        to: "/x/purchasing/supplier-types",
+        role: "employee",
       },
     ],
   },
 ];
 
-export default function useSalesSidebar() {
-  return { links: purchasingRoutes };
+export default function usePurchasingSidebar() {
+  const permissions = usePermissions();
+  return {
+    groups: purchasingRoutes
+      .filter((group) => {
+        const filteredRoutes = group.routes.filter((route) => {
+          if (route.role) {
+            return permissions.is(route.role);
+          } else {
+            return true;
+          }
+        });
+
+        return filteredRoutes.length > 0;
+      })
+      .map((group) => ({
+        ...group,
+        routes: group.routes.filter((route) => {
+          if (route.role) {
+            return permissions.is(route.role);
+          } else {
+            return true;
+          }
+        }),
+      })),
+  };
 }

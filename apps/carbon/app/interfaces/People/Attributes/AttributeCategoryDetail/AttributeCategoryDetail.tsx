@@ -29,7 +29,7 @@ import { ConfirmDelete } from "~/components/Modals";
 import type {
   Attribute,
   AttributeCategoryDetail as AttributeCategoryDetailType,
-} from "~/interfaces/Users/types";
+} from "~/interfaces/People/types";
 import { useUrlParams } from "~/hooks";
 
 type AttributeCategoryDetailProps = {
@@ -67,8 +67,8 @@ const AttributeCategoryDetail = ({
       : []
   );
 
-  const onReorder = (newOrder: number[]) => {
-    let updates: Record<number, number> = {};
+  const onReorder = (newOrder: string[]) => {
+    let updates: Record<string, number> = {};
     newOrder.forEach((id, index) => {
       if (id !== sortOrder[index]) {
         updates[id] = index + 1;
@@ -78,7 +78,7 @@ const AttributeCategoryDetail = ({
     updateSortOrder(updates);
   };
 
-  const updateSortOrder = (updates: Record<number, number>) => {
+  const updateSortOrder = (updates: Record<string, number>) => {
     let formData = new FormData();
     formData.append("updates", JSON.stringify(updates));
     sortOrderFetcher.submit(formData, { method: "post" });
@@ -202,7 +202,7 @@ const AttributeCategoryDetail = ({
       </Drawer>
       <ConfirmDelete
         isOpen={deleteModal.isOpen}
-        action={`/app/people/attribute/delete/${selectedAttribute?.id}`}
+        action={`/x/people/attribute/delete/${selectedAttribute?.id}`}
         name={selectedAttribute?.name ?? ""}
         text={`Are you sure you want to deactivate the ${selectedAttribute?.name} attribute?`}
         onCancel={onDeleteCancel}

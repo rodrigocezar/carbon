@@ -117,18 +117,6 @@ const SupplierAccountsTable = memo(
               {permissions.can("update", "users") && (
                 <ActionMenu>
                   <MenuItem
-                    icon={<BsPencilSquare />}
-                    onClick={() =>
-                      navigate(
-                        `/app/users/suppliers/${
-                          item.getValue() as string
-                        }?${params.toString()}`
-                      )
-                    }
-                  >
-                    Edit Supplier
-                  </MenuItem>
-                  <MenuItem
                     icon={<BsEnvelope />}
                     onClick={() => {
                       setSelectedUserIds([item.getValue() as string]);
@@ -224,7 +212,7 @@ const SupplierAccountsTable = memo(
           <DeactivateUsersModal
             userIds={selectedUserIds}
             isOpen={deactivateSupplierModal.isOpen}
-            redirectTo="/app/users/suppliers"
+            redirectTo="/x/users/suppliers"
             onClose={deactivateSupplierModal.onClose}
           />
         )}

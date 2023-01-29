@@ -87,7 +87,7 @@ const CustomersTable = memo(({ data, count }: CustomersTableProps) => {
         accessorKey: "id",
         cell: (item) => (
           <Flex justifyContent="end">
-            {permissions.can("update", "users") && (
+            {permissions.can("update", "sales") && (
               <ActionMenu>
                 <MenuItem icon={<BsPencilSquare />}>Edit Customer</MenuItem>
               </ActionMenu>
@@ -107,7 +107,7 @@ const CustomersTable = memo(({ data, count }: CustomersTableProps) => {
         data={data}
         withPagination
         onRowClick={(row) =>
-          navigate(`/app/sales/customers/${row.id}?${params.toString()}`)
+          navigate(`/x/sales/customers/${row.id}?${params.toString()}`)
         }
       />
     </>

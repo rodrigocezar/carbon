@@ -1,20 +1,21 @@
-import type { Route } from "~/types";
+import type { RouteGroup } from "~/types";
 
-const usersRoutes: Record<string, Route[]>[] = [
+const usersRoutes: RouteGroup[] = [
   {
-    Configuration: [
+    name: "Configuration",
+    routes: [
       {
         name: "Attributes",
-        to: "/app/people/attributes",
+        to: "/x/people/attributes",
       },
       {
         name: "Skills",
-        to: "/app/people/skills",
+        to: "/x/people/skills",
       },
     ],
   },
 ];
 
 export default function usePeopleSidebar() {
-  return { links: usersRoutes };
+  return { groups: usersRoutes };
 }

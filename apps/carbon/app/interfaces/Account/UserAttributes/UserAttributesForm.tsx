@@ -44,7 +44,7 @@ const UserAttributesForm = ({ attributeCategory }: UserAttributesFormProps) => {
   const user = useUser();
   const updateFetcher = useFetcher<{}>();
   const [optimisticUpdates, setOptimisticUpdates] = useState<
-    Record<number, boolean | string | number>
+    Record<string, boolean | string | number>
   >({});
 
   if (
@@ -89,7 +89,7 @@ const UserAttributesForm = ({ attributeCategory }: UserAttributesFormProps) => {
 
 type GenericAttributeRowProps = {
   attribute: {
-    id: number | null;
+    id: string | null;
     name: string | null;
     canSelfManage: boolean | null;
     listOptions: string[] | null;
@@ -97,8 +97,8 @@ type GenericAttributeRowProps = {
   displayValue: string | number | boolean;
   type: DataType;
   updateFetcher: ReturnType<typeof useFetcher>;
-  userAttributeId: number;
-  userAttributeValueId?: number;
+  userAttributeId: string;
+  userAttributeValueId?: string;
   userId: string;
   value: Date | string | number | boolean | null;
   setOptimisticUpdate: (value: boolean | string | number) => void;
@@ -142,7 +142,7 @@ function renderTypedForm({
       return (
         <ValidatedForm
           method="post"
-          action={`/app/account/${userId}/attribute`}
+          action={`/x/account/${userId}/attribute`}
           validator={attributeBooleanValidator}
           defaultValues={{
             userAttributeId,
@@ -184,7 +184,7 @@ function renderTypedForm({
       return (
         <ValidatedForm
           method="post"
-          action={`/app/account/${userId}/attribute`}
+          action={`/x/account/${userId}/attribute`}
           validator={attributeTextValidator}
           defaultValues={{
             userAttributeId,
@@ -226,7 +226,7 @@ function renderTypedForm({
       return (
         <ValidatedForm
           method="post"
-          action={`/app/account/${userId}/attribute`}
+          action={`/x/account/${userId}/attribute`}
           validator={attributeTextValidator}
           defaultValues={{
             userAttributeId,
@@ -276,7 +276,7 @@ function renderTypedForm({
       return (
         <ValidatedForm
           method="post"
-          action={`/app/account/${userId}/attribute`}
+          action={`/x/account/${userId}/attribute`}
           validator={attributeNumericValidator}
           defaultValues={{
             userAttributeId,
@@ -318,7 +318,7 @@ function renderTypedForm({
       return (
         <ValidatedForm
           method="post"
-          action={`/app/account/${userId}/attribute`}
+          action={`/x/account/${userId}/attribute`}
           validator={attributeTextValidator}
           defaultValues={{
             userAttributeId,
@@ -360,7 +360,7 @@ function renderTypedForm({
       return (
         <ValidatedForm
           method="post"
-          action={`/app/account/${userId}/attribute`}
+          action={`/x/account/${userId}/attribute`}
           validator={attributeUserValidator}
           defaultValues={{
             userAttributeId,
@@ -624,8 +624,8 @@ function UpdateRemoveButtons({
   canUpdate: boolean;
   updateFetcher: ReturnType<typeof useFetcher>;
   userId: string;
-  userAttributeId: number;
-  userAttributeValueId?: number;
+  userAttributeId: string;
+  userAttributeValueId?: string;
   onOpen: () => void;
 }) {
   return (
@@ -633,7 +633,7 @@ function UpdateRemoveButtons({
       {userAttributeValueId && (
         <ValidatedForm
           method="post"
-          action={`/app/account/${userId}/delete/attribute`}
+          action={`/x/account/${userId}/delete/attribute`}
           validator={deleteUserAttributeValueValidator}
           defaultValues={{
             userAttributeId,
