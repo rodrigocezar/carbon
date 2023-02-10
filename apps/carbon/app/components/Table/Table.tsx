@@ -31,7 +31,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useVirtual } from "react-virtual";
 import { AiFillCaretUp, AiFillCaretDown } from "react-icons/ai";
 import {
-  Header,
+  TableHeader,
   IndeterminateCheckbox,
   Pagination,
   // Td,
@@ -78,7 +78,7 @@ const Table = <T extends object>({
   editableComponents = {},
   defaultColumnOrder = [],
   defaultColumnPinning = {
-    left: ["select"],
+    left: ["Select"],
   },
   defaultColumnVisibility = {},
   withFilters = false,
@@ -409,7 +409,7 @@ const Table = <T extends object>({
   return (
     <VStack w="full" h="full" spacing={0}>
       {(withColumnOrdering || withFilters || withSelectableRows) && (
-        <Header
+        <TableHeader
           actions={actions}
           columnAccessors={columnAccessors}
           columnOrder={columnOrder}
@@ -429,6 +429,7 @@ const Table = <T extends object>({
       <Box
         w="full"
         h="full"
+        bg={useColor("white")}
         overflow="scroll"
         style={{ contain: "strict" }}
         ref={tableContainerRef}
@@ -477,7 +478,7 @@ const Table = <T extends object>({
                           py={2}
                           whiteSpace="nowrap"
                         >
-                          {!header.isPlaceholder ? null : (
+                          {header.isPlaceholder ? null : (
                             <Flex
                               justify="flex-start"
                               align="center"
@@ -672,7 +673,7 @@ const Table = <T extends object>({
 function getRowSelectionColumn<T>(): ColumnDef<T>[] {
   return [
     {
-      id: "select",
+      id: "Select",
       size: 40,
       header: ({ table }) => (
         <IndeterminateCheckbox

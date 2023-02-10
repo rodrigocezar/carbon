@@ -35,7 +35,8 @@ type SearchResult = {
   id: number;
   name: string;
   entity:
-    | "People"
+    | "Person"
+    | "Resource"
     | "Customer"
     | "Supplier"
     | "Job"
@@ -80,6 +81,8 @@ const SearchModal = ({
         tokens.length > 1
           ? tokens.map((token) => `"${token}"`).join(" <-> ")
           : q;
+
+      console.log(supabase);
 
       const result = await supabase
         ?.from("search")
@@ -243,7 +246,9 @@ function ResultIcon({ entity }: { entity: SearchResult["entity"] }) {
       return <Icon as={BiListCheck} {...resultIconProps} />;
     case "Part":
       return <Icon as={AiOutlinePartition} {...resultIconProps} />;
-    case "People":
+    case "Person":
+      return <Icon as={CgProfile} {...resultIconProps} />;
+    case "Resource":
       return <Icon as={CgProfile} {...resultIconProps} />;
     case "Purchase Order":
       return <Icon as={BsCartDash} {...resultIconProps} />;

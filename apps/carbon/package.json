@@ -8,14 +8,14 @@
     "dev": "PORT=3000 remix dev",
     "start": "remix-serve api/build",
     "clean": "rm -rf .cache && rm -rf node_modules && rm -rf api/build && rm -rf public/build",
-    "lint": "TIMING=1 eslint \"app/**/*.ts*\""
+    "lint": "tsc && TIMING=1 eslint \"app/**/*.ts*\""
   },
   "dependencies": {
     "@carbon/database": "*",
     "@carbon/logger": "*",
     "@carbon/react": "*",
     "@carbon/utils": "*",
-    "@chakra-ui/react": "^2.4.1",
+    "@chakra-ui/react": "^2.4.9",
     "@chakra-ui/skip-nav": "^2.0.13",
     "@emotion/react": "^11.10.4",
     "@emotion/server": "^11.10.0",

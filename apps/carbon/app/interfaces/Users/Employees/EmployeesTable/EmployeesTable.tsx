@@ -224,6 +224,9 @@ const EmployeesTable = memo(
           columns={columns}
           data={rows}
           defaultColumnVisibility={defaultColumnVisibility}
+          defaultColumnPinning={{
+            left: ["Select", "User"],
+          }}
           withColumnOrdering
           withFilters
           withPagination

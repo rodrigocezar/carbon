@@ -1,8 +1,9 @@
+import { Box } from "@chakra-ui/react";
 import type { LoaderArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { json } from "@remix-run/router";
-import { PageTitle } from "~/components/Layout";
+import { PageTitle, SectionTitle } from "~/components/Layout";
 import { UserAttributesForm } from "~/interfaces/Account/UserAttributes";
 import type { PrivateAttributes } from "~/interfaces/Account/types";
 import { getPrivateAttributes } from "~/services/account";
@@ -40,7 +41,11 @@ export default function AccountPersonal() {
       />
       {/* <PersonalDataForm personalData={{}} /> */}
       {attributes.map((category: PrivateAttributes) => (
-        <UserAttributesForm key={category.id} attributeCategory={category} />
+        <Box key={category.id} mb={8} w="full">
+          <SectionTitle title={category.name} />
+
+          <UserAttributesForm attributeCategory={category} />
+        </Box>
       ))}
     </>
   );
