@@ -1,4 +1,9 @@
-import { FormControl, FormErrorMessage, FormLabel } from "@chakra-ui/react";
+import {
+  FormControl,
+  FormErrorMessage,
+  FormHelperText,
+  FormLabel,
+} from "@chakra-ui/react";
 import { useState } from "react";
 import { useField } from "remix-validated-form";
 import { UserSelect } from "../Selectors";
@@ -7,9 +12,13 @@ import type {
   UserSelectProps,
 } from "../Selectors/UserSelect/types";
 
-type UserProps = { name: string; label?: string } & UserSelectProps;
+export type UserProps = {
+  name: string;
+  label?: string;
+  helperText?: string;
+} & UserSelectProps;
 
-const User = ({ name, label, ...props }: UserProps) => {
+const User = ({ name, label, type, helperText, ...props }: UserProps) => {
   const { error, defaultValue, validate } = useField(name);
   const [selection, setSelection] = useState<string>(defaultValue);
 
@@ -29,11 +38,13 @@ const User = ({ name, label, ...props }: UserProps) => {
       <input type="hidden" name={name} value={selection} />
       <UserSelect
         {...props}
+        type={type}
         usersOnly
         isMulti={false}
         value={selection}
         onChange={handleChange}
       />
+      {helperText && <FormHelperText>{helperText}</FormHelperText>}
       {error && <FormErrorMessage>{error}</FormErrorMessage>}
     </FormControl>
   );

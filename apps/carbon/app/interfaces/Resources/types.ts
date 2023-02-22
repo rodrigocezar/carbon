@@ -4,7 +4,32 @@ import type {
   getAttributeCategory,
   getPeople,
   getNotes,
+  getAbility,
+  getAbilities,
 } from "~/services/resources";
+
+export type Ability = NonNullable<
+  Awaited<ReturnType<typeof getAbility>>["data"]
+>;
+
+export type Abilities = NonNullable<
+  Awaited<ReturnType<typeof getAbilities>>["data"]
+>;
+
+export type AbilityDatum = {
+  week: number;
+  value: number;
+};
+
+export type AbilityEmployees = NonNullable<
+  NonNullable<Awaited<ReturnType<typeof getAbility>>["data"]>["employeeAbility"]
+>;
+
+export enum AbilityEmployeeStatus {
+  NotStarted = "Not Started",
+  InProgress = "In Progress",
+  Complete = "Complete",
+}
 
 export type Attribute = NonNullable<
   Awaited<ReturnType<typeof getAttribute>>["data"]

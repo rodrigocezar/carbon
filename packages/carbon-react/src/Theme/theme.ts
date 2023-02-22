@@ -56,7 +56,9 @@ export const theme = {
           borderBottomStyle: "solid",
         },
         footer: {
-          background: "gray.100",
+          borderTopWidth: "1px",
+          borderTopStyle: "solid",
+          borderColor: "gray.200",
           display: "block",
         },
       },
@@ -80,11 +82,6 @@ export const theme = {
       defaultProps: {},
     },
     Input: {
-      baseStyle: {
-        field: {
-          background: "white",
-        },
-      },
       defaultProps: {
         borderRadius: "md",
       },
@@ -123,9 +120,9 @@ export const theme = {
     },
     Textarea: {
       variants: {
-        outline: () => focusRingOutlined().field,
-        filled: () => focusRingFilled().field,
-        flushed: () => focusRingFlushed().field,
+        outline: () => focusRingOutlined,
+        filled: () => focusRingFilled,
+        flushed: () => focusRingFlushed,
       },
     },
   },

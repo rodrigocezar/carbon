@@ -29,10 +29,12 @@ const GroupForm = ({ initialValues }: GroupFormProps) => {
   const navigate = useNavigate();
   const onClose = () => navigate(-1);
 
+  console.log(initialValues.selections);
+
   const isEditing = initialValues.id !== undefined;
   const isDisabled = isEditing
-    ? !permissions.can("update", "purchasing")
-    : !permissions.can("create", "purchasing");
+    ? !permissions.can("update", "users")
+    : !permissions.can("create", "users");
 
   return (
     <Drawer onClose={onClose} isOpen={true} size="sm">
