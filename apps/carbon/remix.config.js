@@ -20,5 +20,12 @@ module.exports = {
     "@carbon/react",
     "@carbon/utils",
   ],
-  watchPaths: packages,
+  watchPaths: async () => {
+    return [
+      "../../packages/carbon-react/src/**/*",
+      "../../packages/carbon-database/src/**/*",
+      "../../packages/carbon-logger/src/**/*",
+      "../../packages/carbon-utils/src/**/*",
+    ];
+  },,
 };
