@@ -27,5 +27,5 @@ module.exports = {
       "../../packages/carbon-logger/src/**/*",
       "../../packages/carbon-utils/src/**/*",
     ];
-  },,
+  },
 };
