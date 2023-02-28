@@ -1,4 +1,5 @@
 import { Box, Grid, VStack } from "@chakra-ui/react";
+import { useParams } from "@remix-run/react";
 import { ValidatedForm } from "remix-validated-form";
 import { Hidden, Input, Submit, TextArea } from "~/components/Form";
 import { SectionTitle } from "~/components/Layout";
@@ -10,12 +11,17 @@ type ProfileFormProps = {
 };
 
 const ProfileForm = ({ user }: ProfileFormProps) => {
+  const { personId } = useParams();
+  const isSelf = !personId;
+
   return (
     <Box w="full">
       <SectionTitle title="Basic Information" />
       <ValidatedForm
         method="post"
-        action="/x/account/profile"
+        action={
+          isSelf ? "/x/account/profile" : `/x/resources/person/${user.id}`
+        }
         validator={accountProfileValidator}
         defaultValues={user}
       >

@@ -45,11 +45,26 @@ export async function deleteEmployeeAbility(
     .eq("id", employeeAbilityId);
 }
 
+export async function deleteLocation(
+  client: SupabaseClient<Database>,
+  locationId: string
+) {
+  return client.from("location").delete().eq("id", locationId);
+}
+
 export async function deleteNote(
   client: SupabaseClient<Database>,
   noteId: string
 ) {
   return client.from("userNote").update({ active: false }).eq("id", noteId);
+}
+
+export async function deleteShift(
+  client: SupabaseClient<Database>,
+  shiftId: string
+) {
+  // TODO: Set all employeeShifts to null
+  return client.from("shift").update({ active: false }).eq("id", shiftId);
 }
 
 export async function getAbilities(
@@ -184,7 +199,7 @@ export async function getAttributeDataTypes(client: SupabaseClient<Database>) {
 export async function getEmployeeAbility(
   client: SupabaseClient<Database>,
   abilityId: string,
-  employeeId: string
+  employeeAbilityId: string
 ) {
   return client
     .from("employeeAbility")
@@ -192,9 +207,67 @@ export async function getEmployeeAbility(
       `id, lastTrainingDate, trainingDays, trainingCompleted, user(id, fullName, avatarUrl)`
     )
     .eq("abilityId", abilityId)
-    .eq("id", employeeId)
+    .eq("id", employeeAbilityId)
     .eq("active", true)
     .single();
+}
+
+export async function getEmployeeAbilities(
+  client: SupabaseClient<Database>,
+  employeeId: string
+) {
+  return client
+    .from("employeeAbility")
+    .select(
+      `id, lastTrainingDate, trainingDays, trainingCompleted, ability(id, name, curve, shadowWeeks)`
+    )
+    .eq("employeeId", employeeId)
+    .eq("active", true);
+}
+
+export async function getEmployeeJob(
+  client: SupabaseClient<Database>,
+  employeeId: string
+) {
+  return client
+    .from("employeeJob")
+    .select("title, locationId, shiftId, managerId")
+    .eq("id", employeeId)
+    .single();
+}
+
+export async function getLocation(
+  client: SupabaseClient<Database>,
+  locationId: string
+) {
+  return client
+    .from("location")
+    .select(`id, name, latitude, longitude, timezone`)
+    .eq("id", locationId)
+    .single();
+}
+
+export async function getLocations(
+  client: SupabaseClient<Database>,
+  args?: GenericQueryFilters & { name: string | null }
+) {
+  let query = client
+    .from("location")
+    .select(`id, name, latitude, longitude, timezone`, { count: "exact" });
+
+  if (args?.name) {
+    query = query.ilike("name", `%${args.name}%`);
+  }
+
+  if (args) {
+    query = setGenericQueryFilters(query, args, "name");
+  }
+
+  return query;
+}
+
+export async function getLocationsList(client: SupabaseClient<Database>) {
+  return client.from("location").select(`id, name`);
 }
 
 export async function getNotes(
@@ -211,6 +284,64 @@ export async function getNotes(
     .eq("userId", userId)
     .eq("active", true)
     .order("createdAt");
+}
+
+export async function getShift(
+  client: SupabaseClient<Database>,
+  shiftId: string
+) {
+  return client
+    .from("shift")
+    .select(
+      `id, name, startTime, endTime, locationId,
+      monday, tuesday, wednesday, thursday, friday, saturday, sunday, 
+      employeeShift(user(id, fullName, avatarUrl)), location(name, timezone)`
+    )
+    .eq("id", shiftId)
+    .eq("active", true)
+    .single();
+}
+
+export async function getShifts(
+  client: SupabaseClient<Database>,
+  args: GenericQueryFilters & { name: string | null; location: string | null }
+) {
+  let query = client
+    .from("shift")
+    .select(
+      `id, name, startTime, endTime, locationId, 
+      monday, tuesday, wednesday, thursday, friday, saturday, sunday,
+      employeeShift(user(id, fullName, avatarUrl)), location(name, timezone)`,
+      {
+        count: "exact",
+      }
+    )
+    .eq("active", true)
+    .eq("employeeShift.user.active", true);
+
+  if (args?.name) {
+    query = query.ilike("name", `%${args.name}%`);
+  }
+
+  if (args.location) {
+    query = query.eq("locationId", args.location);
+  }
+
+  query = setGenericQueryFilters(query, args, "locationId");
+  return query;
+}
+
+export async function getShiftsList(
+  client: SupabaseClient<Database>,
+  locationId: string | null
+) {
+  let query = client.from("shift").select(`id, name`).eq("active", true);
+
+  if (locationId) {
+    query = query.eq("locationId", locationId);
+  }
+
+  return query;
 }
 
 type UserAttributeId = string;
@@ -497,4 +628,67 @@ export async function upsertEmployeeAbility(
     .from("employeeAbility")
     .insert([{ ...update }])
     .select("id");
+}
+
+export async function upsertEmployeeJob(
+  client: SupabaseClient<Database>,
+  employeeId: string,
+  employeeJob: {
+    title: string | null;
+    locationId: string | null;
+    shiftId: string | null;
+    managerId: string | null;
+  }
+) {
+  return client
+    .from("employeeJob")
+    .upsert([{ id: employeeId, ...employeeJob }]);
+}
+
+export async function upsertLocation(
+  client: SupabaseClient<Database>,
+  location: {
+    id?: string;
+    name: string;
+    timezone: string;
+    latitude: number | null;
+    longitude: number | null;
+  }
+) {
+  const { id, ...update } = location;
+  if (id) {
+    return client
+      .from("location")
+      .update({ ...update })
+      .eq("id", id);
+  }
+  return client.from("location").insert([update]).select("id");
+}
+
+export async function upsertShift(
+  client: SupabaseClient<Database>,
+  shift: {
+    id?: string;
+    name: string;
+    startTime: string;
+    endTime: string;
+    locationId: string;
+    monday: boolean;
+    tuesday: boolean;
+    wednesday: boolean;
+    thursday: boolean;
+    friday: boolean;
+    saturday: boolean;
+    sunday: boolean;
+  }
+) {
+  const { id, ...update } = shift;
+  if (id) {
+    return client
+      .from("shift")
+      .update({ ...update })
+      .eq("id", id);
+  }
+
+  return client.from("shift").insert([update]).select("id");
 }

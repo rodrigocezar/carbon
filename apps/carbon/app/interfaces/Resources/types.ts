@@ -6,6 +6,10 @@ import type {
   getNotes,
   getAbility,
   getAbilities,
+  getEmployeeAbilities,
+  getShifts,
+  getLocations,
+  getEmployeeJob,
 } from "~/services/resources";
 
 export type Ability = NonNullable<
@@ -31,6 +35,19 @@ export enum AbilityEmployeeStatus {
   Complete = "Complete",
 }
 
+export function getTrainingStatus(
+  employeeAbility: {
+    lastTrainingDate: string | null;
+    trainingDays: number;
+    trainingCompleted: boolean | null;
+  } | null
+) {
+  if (!employeeAbility) return undefined;
+  if (employeeAbility.trainingCompleted) return AbilityEmployeeStatus.Complete;
+  if (employeeAbility.trainingDays > 0) return AbilityEmployeeStatus.InProgress;
+  return AbilityEmployeeStatus.NotStarted;
+}
+
 export type Attribute = NonNullable<
   Awaited<ReturnType<typeof getAttribute>>["data"]
 >;
@@ -53,10 +70,26 @@ export type AttributeDataType = {
   isText: boolean;
 };
 
+export type EmployeeAbility = NonNullable<
+  Awaited<ReturnType<typeof getEmployeeAbilities>>["data"]
+>[number];
+
+export type EmployeeJob = NonNullable<
+  Awaited<ReturnType<typeof getEmployeeJob>>["data"]
+>;
+
 export type Note = NonNullable<
   Awaited<ReturnType<typeof getNotes>>["data"]
 >[number];
 
 export type Person = NonNullable<
   Awaited<ReturnType<typeof getPeople>>["data"]
+>[number];
+
+export type Shift = NonNullable<
+  Awaited<ReturnType<typeof getShifts>>["data"]
+>[number];
+
+export type ShiftLocation = NonNullable<
+  Awaited<ReturnType<typeof getLocations>>["data"]
 >[number];

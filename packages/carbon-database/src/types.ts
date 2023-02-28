@@ -374,6 +374,46 @@ export interface Database {
           trainingCompleted?: boolean | null
         }
       }
+      employeeJob: {
+        Row: {
+          id: string
+          locationId: string | null
+          shiftId: string | null
+          managerId: string | null
+          title: string | null
+        }
+        Insert: {
+          id: string
+          locationId?: string | null
+          shiftId?: string | null
+          managerId?: string | null
+          title?: string | null
+        }
+        Update: {
+          id?: string
+          locationId?: string | null
+          shiftId?: string | null
+          managerId?: string | null
+          title?: string | null
+        }
+      }
+      employeeShift: {
+        Row: {
+          employeeId: string
+          shiftId: string
+          id: string
+        }
+        Insert: {
+          employeeId: string
+          shiftId: string
+          id?: string
+        }
+        Update: {
+          employeeId?: string
+          shiftId?: string
+          id?: string
+        }
+      }
       employeeType: {
         Row: {
           name: string
@@ -490,6 +530,29 @@ export interface Database {
           createdAt?: string
         }
       }
+      location: {
+        Row: {
+          name: string
+          timezone: string
+          latitude: number | null
+          longitude: number | null
+          id: string
+        }
+        Insert: {
+          name: string
+          timezone: string
+          latitude?: number | null
+          longitude?: number | null
+          id?: string
+        }
+        Update: {
+          name?: string
+          timezone?: string
+          latitude?: number | null
+          longitude?: number | null
+          id?: string
+        }
+      }
       membership: {
         Row: {
           groupId: string
@@ -537,6 +600,53 @@ export interface Database {
           link?: string
           description?: string | null
           fts?: unknown | null
+        }
+      }
+      shift: {
+        Row: {
+          name: string
+          startTime: string
+          endTime: string
+          locationId: string
+          id: string
+          sunday: boolean
+          monday: boolean
+          tuesday: boolean
+          wednesday: boolean
+          thursday: boolean
+          friday: boolean
+          saturday: boolean
+          active: boolean
+        }
+        Insert: {
+          name: string
+          startTime: string
+          endTime: string
+          locationId: string
+          id?: string
+          sunday?: boolean
+          monday?: boolean
+          tuesday?: boolean
+          wednesday?: boolean
+          thursday?: boolean
+          friday?: boolean
+          saturday?: boolean
+          active?: boolean
+        }
+        Update: {
+          name?: string
+          startTime?: string
+          endTime?: string
+          locationId?: string
+          id?: string
+          sunday?: boolean
+          monday?: boolean
+          tuesday?: boolean
+          wednesday?: boolean
+          thursday?: boolean
+          friday?: boolean
+          saturday?: boolean
+          active?: boolean
         }
       }
       supplier: {

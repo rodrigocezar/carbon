@@ -22,11 +22,12 @@
     "db:setup": "supabase db reset",
     "dev": "tsup --watch",
     "lint": "TIMING=1 eslint \"src/**/*.ts*\"",
-    "setup": "run-s db:setup db:seed"
+    "setup": "run-s db:setup db:seed",
+    "deploy": "supabase link --project-ref $SUPABASE_PROJECT_ID && supabase db push"
   },
   "devDependencies": {
     "@carbon/tsconfig": "*",
-    "@supabase/supabase-js": "^2.2.1",
+    "@supabase/supabase-js": "^2.8.0",
     "@types/node": "^16.17.1",
     "@types/uuid": "^8.3.4",
     "dotenv": "16.0.3",

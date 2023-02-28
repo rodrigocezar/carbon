@@ -15,7 +15,7 @@ import { error } from "~/utils/result";
 
 export async function loader({ request }: LoaderArgs) {
   const { client } = await requirePermissions(request, {
-    view: "users",
+    view: "resources",
     role: "employee",
   });
 

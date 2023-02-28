@@ -83,9 +83,54 @@ export const employeeAbilityValidator = withZod(
   })
 );
 
+export const employeeJobValidator = withZod(
+  z.object({
+    title: z.string().min(1, { message: "Title is required" }),
+    locationId: zfd.text(z.string().optional()),
+    shiftId: zfd.text(z.string().optional()),
+    managerId: zfd.text(z.string().optional()),
+  })
+);
+
+export const locationValidator = withZod(
+  z
+    .object({
+      id: zfd.text(z.string().optional()),
+      name: z.string().min(1, { message: "Name is required" }),
+      timezone: z.string().min(1, { message: "Timezone is required" }),
+      latitude: zfd.numeric(z.number().optional()),
+      longitude: zfd.numeric(z.number().optional()),
+    })
+    .superRefine(({ latitude, longitude }, ctx) => {
+      if ((latitude && !longitude) || (!latitude && longitude)) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Both latitude and longitude are required",
+        });
+      }
+    })
+);
+
 export const noteValidator = withZod(
   z.object({
     id: zfd.text(z.string().optional()),
     note: z.string().min(1, { message: "Note is required" }),
+  })
+);
+
+export const shiftValidator = withZod(
+  z.object({
+    id: zfd.text(z.string().optional()),
+    name: z.string().min(1, { message: "Name is required" }),
+    startTime: z.string().min(1, { message: "Start time is required" }),
+    endTime: z.string().min(1, { message: "End time is required" }),
+    locationId: z.string().min(1, { message: "Location is required" }),
+    monday: zfd.checkbox(),
+    tuesday: zfd.checkbox(),
+    wednesday: zfd.checkbox(),
+    thursday: zfd.checkbox(),
+    friday: zfd.checkbox(),
+    saturday: zfd.checkbox(),
+    sunday: zfd.checkbox(),
   })
 );
