@@ -1,14 +1,5 @@
 const path = require("node:path");
 const { flatRoutes } = require("remix-flat-routes");
-const glob = require("glob");
-
-const packages = glob
-  .sync("packages/**/package.json", {
-    cwd: path.join(__dirname, "..", ".."),
-    ignore: ["**/node_modules/**"],
-    absolute: true,
-  })
-  .map((pkg) => path.dirname(pkg));
 
 module.exports = {
   serverBuildTarget: "vercel",
