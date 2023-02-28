@@ -1,5 +1,14 @@
+const path = require("node:path");
 const { flatRoutes } = require("remix-flat-routes");
-const { getDependenciesToBundle } = require("@remix-run/dev");
+const glob = require("glob");
+
+const packages = glob
+  .sync("packages/**/package.json", {
+    cwd: path.join(__dirname, "..", ".."),
+    ignore: ["**/node_modules/**"],
+    absolute: true,
+  })
+  .map((pkg) => path.dirname(pkg));
 
 module.exports = {
   serverBuildTarget: "vercel",
@@ -11,9 +20,7 @@ module.exports = {
   assetsBuildDirectory: "public/build",
   routes: async (defineRoutes) => {
     return flatRoutes("routes", defineRoutes, {
-      basePath: "/", // optional base path (defaults to /)
-      paramPrefixChar: "$", // optional specify param prefix
-      ignoredRouteFiles: [], // same as remix config
+      appDir: path.resolve(__dirname, "app"),
     });
   },
   serverDependenciesToBundle: [
@@ -22,12 +29,5 @@ module.exports = {
     "@carbon/react",
     "@carbon/utils",
   ],
-  watchPaths: async () => {
-    return [
-      "../../packages/carbon-react/src/**/*",
-      "../../packages/carbon-database/src/**/*",
-      "../../packages/carbon-logger/src/**/*",
-      "../../packages/carbon-utils/src/**/*",
-    ];
-  },
+  watchPaths: packages,
 };
