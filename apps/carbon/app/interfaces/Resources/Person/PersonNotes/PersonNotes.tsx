@@ -1,4 +1,4 @@
-import { useColor } from "@carbon/react";
+import { HTML, useColor } from "@carbon/react";
 import { formatTimeAgo } from "@carbon/utils";
 import {
   Box,
@@ -13,7 +13,7 @@ import { Form, useParams } from "@remix-run/react";
 import { Fragment } from "react";
 import { ValidatedForm } from "remix-validated-form";
 import { Avatar } from "~/components";
-import { Submit, TextArea } from "~/components/Form";
+import { RichText, Submit } from "~/components/Form";
 import { SectionTitle } from "~/components/Layout";
 import { usePermissions, useUser } from "~/hooks";
 import type { Note } from "~/interfaces/Resources/types";
@@ -53,7 +53,7 @@ const PersonNotes = ({ notes }: PersonNoteProps) => {
                 <Avatar path={user.avatarUrl} />
                 <VStack spacing={1} w="full" alignItems="start">
                   <Text fontWeight="bold">{note.user?.fullName}</Text>
-                  <Text>{note.note}</Text>
+                  <HTML text={note.note} />
                   <HStack spacing={4}>
                     <Text color="gray.500">
                       {formatTimeAgo(note.createdAt)}
@@ -85,14 +85,7 @@ const PersonNotes = ({ notes }: PersonNoteProps) => {
         </Box>
       )}
       {canCreate && (
-        <Box
-          borderTopColor={borderColor}
-          borderTopStyle="solid"
-          borderTopWidth={1}
-          mt={8}
-          pt={8}
-          w="full"
-        >
+        <Box pt={8} w="full">
           <ValidatedForm
             method="post"
             action={`/x/resources/person/${personId}/notes/new`}
@@ -100,10 +93,15 @@ const PersonNotes = ({ notes }: PersonNoteProps) => {
             validator={noteValidator}
           >
             <VStack spacing={3} w="full">
-              <Grid gridTemplateColumns="auto 1fr" gridColumnGap={4} w="full">
-                <Avatar path={user.avatarUrl} />
-                <TextArea name="note" />
-              </Grid>
+              <Box
+                w="full"
+                borderColor={borderColor}
+                borderWidth={1}
+                borderStyle="solid"
+                borderRadius="md"
+              >
+                <RichText name="note" minH={160} />
+              </Box>
               <Flex justifyContent="flex-end" w="full">
                 <Submit>Comment</Submit>
               </Flex>

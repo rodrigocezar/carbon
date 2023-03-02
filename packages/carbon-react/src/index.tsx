@@ -1,11 +1,15 @@
+import Dot from "./Dot";
+import HTML from "./HTML";
 import type { OptionBase, OptionProps, GroupBase } from "./Inputs";
 import {
   DatePicker,
   DateTimePicker,
   DateRangePicker,
+  Editor,
   Select,
   TimePicker,
   createFilter,
+  useEditor,
 } from "./Inputs";
 import Loading from "./Loading";
 import { ActionMenu } from "./Overlay";
@@ -29,6 +33,9 @@ export {
   DatePicker,
   DateTimePicker,
   DateRangePicker,
+  Dot,
+  Editor,
+  HTML,
   Loading,
   Select,
   ThemeProvider,
@@ -37,6 +44,7 @@ export {
   theme,
   useColor,
   useDebounce,
+  useEditor,
   useEscape,
   useHydrated,
   useInterval,

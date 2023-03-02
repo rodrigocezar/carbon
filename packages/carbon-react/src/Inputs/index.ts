@@ -5,6 +5,7 @@ import {
   DateRangePicker,
   TimePicker,
 } from "./Date";
+import { Editor, useEditor } from "./Editor";
 import Select, { createFilter } from "./Select";
 import type { OptionBase } from "./Select/types";
 
@@ -13,7 +14,9 @@ export {
   DatePicker,
   DateTimePicker,
   DateRangePicker,
+  Editor,
   Select,
   TimePicker,
   createFilter,
+  useEditor,
 };
