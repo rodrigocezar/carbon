@@ -1,7 +1,7 @@
 import { redis } from "@carbon/redis";
 import type { Processor } from "bullmq";
 import { Queue as BullQueue, Worker } from "bullmq";
-import { isVercel } from "~/config/env";
+// import { isVercel } from "~/config/env";
 
 type RegisteredQueue = {
   queue: BullQueue;
@@ -15,16 +15,16 @@ declare global {
 const registeredQueues =
   global.__registeredQueues || (global.__registeredQueues = {});
 
-const mockQueue = {
-  add: (args: any) => Promise.resolve(),
-  addBulk: (args: any) => Promise.resolve(),
-};
+// const mockQueue = {
+//   add: (args: any) => Promise.resolve(),
+//   addBulk: (args: any) => Promise.resolve(),
+// };
 
 export const Queue = <Payload>(
   name: string,
   handler: Processor<Payload>
 ): BullQueue<Payload> => {
-  if (isVercel()) return mockQueue as any;
+  // if (isVercel()) return mockQueue as any;
   if (registeredQueues[name]) {
     return registeredQueues[name].queue;
   }

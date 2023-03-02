@@ -54,13 +54,9 @@ export async function action({ request }: ActionArgs): FormActionData {
         status: 500,
       });
     }
-  } else {
-    return json(error(null, "User has been deactivated"), {
-      status: 500,
-    });
   }
 
-  return json(success("Magic link sent"));
+  return json(success("Success"));
 }
 
 export default function ForgotPasswordRoute() {
