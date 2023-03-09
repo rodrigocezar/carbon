@@ -8,7 +8,6 @@ import {
   PersonAbilities,
   PersonHeader,
   PersonTabs,
-  PersonJob,
   PersonDaysOff,
   PersonOvertime,
 } from "~/interfaces/Resources/Person";

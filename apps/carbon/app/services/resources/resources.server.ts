@@ -45,6 +45,26 @@ export async function deleteEmployeeAbility(
     .eq("id", employeeAbilityId);
 }
 
+export async function deleteEquipment(
+  client: SupabaseClient<Database>,
+  equipmentId: string
+) {
+  return client
+    .from("equipment")
+    .update({ active: false })
+    .eq("id", equipmentId);
+}
+
+export async function deleteEquipmentType(
+  client: SupabaseClient<Database>,
+  equipmentTypeId: string
+) {
+  return client
+    .from("equipmentType")
+    .update({ active: false })
+    .eq("id", equipmentTypeId);
+}
+
 export async function deleteLocation(
   client: SupabaseClient<Database>,
   locationId: string
@@ -234,6 +254,55 @@ export async function getEmployeeJob(
     .select("title, locationId, shiftId, managerId")
     .eq("id", employeeId)
     .single();
+}
+
+export async function getEquipment(
+  client: SupabaseClient<Database>,
+  equipmentId: string
+) {
+  return client
+    .from("equipment")
+    .select(
+      "id, name, description, operatorsRequired, setupHours, equipmentType(id, name), workCell(id, name)"
+    )
+    .eq("id", equipmentId)
+    .eq("active", true)
+    .single();
+}
+
+export async function getEquipmentType(
+  client: SupabaseClient<Database>,
+  equipmentTypeId: string
+) {
+  return client
+    .from("equipmentType")
+    .select("id, name, color, description, equipment(id, name)")
+    .eq("active", true)
+    .eq("id", equipmentTypeId)
+    .single();
+}
+
+export async function getEquipmentTypes(
+  client: SupabaseClient<Database>,
+  args?: { name: string | null } & GenericQueryFilters
+) {
+  let query = client
+    .from("equipmentType")
+    .select("id, name, color, description, equipment(id, name)", {
+      count: "exact",
+    })
+    .eq("active", true)
+    .eq("equipment.active", true);
+
+  if (args?.name) {
+    query = query.ilike("name", `%${args.name}%`);
+  }
+
+  if (args) {
+    query = setGenericQueryFilters(query, args, "name");
+  }
+
+  return query;
 }
 
 export async function getLocation(
@@ -643,6 +712,65 @@ export async function upsertEmployeeJob(
   return client
     .from("employeeJob")
     .upsert([{ id: employeeId, ...employeeJob }]);
+}
+
+export async function upsertEquipment(
+  client: SupabaseClient<Database>,
+  equipment:
+    | {
+        name: string;
+        description: string;
+        equipmentTypeId: string;
+        operatorsRequired?: number;
+        setupHours?: number;
+        workCellId?: string;
+        createdBy: string;
+      }
+    | {
+        id: string;
+        name: string;
+        description: string;
+        equipmentTypeId: string;
+        operatorsRequired?: number;
+        workCellId?: string;
+        updatedBy: string;
+      }
+) {
+  if ("id" in equipment) {
+    const { id, ...update } = equipment;
+    return client
+      .from("equipment")
+      .update({ ...update })
+      .eq("id", id);
+  }
+  return client.from("equipment").insert([equipment]).select("id");
+}
+
+export async function upsertEquipmentType(
+  client: SupabaseClient<Database>,
+  equipmentType:
+    | {
+        name: string;
+        description: string;
+        color: string;
+        createdBy: string;
+      }
+    | {
+        id: string;
+        name: string;
+        description: string;
+        color: string;
+        updatedBy: string;
+      }
+) {
+  if ("id" in equipmentType) {
+    const { id, ...update } = equipmentType;
+    return client
+      .from("equipmentType")
+      .update({ ...update })
+      .eq("id", id);
+  }
+  return client.from("equipmentType").insert([equipmentType]).select("id");
 }
 
 export async function upsertLocation(

@@ -5,7 +5,7 @@ import { IoMdAdd } from "react-icons/io";
 import { DebouncedInput } from "~/components/Search";
 import { usePermissions, useUrlParams } from "~/hooks";
 
-const AttributesTableFilters = () => {
+const AttributeCategoriesTableFilters = () => {
   const permissions = usePermissions();
   const [params] = useUrlParams();
   const borderColor = useColor("gray.200");
@@ -43,4 +43,4 @@ const AttributesTableFilters = () => {
   );
 };
 
-export default AttributesTableFilters;
+export default AttributeCategoriesTableFilters;

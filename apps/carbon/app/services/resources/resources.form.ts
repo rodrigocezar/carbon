@@ -92,6 +92,27 @@ export const employeeJobValidator = withZod(
   })
 );
 
+export const equipmentValidator = withZod(
+  z.object({
+    id: zfd.text(z.string().optional()),
+    name: z.string().min(1, { message: "Name is required" }),
+    description: z.string(),
+    equipmentTypeId: z.string().min(1, { message: "Type is required" }),
+    operatorsRequired: zfd.numeric(z.number().optional()),
+    setupHours: zfd.numeric(z.number().optional()),
+    workCellId: zfd.text(z.string().optional()),
+  })
+);
+
+export const equipmentTypeValidator = withZod(
+  z.object({
+    id: z.string(),
+    name: z.string().min(1, { message: "Name is required" }),
+    description: z.string(),
+    color: z.string(),
+  })
+);
+
 export const locationValidator = withZod(
   z
     .object({
