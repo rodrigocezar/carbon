@@ -2089,6 +2089,10 @@ CREATE TABLE "location" (
   "timezone" TEXT NOT NULL,
   "latitude" NUMERIC,
   "longitude" NUMERIC,
+  "createdBy" TEXT NOT NULL,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+  "updatedBy" TEXT,
+  "updatedAt" TIMESTAMP,
 
   CONSTRAINT "location_pkey" PRIMARY KEY ("id")
 );
@@ -2284,9 +2288,15 @@ CREATE TABLE "department" (
   "id" TEXT NOT NULL DEFAULT xid(),
   "name" TEXT NOT NULL UNIQUE,
   "color" TEXT NOT NULL DEFAULT '#000000',
+  "parentDepartmentId" TEXT,
+  "createdBy" TEXT NOT NULL,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+  "updatedBy" TEXT,
+  "updatedAt" TIMESTAMP,
 
   CONSTRAINT "department_pkey" PRIMARY KEY ("id"),
-  CONSTRAINT "department_colorCheck" CHECK ("color" is null or "color" ~* '^#[a-f0-9]{6}$')
+  CONSTRAINT "department_colorCheck" CHECK ("color" is null or "color" ~* '^#[a-f0-9]{6}$'),
+  CONSTRAINT "department_parentDepartmentId_fkey" FOREIGN KEY ("parentDepartmentId") REFERENCES "department"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE "workCellType" (
@@ -2294,27 +2304,39 @@ CREATE TABLE "workCellType" (
   "name" TEXT NOT NULL UNIQUE,
   "color" TEXT NOT NULL DEFAULT '#000000',
   "description" TEXT,
+  "requiredAbility" TEXT,
+  "active" BOOLEAN NOT NULL DEFAULT true,
+  "createdBy" TEXT NOT NULL,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+  "updatedBy" TEXT,
+  "updatedAt" TIMESTAMP,
 
   CONSTRAINT "workCellType_pkey" PRIMARY KEY ("id"),
-  CONSTRAINT "workCellType_colorCheck" CHECK ("color" is null or "color" ~* '^#[a-f0-9]{6}$')
+  CONSTRAINT "workCellType_colorCheck" CHECK ("color" is null or "color" ~* '^#[a-f0-9]{6}$'),
+  CONSTRAINT "workCellType_requiredAbility_fkey" FOREIGN KEY ("requiredAbility") REFERENCES "ability"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "workCellType_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "workCellType_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE "workCell" (
   "id" TEXT NOT NULL DEFAULT xid(),
   "name" TEXT NOT NULL,
   "description" TEXT,
-  "defaultProcessId" TEXT NOT NULL,
   "defaultStandardFactor" factor NOT NULL DEFAULT 'Hours/Piece',
   "departmentId" TEXT NOT NULL,
   "locationId" TEXT,
-  "setupHours" NUMERIC NOT NULL DEFAULT 0,
   "workCellTypeId" TEXT NOT NULL,
+  "active" BOOLEAN NOT NULL DEFAULT true,
+  "activeDate" DATE,
+  "createdBy" TEXT NOT NULL,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+  "updatedBy" TEXT,
+  "updatedAt" TIMESTAMP,
 
   CONSTRAINT "workCell_pkey" PRIMARY KEY ("id"),
-  CONSTRAINT "workCell_defaultProcessId_fkey" FOREIGN KEY ("defaultProcessId") REFERENCES "ability"("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "workCell_workCellTypeId_fkey" FOREIGN KEY ("workCellTypeId") REFERENCES "workCellType"("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "workCell_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "location"("id") ON DELETE CASCADE ON UPDATE CASCADE,
-
+  CONSTRAINT "workCell_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "department"("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "uq_workCell_name_departmentId" UNIQUE ("name", "departmentId")
 );
 
@@ -2352,6 +2374,7 @@ CREATE TABLE "equipmentType" (
   "name" TEXT NOT NULL UNIQUE,
   "color" TEXT NOT NULL DEFAULT '#000000',
   "description" TEXT,
+  "requiredAbility" TEXT,
   "active" BOOLEAN NOT NULL DEFAULT true,
   "createdBy" TEXT NOT NULL,
   "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
@@ -2360,6 +2383,7 @@ CREATE TABLE "equipmentType" (
 
   CONSTRAINT "equipmentType_pkey" PRIMARY KEY ("id"),
   CONSTRAINT "equipmentType_colorCheck" CHECK ("color" is null or "color" ~* '^#[a-f0-9]{6}$'),
+  CONSTRAINT "equipmentType_requiredAbility_fkey" FOREIGN KEY ("requiredAbility") REFERENCES "ability"("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "equipmentType_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "equipmentType_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -2371,8 +2395,10 @@ CREATE TABLE "equipment" (
   "equipmentTypeId" TEXT NOT NULL,
   "operatorsRequired" NUMERIC NOT NULL DEFAULT 1,
   "setupHours" NUMERIC NOT NULL DEFAULT 0,
+  "locationId" TEXT NOT NULL,
   "workCellId" TEXT,
   "active" BOOLEAN NOT NULL DEFAULT true,
+  "activeDate" DATE,
   "createdBy" TEXT NOT NULL,
   "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
   "updatedBy" TEXT,
@@ -2385,10 +2411,7 @@ CREATE TABLE "equipment" (
   CONSTRAINT "equipment_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-ALTER TABLE "ability" 
-  ADD COLUMN "equipmentTypeId" TEXT REFERENCES "equipmentType"("id") ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD COLUMN "workCellTypeId" TEXT REFERENCES "workCellType"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
+-- TODO: insert/update search results with triggers
 
 ```
 

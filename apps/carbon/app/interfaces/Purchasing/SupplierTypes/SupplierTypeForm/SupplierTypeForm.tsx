@@ -15,13 +15,10 @@ import { ValidatedForm } from "remix-validated-form";
 import { Color, Hidden, Input, Submit } from "~/components/Form";
 import { usePermissions } from "~/hooks";
 import { supplierTypeValidator } from "~/services/purchasing";
+import type { TypeOfValidator } from "~/types/validators";
 
 type SupplierTypeFormProps = {
-  initialValues: {
-    id?: string;
-    name: string;
-    color: string;
-  };
+  initialValues: TypeOfValidator<typeof supplierTypeValidator>;
 };
 
 const SupplierTypeForm = ({ initialValues }: SupplierTypeFormProps) => {

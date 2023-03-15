@@ -1,9 +1,11 @@
+import Ability from "./Ability";
 import Array from "./Array";
 import Boolean from "./Boolean";
 import Color from "./Color";
 import Customer from "./Customer";
 import CustomerContact from "./CustomerContact";
 import DatePicker from "./DatePicker";
+import Department from "./Department";
 import Employee from "./Employee";
 import Employees from "./Employees";
 import Hidden from "./Hidden";
@@ -26,12 +28,14 @@ import User from "./User";
 import Users from "./Users";
 
 export {
+  Ability,
   Array,
   Boolean,
   Color,
   Customer,
   CustomerContact,
   DatePicker,
+  Department,
   Employee,
   Employees,
   Hidden,

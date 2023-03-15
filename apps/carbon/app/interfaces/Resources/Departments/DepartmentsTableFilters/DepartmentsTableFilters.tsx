@@ -5,18 +5,19 @@ import { IoMdAdd } from "react-icons/io";
 import { DebouncedInput } from "~/components/Search";
 import { usePermissions, useUrlParams } from "~/hooks";
 
-const EquipmentTypesTableFilters = () => {
-  const permissions = usePermissions();
+const DepartmentsTableFilters = () => {
   const [params] = useUrlParams();
+  const permissions = usePermissions();
   const borderColor = useColor("gray.200");
+
   return (
     <HStack
-      px={4}
-      py={3}
-      justifyContent="space-between"
       borderBottomColor={borderColor}
       borderBottomStyle="solid"
       borderBottomWidth={1}
+      justifyContent="space-between"
+      px={4}
+      py={3}
       w="full"
     >
       <HStack spacing={2}>
@@ -28,14 +29,14 @@ const EquipmentTypesTableFilters = () => {
         />
       </HStack>
       <HStack spacing={2}>
-        {permissions.can("update", "users") && (
+        {permissions.can("create", "resources") && (
           <Button
             as={Link}
             to={`new?${params.toString()}`}
             colorScheme="brand"
             leftIcon={<IoMdAdd />}
           >
-            New Equipment Type
+            New Department
           </Button>
         )}
       </HStack>
@@ -43,4 +44,4 @@ const EquipmentTypesTableFilters = () => {
   );
 };
 
-export default EquipmentTypesTableFilters;
+export default DepartmentsTableFilters;

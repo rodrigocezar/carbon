@@ -7,32 +7,32 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
   HStack,
   VStack,
 } from "@chakra-ui/react";
-import { ValidatedForm } from "remix-validated-form";
+import { useFetcher } from "@remix-run/react";
+import { useEffect, useMemo, useState } from "react";
+import { useControlField, useField, ValidatedForm } from "remix-validated-form";
 import {
   Input,
   Hidden,
+  Location,
   Number,
   Submit,
   Select,
   TextArea,
 } from "~/components/Form";
 import { usePermissions } from "~/hooks";
+import type { getWorkCellList } from "~/services/resources";
 import { equipmentValidator } from "~/services/resources";
+import type { TypeOfValidator } from "~/types/validators";
 import { mapRowsToOptions } from "~/utils/form";
 
 type EquipmentFormProps = {
-  initialValues: {
-    id?: string;
-    name: string;
-    description: string;
-    equipmentTypeId: string;
-    operatorsRequired: number;
-    setupHours: number;
-    workCellId?: string;
-  };
+  initialValues: TypeOfValidator<typeof equipmentValidator>;
   equipmentTypes: {
     id: string;
     name: string;
@@ -55,6 +55,33 @@ const EquipmentForm = ({
   const isDisabled = isEditing
     ? !permissions.can("update", "resources")
     : !permissions.can("create", "resources");
+
+  const workCellFetcher =
+    useFetcher<Awaited<ReturnType<typeof getWorkCellList>>>();
+  const [location, setLocation] = useState<string | null>(
+    initialValues.locationId ?? null
+  );
+
+  const onLocationChange = ({ value }: { value: string | number }) => {
+    setLocation(value as string);
+  };
+
+  useEffect(() => {
+    if (location) {
+      workCellFetcher.load(`/api/resources/work-cells?location=${location}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location]);
+
+  const workCells = useMemo(
+    () =>
+      mapRowsToOptions({
+        data: workCellFetcher.data?.data ?? [],
+        value: "id",
+        label: "name",
+      }),
+    [workCellFetcher.data]
+  );
 
   return (
     <Drawer onClose={onClose} isOpen={true} size="sm">
@@ -81,6 +108,15 @@ const EquipmentForm = ({
                 name="equipmentTypeId"
                 label="Equipment Type"
                 options={options}
+              />
+              <Location
+                name="locationId"
+                label="Location"
+                onChange={onLocationChange}
+              />
+              <WorkCellsByLocation
+                workCells={workCells}
+                initialWorkCell={initialValues.workCellId ?? undefined}
               />
               <Number
                 name="setupHours"
@@ -112,6 +148,49 @@ const EquipmentForm = ({
         </DrawerContent>
       </ValidatedForm>
     </Drawer>
+  );
+};
+
+const WORK_CELL_FIELD = "workCellId";
+
+const WorkCellsByLocation = ({
+  workCells,
+  initialWorkCell,
+}: {
+  workCells: { value: string | number; label: string }[];
+  initialWorkCell?: string;
+}) => {
+  const { error, getInputProps } = useField(WORK_CELL_FIELD);
+
+  const [workCell, setWorkCell] = useControlField<{
+    value: string | number;
+    label: string;
+  } | null>(WORK_CELL_FIELD);
+
+  useEffect(() => {
+    // if the initial value is in the options, set it, otherwise set to null
+    if (workCells) {
+      setWorkCell(workCells.find((s) => s.value === initialWorkCell) ?? null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workCells, initialWorkCell]);
+
+  return (
+    <FormControl isInvalid={!!error}>
+      <FormLabel htmlFor={WORK_CELL_FIELD}>Work Cell</FormLabel>
+      <Select
+        {...getInputProps({
+          // @ts-ignore
+          id: WORK_CELL_FIELD,
+        })}
+        options={workCells}
+        // @ts-ignore
+        value={workCell}
+        onChange={setWorkCell}
+        w="full"
+      />
+      {error && <FormErrorMessage>{error}</FormErrorMessage>}
+    </FormControl>
   );
 };
 

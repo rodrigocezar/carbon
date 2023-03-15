@@ -20,8 +20,6 @@ export interface Database {
           shadowWeeks: number;
           active: boolean;
           createdAt: string;
-          equipmentTypeId: string | null;
-          workCellTypeId: string | null;
         };
         Insert: {
           name: string;
@@ -33,8 +31,6 @@ export interface Database {
           shadowWeeks?: number;
           active?: boolean;
           createdAt?: string;
-          equipmentTypeId?: string | null;
-          workCellTypeId?: string | null;
         };
         Update: {
           name?: string;
@@ -46,8 +42,6 @@ export interface Database {
           shadowWeeks?: number;
           active?: boolean;
           createdAt?: string;
-          equipmentTypeId?: string | null;
-          workCellTypeId?: string | null;
         };
       };
       address: {
@@ -386,18 +380,33 @@ export interface Database {
       department: {
         Row: {
           name: string;
+          parentDepartmentId: string | null;
+          createdBy: string;
+          updatedBy: string | null;
+          updatedAt: string | null;
           id: string;
           color: string;
+          createdAt: string;
         };
         Insert: {
           name: string;
+          parentDepartmentId?: string | null;
+          createdBy: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
           id?: string;
           color?: string;
+          createdAt?: string;
         };
         Update: {
           name?: string;
+          parentDepartmentId?: string | null;
+          createdBy?: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
           id?: string;
           color?: string;
+          createdAt?: string;
         };
       };
       employee: {
@@ -552,7 +561,9 @@ export interface Database {
           name: string;
           description: string | null;
           equipmentTypeId: string;
+          locationId: string;
           workCellId: string | null;
+          activeDate: string | null;
           createdBy: string;
           updatedBy: string | null;
           updatedAt: string | null;
@@ -566,7 +577,9 @@ export interface Database {
           name: string;
           description?: string | null;
           equipmentTypeId: string;
+          locationId: string;
           workCellId?: string | null;
+          activeDate?: string | null;
           createdBy: string;
           updatedBy?: string | null;
           updatedAt?: string | null;
@@ -580,7 +593,9 @@ export interface Database {
           name?: string;
           description?: string | null;
           equipmentTypeId?: string;
+          locationId?: string;
           workCellId?: string | null;
+          activeDate?: string | null;
           createdBy?: string;
           updatedBy?: string | null;
           updatedAt?: string | null;
@@ -595,6 +610,7 @@ export interface Database {
         Row: {
           name: string;
           description: string | null;
+          requiredAbility: string | null;
           createdBy: string;
           updatedBy: string | null;
           updatedAt: string | null;
@@ -606,6 +622,7 @@ export interface Database {
         Insert: {
           name: string;
           description?: string | null;
+          requiredAbility?: string | null;
           createdBy: string;
           updatedBy?: string | null;
           updatedAt?: string | null;
@@ -617,6 +634,7 @@ export interface Database {
         Update: {
           name?: string;
           description?: string | null;
+          requiredAbility?: string | null;
           createdBy?: string;
           updatedBy?: string | null;
           updatedAt?: string | null;
@@ -690,21 +708,33 @@ export interface Database {
           timezone: string;
           latitude: number | null;
           longitude: number | null;
+          createdBy: string;
+          updatedBy: string | null;
+          updatedAt: string | null;
           id: string;
+          createdAt: string;
         };
         Insert: {
           name: string;
           timezone: string;
           latitude?: number | null;
           longitude?: number | null;
+          createdBy: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
           id?: string;
+          createdAt?: string;
         };
         Update: {
           name?: string;
           timezone?: string;
           latitude?: number | null;
           longitude?: number | null;
+          createdBy?: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
           id?: string;
+          createdAt?: string;
         };
       };
       membership: {
@@ -1147,55 +1177,85 @@ export interface Database {
         Row: {
           name: string;
           description: string | null;
-          defaultProcessId: string;
           departmentId: string;
           locationId: string | null;
           workCellTypeId: string;
+          activeDate: string | null;
+          createdBy: string;
+          updatedBy: string | null;
+          updatedAt: string | null;
           id: string;
           defaultStandardFactor: Database["public"]["Enums"]["factor"];
-          setupHours: number;
+          active: boolean;
+          createdAt: string;
         };
         Insert: {
           name: string;
           description?: string | null;
-          defaultProcessId: string;
           departmentId: string;
           locationId?: string | null;
           workCellTypeId: string;
+          activeDate?: string | null;
+          createdBy: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
           id?: string;
           defaultStandardFactor?: Database["public"]["Enums"]["factor"];
-          setupHours?: number;
+          active?: boolean;
+          createdAt?: string;
         };
         Update: {
           name?: string;
           description?: string | null;
-          defaultProcessId?: string;
           departmentId?: string;
           locationId?: string | null;
           workCellTypeId?: string;
+          activeDate?: string | null;
+          createdBy?: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
           id?: string;
           defaultStandardFactor?: Database["public"]["Enums"]["factor"];
-          setupHours?: number;
+          active?: boolean;
+          createdAt?: string;
         };
       };
       workCellType: {
         Row: {
           name: string;
           description: string | null;
+          requiredAbility: string | null;
+          createdBy: string;
+          updatedBy: string | null;
+          updatedAt: string | null;
           id: string;
           color: string;
+          active: boolean;
+          createdAt: string;
         };
         Insert: {
           name: string;
           description?: string | null;
+          requiredAbility?: string | null;
+          createdBy: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
           id?: string;
           color?: string;
+          active?: boolean;
+          createdAt?: string;
         };
         Update: {
           name?: string;
           description?: string | null;
+          requiredAbility?: string | null;
+          createdBy?: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
           id?: string;
           color?: string;
+          active?: boolean;
+          createdAt?: string;
         };
       };
     };

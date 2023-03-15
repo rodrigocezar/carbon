@@ -23,17 +23,11 @@ import {
 import { usePermissions } from "~/hooks";
 import { DataType } from "~/interfaces/Users/types";
 import { attributeValidator } from "~/services/resources";
+import type { TypeOfValidator } from "~/types/validators";
 import { mapRowsToOptions } from "~/utils/form";
 
 type AttributeFormProps = {
-  initialValues: {
-    id?: string;
-    name: string;
-    userAttributeCategoryId: string;
-    attributeDataTypeId?: number;
-    listOptions?: string[];
-    canSelfManage: boolean;
-  };
+  initialValues: TypeOfValidator<typeof attributeValidator>;
   dataTypes: {
     id: number;
     label: string;
@@ -59,8 +53,8 @@ const AttributeForm = ({
   });
   const isEditing = initialValues.id !== undefined;
   const isDisabled = isEditing
-    ? !permissions.can("update", "users")
-    : !permissions.can("create", "users");
+    ? !permissions.can("update", "resources")
+    : !permissions.can("create", "resources");
 
   const [isList, setIsList] = useState(
     initialValues.attributeDataTypeId === DataType.List
