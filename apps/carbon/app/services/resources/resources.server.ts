@@ -72,6 +72,13 @@ export async function deleteEquipmentType(
     .eq("id", equipmentTypeId);
 }
 
+export async function deleteHoliday(
+  client: SupabaseClient<Database>,
+  holidayId: string
+) {
+  return client.from("holiday").delete().eq("id", holidayId);
+}
+
 export async function deleteLocation(
   client: SupabaseClient<Database>,
   locationId: string
@@ -372,6 +379,44 @@ export async function getEquipmentTypes(
   }
 
   return query;
+}
+
+export async function getHoliday(
+  client: SupabaseClient<Database>,
+  holidayId: string
+) {
+  return client
+    .from("holiday")
+    .select(`id, name, date, year`)
+    .eq("id", holidayId)
+    .single();
+}
+
+export async function getHolidays(
+  client: SupabaseClient<Database>,
+  args?: GenericQueryFilters & { name: string | null; year: number | null }
+) {
+  let query = client.from("holiday").select(`id, name, date, year`, {
+    count: "exact",
+  });
+
+  if (args?.name) {
+    query = query.ilike("name", `%${args.name}%`);
+  }
+
+  if (args?.year) {
+    query = query.eq("year", args.year);
+  }
+
+  if (args) {
+    query = setGenericQueryFilters(query, args, "date");
+  }
+
+  return query;
+}
+
+export function getHolidayYears(client: SupabaseClient<Database>) {
+  return client.from("holiday_years").select("year");
 }
 
 export async function getLocation(
@@ -939,6 +984,27 @@ export async function upsertEquipmentType(
       .eq("id", id);
   }
   return client.from("equipmentType").insert([equipmentType]).select("id");
+}
+
+export async function upsertHoliday(
+  client: SupabaseClient<Database>,
+  holiday:
+    | {
+        name: string;
+        date: string;
+        createdBy: string;
+      }
+    | {
+        id: string;
+        name: string;
+        date: string;
+        updatedBy: string;
+      }
+) {
+  if ("id" in holiday) {
+    return client.from("holiday").update(holiday).eq("id", holiday.id);
+  }
+  return client.from("holiday").insert(holiday).select("id");
 }
 
 export async function upsertLocation(
