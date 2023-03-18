@@ -95,7 +95,7 @@ $ yarn build        # build the packages
 Finally, start the apps and packages:
 
 ```bash
-yarn dev         # yarn dev in all apps & packages
+$ yarn dev         # yarn dev in all apps & packages
 ```
 
 To kill the database containers in a non-recoverable way, you can run:
