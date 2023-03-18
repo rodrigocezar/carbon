@@ -117,21 +117,3 @@ For example, to run the `carbon` app you can run:
 ```
 $ yarn workspace carbon dev
 ```
-
-The generalized command for workspaces is:
-
-```
-$ yarn workspace <package name> <dev|build|lint|test>
-```
-
-In order to import a package from the repo into another package/app from
-the repo, use the convention of using `"*"` for the version number.
-
-For example, in order to include the `@carbon/react` package, add this line
-to the `package.json`:
-
-```
-{
-  "@carbon/react": "*"
-}
-```

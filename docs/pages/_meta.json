@@ -1,6 +1,7 @@
 {
   "index": "Introduction",
-  "get-started": "Getting Started",
+  "stack": "Tech Stack",
+  "getting-started": "Getting Started",
   "principles": "Principles",
   "core-concepts": "Core Concepts"
 }
