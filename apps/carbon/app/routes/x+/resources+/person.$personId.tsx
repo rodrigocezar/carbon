@@ -4,30 +4,28 @@ import { json } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { validationError } from "remix-validated-form";
-import {
-  PersonAbilities,
-  PersonHeader,
-  PersonTabs,
-  PersonDaysOff,
-  PersonOvertime,
-} from "~/interfaces/Resources/Person";
-import type { EmployeeJob } from "~/interfaces/Resources/types";
 import logger from "~/lib/logger";
+import type { EmployeeJob } from "~/modules/resources";
 import {
   accountProfileValidator,
   getAccount,
   getPrivateAttributes,
   getPublicAttributes,
   updatePublicAccount,
-} from "~/services/account";
-import { requirePermissions } from "~/services/auth";
+} from "~/modules/account";
 import {
+  PersonAbilities,
+  PersonHeader,
+  PersonTabs,
+  PersonDaysOff,
+  PersonOvertime,
   employeeJobValidator,
   getEmployeeAbilities,
   getEmployeeJob,
   getNotes,
   upsertEmployeeJob,
-} from "~/services/resources";
+} from "~/modules/resources";
+import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
 import { assertIsPost } from "~/utils/http";
 import { error, success } from "~/utils/result";
@@ -128,10 +126,12 @@ export async function action({ request, params }: ActionArgs) {
       return validationError(validation.error);
     }
 
-    const { title, locationId, shiftId, managerId } = validation.data;
+    const { title, startDate, locationId, shiftId, managerId } =
+      validation.data;
 
     const updateJob = await upsertEmployeeJob(client, personId, {
       title: title ?? null,
+      startDate: startDate ?? null,
       locationId: locationId ?? null,
       shiftId: shiftId ?? null,
       managerId: managerId ?? null,

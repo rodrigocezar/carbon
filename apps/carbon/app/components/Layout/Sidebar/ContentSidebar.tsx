@@ -19,8 +19,7 @@ const ContentSidebar = ({ links }: { links: Route[] }) => {
               borderBottomStyle={"solid"}
               borderBottomWidth={1}
               borderBottomColor={borderColor}
-              px={2}
-              py={4}
+              p={2}
               w="full"
             >
               {links.map((route) => {
@@ -33,6 +32,7 @@ const ContentSidebar = ({ links }: { links: Route[] }) => {
                     as={Link}
                     to={route.to}
                     variant={isActive ? "solid" : "ghost"}
+                    border="none"
                     fontWeight={isActive ? "bold" : "normal"}
                     justifyContent="start"
                     w="full"

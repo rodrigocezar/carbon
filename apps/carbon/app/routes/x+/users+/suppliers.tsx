@@ -4,14 +4,14 @@ import { redirect } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Outlet, useLoaderData } from "@remix-run/react";
 import { usePermissions } from "~/hooks";
+import { getSupplierTypes } from "~/modules/purchasing";
 import {
   SupplierAccountsTable,
   SupplierAccountsTableFilters,
-} from "~/interfaces/Users/Suppliers";
+  getSuppliers,
+} from "~/modules/users";
 import { requirePermissions } from "~/services/auth";
-import { getSupplierTypes } from "~/services/purchasing";
 import { flash } from "~/services/session";
-import { getSuppliers } from "~/services/users";
 import { getGenericQueryFilters } from "~/utils/query";
 import { error } from "~/utils/result";
 

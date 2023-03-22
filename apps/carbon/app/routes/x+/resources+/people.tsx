@@ -4,11 +4,15 @@ import { redirect } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Outlet, useLoaderData } from "@remix-run/react";
 import { usePermissions } from "~/hooks";
-import { PeopleTable, PeopleTableFilters } from "~/interfaces/Resources/People";
+import {
+  PeopleTable,
+  PeopleTableFilters,
+  getAttributeCategories,
+  getPeople,
+} from "~/modules/resources";
 import { requirePermissions } from "~/services/auth";
-import { getAttributeCategories, getPeople } from "~/services/resources";
 import { flash } from "~/services/session";
-import { getEmployeeTypes } from "~/services/users";
+import { getEmployeeTypes } from "~/modules/users";
 import { getGenericQueryFilters } from "~/utils/query";
 import { error } from "~/utils/result";
 

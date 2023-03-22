@@ -22,8 +22,7 @@ const GroupedContentSidebar = ({ groups }: { groups: RouteGroup[] }) => {
                 borderBottomStyle={"solid"}
                 borderBottomWidth={1}
                 borderBottomColor={borderColor}
-                px={2}
-                py={4}
+                p={2}
                 w="full"
               >
                 <Text
@@ -46,6 +45,7 @@ const GroupedContentSidebar = ({ groups }: { groups: RouteGroup[] }) => {
                       as={Link}
                       to={route.to}
                       variant={isActive ? "solid" : "ghost"}
+                      border="none"
                       fontWeight={isActive ? "bold" : "normal"}
                       leftIcon={route.icon}
                       justifyContent="start"
