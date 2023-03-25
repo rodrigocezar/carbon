@@ -17,7 +17,7 @@ export default function Home() {
         <div className="flex flex-col justify-between text-center">
           <div>
             <h1 className="max-w-5xl mx-auto nx-text-6xl font-extrabold tracking-tighter leading-[1.1] text-6xl sm:text-7xl lg:nx-text-8xl xl:nx-text-8xl">
-              ERP &nbsp;
+              ERP&nbsp;
               <span className="pr-1 inline-block text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-blue-500 ">
                 for the builders
               </span>
@@ -26,6 +26,16 @@ export default function Home() {
               Carbon ERP is an open source high performance ERP for
               manufacturers.
             </p>
+          </div>
+          <div className="flex fix-flex-col h-32 mt-4 md:mt-0 mb-6 md:mb-0 items-center justify-center gap-3 md:flex-row xl:flex-row">
+            <div className="rounded-md fix-width-auto xl:w-auto">
+              <a
+                className="flex items-center justify-center w-full px-8 py-3 text-base font-medium text-white no-underline bg-black border border-transparent rounded-md dark:bg-white dark:text-black betterhover:dark:hover:bg-gray-300 betterhover:hover:bg-gray-700 md:py-3 md:text-lg md:px-10 md:leading-6"
+                href="/docs/getting-started"
+              >
+                Get Started →
+              </a>
+            </div>
           </div>
         </div>
       </div>
