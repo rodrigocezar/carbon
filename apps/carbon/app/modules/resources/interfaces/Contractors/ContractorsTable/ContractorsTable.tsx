@@ -6,14 +6,14 @@ import { BsPencilSquare } from "react-icons/bs";
 import { IoMdTrash } from "react-icons/io";
 import { Table } from "~/components";
 import { usePermissions, useUrlParams } from "~/hooks";
-import type { Partner } from "~/modules/resources";
+import type { Contractor } from "~/modules/resources";
 
-type PartnersTableProps = {
-  data: Partner[];
+type ContractorsTableProps = {
+  data: Contractor[];
   count: number;
 };
 
-const PartnersTable = memo(({ data, count }: PartnersTableProps) => {
+const ContractorsTable = memo(({ data, count }: ContractorsTableProps) => {
   const navigate = useNavigate();
   const permissions = usePermissions();
   const [params] = useUrlParams();
@@ -42,11 +42,9 @@ const PartnersTable = memo(({ data, count }: PartnersTableProps) => {
         ),
       },
       {
-        header: "Location",
+        header: "Contractor",
         cell: ({ row }) => (
-          <>
-            {row.original.city}, {row.original.state}
-          </>
+          <>{`${row.original.firstName} ${row.original.lastName}`}</>
         ),
       },
       {
@@ -65,26 +63,26 @@ const PartnersTable = memo(({ data, count }: PartnersTableProps) => {
             icon={<BsPencilSquare />}
             onClick={() => {
               navigate(
-                `/x/resources/partners/${
-                  row.supplierLocationId
+                `/x/resources/contractors/${
+                  row.supplierContactId
                 }?${params.toString()}`
               );
             }}
           >
-            Edit Partner
+            Edit Contractor
           </MenuItem>
           <MenuItem
             isDisabled={!permissions.can("delete", "resources")}
             icon={<IoMdTrash />}
             onClick={() => {
               navigate(
-                `/x/resources/partners/delete/${
-                  row.supplierLocationId
+                `/x/resources/contractors/delete/${
+                  row.supplierContactId
                 }?${params.toString()}`
               );
             }}
           >
-            Delete Partner
+            Delete Contractor
           </MenuItem>
         </>
       );
@@ -102,5 +100,5 @@ const PartnersTable = memo(({ data, count }: PartnersTableProps) => {
   );
 });
 
-PartnersTable.displayName = "PartnersTable";
-export default PartnersTable;
+ContractorsTable.displayName = "ContractorsTable";
+export default ContractorsTable;

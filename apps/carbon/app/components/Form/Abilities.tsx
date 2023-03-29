@@ -9,78 +9,86 @@ import {
 import { useFetcher } from "@remix-run/react";
 import { useEffect, useMemo } from "react";
 import { useControlField, useField } from "remix-validated-form";
-import type { getDepartmentsList } from "~/modules/resources";
+import type { getAbilitiesList } from "~/modules/resources";
 import type { SelectProps } from "./Select";
 
-type DepartmentSelectProps = Omit<SelectProps, "options"> & {
-  department?: string;
+type AbilitiesSelectProps = Omit<SelectProps, "options" | "onChange"> & {
+  ability?: string;
+  onChange?: (
+    selections: {
+      value: string;
+      label: string;
+    }[]
+  ) => void;
 };
 
-const Department = ({
+const Abilities = ({
   name,
-  label = "Department",
-  department,
+  label = "Abilities",
+  ability,
   helperText,
   isLoading,
   isReadOnly,
-  placeholder = "Select Department",
+  placeholder = "Select Abilities",
   onChange,
   ...props
-}: DepartmentSelectProps) => {
-  const { error, defaultValue } = useField(name);
-  const [value, setValue] = useControlField<string | undefined>(name);
+}: AbilitiesSelectProps) => {
+  const { error } = useField(name);
+  const [value, setValue] = useControlField<string[]>(name);
 
-  const departmentFetcher =
-    useFetcher<Awaited<ReturnType<typeof getDepartmentsList>>>();
+  const abilityFetcher =
+    useFetcher<Awaited<ReturnType<typeof getAbilitiesList>>>();
 
   useEffect(() => {
-    departmentFetcher.load(`/api/resources/departments`);
+    abilityFetcher.load(`/api/resources/abilities`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const options = useMemo(
     () =>
-      departmentFetcher.data?.data
-        ? departmentFetcher.data?.data.map((c) => ({
+      abilityFetcher.data?.data
+        ? abilityFetcher.data?.data.map((c) => ({
             value: c.id,
             label: c.name,
           }))
         : [],
-    [departmentFetcher.data]
+    [abilityFetcher.data]
   );
 
-  const handleChange = (selection: {
-    value: string | number;
-    label: string;
-  }) => {
-    const newValue = (selection.value as string) || undefined;
+  const handleChange = (
+    selections: {
+      value: string;
+      label: string;
+    }[]
+  ) => {
+    const newValue = selections.map((s) => s.value as string) || [];
     setValue(newValue);
     if (onChange && typeof onChange === "function") {
-      onChange(selection);
+      onChange(selections);
     }
   };
 
   const controlledValue = useMemo(
     // @ts-ignore
-    () => options.find((option) => option.value === value),
+    () => options?.filter((option) => value?.includes(option.value)) ?? [],
     [value, options]
   );
 
-  // so that we can call onChange on load
-  useEffect(() => {
-    if (controlledValue && controlledValue.value === defaultValue) {
-      handleChange(controlledValue);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [controlledValue?.value]);
-
   // TODO: hack for default value
-  return departmentFetcher.state !== "loading" ? (
+  return abilityFetcher.state !== "loading" ? (
     <FormControl isInvalid={!!error}>
       {label && <FormLabel htmlFor={name}>{label}</FormLabel>}
-      <input type="hidden" name={name} id={name} value={value} />
+      {value.map((selection, index) => (
+        <input
+          key={`${name}[${index}]`}
+          type="hidden"
+          name={`${name}[${index}]`}
+          value={selection}
+        />
+      ))}
       <Select
         {...props}
+        isMulti
         value={controlledValue}
         isLoading={isLoading}
         options={options}
@@ -107,6 +115,6 @@ const Department = ({
   );
 };
 
-Department.displayName = "Department";
+Abilities.displayName = "Abilities";
 
-export default Department;
+export default Abilities;

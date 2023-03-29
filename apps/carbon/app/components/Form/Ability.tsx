@@ -8,66 +8,85 @@ import {
 } from "@chakra-ui/react";
 import { useFetcher } from "@remix-run/react";
 import { useEffect, useMemo } from "react";
-import { useField } from "remix-validated-form";
+import { useControlField, useField } from "remix-validated-form";
 import type { getAbilitiesList } from "~/modules/resources";
-import { mapRowsToOptions } from "~/utils/form";
 import type { SelectProps } from "./Select";
 
-type AbilitySelectProps = Omit<SelectProps, "options">;
+type AbilitySelectProps = Omit<SelectProps, "options"> & {
+  ability?: string;
+};
 
 const Ability = ({
   name,
   label = "Ability",
+  ability,
   helperText,
   isLoading,
   isReadOnly,
-  placeholder,
+  placeholder = "Select Ability",
   onChange,
   ...props
 }: AbilitySelectProps) => {
-  const { getInputProps, error, defaultValue } = useField(name);
+  const { error, defaultValue } = useField(name);
+  const [value, setValue] = useControlField<string | undefined>(name);
 
   const abilityFetcher =
     useFetcher<Awaited<ReturnType<typeof getAbilitiesList>>>();
 
   useEffect(() => {
-    if (abilityFetcher.type === "init") {
-      abilityFetcher.load("/api/resources/abilities");
-    }
-  }, [abilityFetcher]);
+    abilityFetcher.load(`/api/resources/abilities`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const options = useMemo(
     () =>
-      mapRowsToOptions({
-        data: abilityFetcher.data?.data,
-        value: "id",
-        label: "name",
-      }),
+      abilityFetcher.data?.data
+        ? abilityFetcher.data?.data.map((c) => ({
+            value: c.id,
+            label: c.name,
+          }))
+        : [],
     [abilityFetcher.data]
   );
 
-  const initialValue = useMemo(
-    () => options.filter((option) => option.value === defaultValue),
-    [defaultValue, options]
+  const handleChange = (selection: {
+    value: string | number;
+    label: string;
+  }) => {
+    const newValue = (selection.value as string) || undefined;
+    setValue(newValue);
+    if (onChange && typeof onChange === "function") {
+      onChange(selection);
+    }
+  };
+
+  const controlledValue = useMemo(
+    // @ts-ignore
+    () => options.find((option) => option.value === value),
+    [value, options]
   );
+
+  // so that we can call onChange on load
+  useEffect(() => {
+    if (controlledValue && controlledValue.value === defaultValue) {
+      handleChange(controlledValue);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [controlledValue?.value]);
 
   // TODO: hack for default value
   return abilityFetcher.state !== "loading" ? (
     <FormControl isInvalid={!!error}>
       {label && <FormLabel htmlFor={name}>{label}</FormLabel>}
+      <input type="hidden" name={name} id={name} value={value} />
       <Select
-        {...getInputProps({
-          // @ts-ignore
-          id: name,
-        })}
         {...props}
-        defaultValue={initialValue}
-        isReadOnly={isReadOnly}
+        value={controlledValue}
         isLoading={isLoading}
         options={options}
         placeholder={placeholder}
         // @ts-ignore
-        onChange={onChange ?? undefined}
+        onChange={handleChange}
       />
       {error ? (
         <FormErrorMessage>{error}</FormErrorMessage>
@@ -78,7 +97,12 @@ const Ability = ({
   ) : (
     <Box>
       {label && <FormLabel>{label}</FormLabel>}
-      <Select isDisabled isLoading options={[]} />
+      <Select
+        isDisabled
+        isLoading={isLoading}
+        options={[]}
+        //@ts-ignore
+      />
     </Box>
   );
 };

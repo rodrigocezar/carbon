@@ -3,9 +3,9 @@ import { redirect } from "@remix-run/node";
 import { validationError } from "remix-validated-form";
 import { useUrlParams } from "~/hooks";
 import {
-  PartnerForm,
-  partnerValidator,
-  upsertPartner,
+  ContractorForm,
+  contractorValidator,
+  upsertContractor,
 } from "~/modules/resources";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
@@ -18,7 +18,9 @@ export async function action({ request }: ActionArgs) {
     create: "resources",
   });
 
-  const validation = await partnerValidator.validate(await request.formData());
+  const validation = await contractorValidator.validate(
+    await request.formData()
+  );
 
   if (validation.error) {
     return validationError(validation.error);
@@ -26,30 +28,30 @@ export async function action({ request }: ActionArgs) {
 
   const { id, hoursPerWeek, abilities } = validation.data;
 
-  const createPartner = await upsertPartner(client, {
+  const createContractor = await upsertContractor(client, {
     id,
     hoursPerWeek,
     abilities,
     createdBy: userId,
   });
 
-  if (createPartner.error) {
+  if (createContractor.error) {
     return redirect(
-      "/x/resources/partners",
+      "/x/resources/contractors",
       await flash(
         request,
-        error(createPartner.error, "Failed to create partner.")
+        error(createContractor.error, "Failed to create contractor.")
       )
     );
   }
 
   return redirect(
-    "/x/resources/partners",
-    await flash(request, success("Partner created."))
+    "/x/resources/contractors",
+    await flash(request, success("Contractor created."))
   );
 }
 
-export default function NewPartnerRoute() {
+export default function NewContractorRoute() {
   const [params] = useUrlParams();
   const initialValues = {
     id: params.get("id") ?? "",
@@ -58,5 +60,5 @@ export default function NewPartnerRoute() {
     abilities: [] as string[],
   };
 
-  return <PartnerForm initialValues={initialValues} />;
+  return <ContractorForm initialValues={initialValues} />;
 }
