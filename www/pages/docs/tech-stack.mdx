@@ -19,15 +19,15 @@ In this page, we'll give you a basic overview of how the tech stack works togeth
 
 ## TypeScript
 
-[TypeScript](https://www.typescriptlang.org) is a programming language that builds on top of JavaScript. It adds a bunch of features that make it easier to write code, and it also makes it easier to catch bugs before you ship your code. It was created by the inventor of C# and maintained by Microsoft.
+[TypeScript](https://www.typescriptlang.org) is a programming language that builds on top of JavaScript. It adds a bunch of features that make it easier to write code, and it also makes it easier to catch bugs before you ship your code.
 
-We chose TypeScript because it allows us to use a single, strongly-typed language across the entire application.
+We chose TypeScript because it allows us to use a single, strongly-typed language across the entire application. Every time you run `yarn db:build`, we use Supabase to generate TypeScript types for your database schema.
 
 ## React
 
 [React](https://reactjs.org) is a JavaScript library for building user interfaces. It's the most popular frontend framework in the world, and it's used by many of the biggest companies in the world, including Facebook, Netflix, and Airbnb.
 
-We have a package called [@carbon/react](https://github.com/barbinbrad/carbon/tree/main/packages/carbon-react/src) that has a bunch of React pre-built components that you can use to build your UI. You can also use any other React component library.
+We have a package called [@carbon/react](https://github.com/barbinbrad/carbon/tree/main/packages/carbon-react/src) that has a bunch of React pre-built components that you can use to build your UI. You can also draw from a rich ecosystem of existing React component libraries.
 
 ## Chakra UI
 
@@ -47,7 +47,7 @@ function App() {
 }
 ```
 
-There are a lot of other component libraries out there, but we chose Chakra UI because it gives us a lot of flexibility while still being easy to use. If you're building user interfaces, we recommend you check out their documentation.
+There are a lot of other component libraries out there, but we chose Chakra UI because it gives us a lot of flexibility while providing great user and developer experience.
 
 ## Remix
 
@@ -88,7 +88,7 @@ export async function action({params, request}) {
 
 ## Supabase
 
-[Supabase](https://supabase.io) is a database, authentication, and storage service that's built on top of Postgres. It allows us to provide a simple, unified authentication layer across many applications (even one's that don't exist yet).
+[Supabase](https://supabase.io) is a database, authentication, and storage service that's built on top of Postgres. It allows us to provide a simple, unified authentication layer across many applications (even those that don't exist yet).
 
 Supabase provides a TypeScript client called [Supabase JS](https://supabase.com/docs/reference/javascript/typescript-support) that makes it incredibly easy to query/modify the database. It also makes it easy to use row-level security to restrict access to certain parts of the database on a per-user basis.
 
@@ -135,4 +135,4 @@ ORDER BY "createdAt" DESC
 LIMIT 10
 ```
 
-But unlike a raw SQL query, the data that we get back is strongly-typed and nicely nested. It also has nice error reporting baked in.
+But unlike a raw SQL query, the data that we get back is strongly-typed, neatly-nested, with error handling built-in.
