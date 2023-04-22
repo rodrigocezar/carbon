@@ -18,10 +18,11 @@ type CellProps<T> = {
   borderColor: string;
   cell: CellType<T, unknown>;
   columnIndex: number;
-  editableComponents: Record<string, EditableTableCellComponent<T>>;
-  isSelected: boolean;
+  editableComponents?: Record<string, EditableTableCellComponent<T>>;
   isEditing: boolean;
   isEditMode: boolean;
+  isRowSelected: boolean;
+  isSelected: boolean;
   onClick?: () => void;
   onUpdate?: (value: unknown) => void;
 };
@@ -31,9 +32,9 @@ const Cell = <T extends object>({
   cell,
   columnIndex,
   editableComponents,
-  isSelected,
   isEditing,
   isEditMode,
+  isSelected,
   onClick,
   onUpdate,
 }: CellProps<T>) => {
@@ -41,7 +42,22 @@ const Cell = <T extends object>({
   const accessorKey = getAccessorKey(cell.column.columnDef);
 
   const hasEditableTableCellComponent =
-    accessorKey !== undefined && accessorKey in editableComponents;
+    accessorKey !== undefined &&
+    editableComponents &&
+    accessorKey in editableComponents;
+
+  const editableCell = hasEditableTableCellComponent
+    ? editableComponents[accessorKey]({
+        accessorKey,
+        value: cell.getValue(),
+        row: cell.row.original,
+        onUpdate:
+          onUpdate ||
+          (() => {
+            console.error("failed to pass an onUpdate function to the popover");
+          }),
+      })
+    : null;
 
   return (
     <Td
@@ -87,18 +103,7 @@ const Cell = <T extends object>({
 
             <PopoverContent>
               <PopoverBody>
-                <HStack spacing={2}>
-                  {editableComponents[accessorKey!]({
-                    accessorKey,
-                    value: cell.getValue(),
-                    row: cell.row.original,
-                    onUpdate: onUpdate
-                      ? onUpdate
-                      : () => {
-                          console.error("failed to pass an onUpdate function");
-                        },
-                  })}
-                </HStack>
+                <HStack spacing={2}>{editableCell}</HStack>
               </PopoverBody>
             </PopoverContent>
           </Popover>
@@ -113,9 +118,10 @@ const Cell = <T extends object>({
 export const MemoizedCell = memo(
   Cell,
   (prev, next) =>
-    next.cell === prev.cell &&
+    next.isRowSelected === prev.isRowSelected &&
     next.isSelected === prev.isSelected &&
     next.isEditing === prev.isEditing &&
     next.isEditMode === prev.isEditMode &&
-    next.cell.column.columnDef.id !== "select"
-);
+    next.cell.getValue() === prev.cell.getValue() &&
+    next.cell.getContext() === prev.cell.getContext()
+) as typeof Cell;

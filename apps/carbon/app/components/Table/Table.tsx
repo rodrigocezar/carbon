@@ -72,12 +72,12 @@ const Table = <T extends object>({
   actions = [],
   count = 0,
   colorScheme = "blackAlpha",
-  editableComponents = {},
-  defaultColumnOrder = [],
+  editableComponents,
+  defaultColumnOrder,
   defaultColumnPinning = {
     left: ["Select"],
   },
-  defaultColumnVisibility = {},
+  defaultColumnVisibility,
   withFilters = false,
   withInlineEditing = false,
   withColumnOrdering = false,
@@ -104,12 +104,13 @@ const Table = <T extends object>({
 
   /* Column Visibility */
   const [columnVisibility, setColumnVisibility] = useState(
-    defaultColumnVisibility
+    defaultColumnVisibility ?? {}
   );
 
   /* Column Ordering */
-  const [columnOrder, setColumnOrder] =
-    useState<ColumnOrderState>(defaultColumnOrder);
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
+    defaultColumnOrder ?? []
+  );
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(
     withColumnOrdering ? defaultColumnPinning : {}
   );
@@ -231,13 +232,19 @@ const Table = <T extends object>({
     (selectedColumn: number) => {
       if (!withInlineEditing) return false;
 
-      const columns = table.getVisibleLeafColumns();
+      const tableColumns = [
+        ...table.getLeftVisibleLeafColumns(),
+        ...table.getCenterVisibleLeafColumns(),
+      ];
+
       const column =
-        columns[withSelectableRows ? selectedColumn + 1 : selectedColumn];
+        tableColumns[withSelectableRows ? selectedColumn + 1 : selectedColumn];
       if (!column) return false;
 
       const accessorKey = getAccessorKey(column.columnDef);
-      return accessorKey && accessorKey in editableComponents;
+      return (
+        accessorKey && editableComponents && accessorKey in editableComponents
+      );
     },
     [table, editableComponents, withInlineEditing, withSelectableRows]
   );
@@ -274,17 +281,17 @@ const Table = <T extends object>({
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (!selectedCell) return;
 
-      const { code } = event;
+      const { code, shiftKey } = event;
 
       const commandCodes: {
-        [key: string]: [0, 1] | [1, 0] | [0, -1] | [-1, 0];
+        [key: string]: [number, number];
       } = {
         Tab: [0, 1],
         Enter: [1, 0],
       };
 
       const navigationCodes: {
-        [key: string]: [0, 1] | [1, 0] | [0, -1] | [-1, 0];
+        [key: string]: [number, number];
       } = {
         ArrowRight: [0, 1],
         ArrowLeft: [0, -1],
@@ -296,7 +303,10 @@ const Table = <T extends object>({
       const lastColumn =
         table.getVisibleLeafColumns().length - 1 - (withSelectableRows ? 1 : 0);
 
-      const navigate = (delta: number[], tabWrap = false): number[] => {
+      const navigate = (
+        delta: [number, number],
+        tabWrap = false
+      ): [number, number] => {
         const x0 = selectedCell?.column || 0;
         const y0 = selectedCell?.row || 0;
 
@@ -304,15 +314,28 @@ const Table = <T extends object>({
         let y1 = y0 + delta[0];
 
         if (tabWrap) {
-          // wrap to the next row if we're on the last column
-          if (x1 > lastColumn) {
-            x1 = 0;
-            y1++;
-          }
-          // don't wrap to the next row if we're on the last row
-          if (y1 > lastRow) {
-            x1 = x0;
-            y1 = y0;
+          if (delta[1] > 0) {
+            // wrap to the next row if we're on the last column
+            if (x1 > lastColumn) {
+              x1 = 0;
+              y1 += 1;
+            }
+            // don't wrap to the next row if we're on the last row
+            if (y1 > lastRow) {
+              x1 = x0;
+              y1 = y0;
+            }
+          } else {
+            // reverse tab wrap
+            if (x1 < 0) {
+              x1 = lastColumn;
+              y1 -= 1;
+            }
+
+            if (y1 < 0) {
+              x1 = x0;
+              y1 = y0;
+            }
           }
         } else {
           x1 = clip(x1, 0, lastColumn);
@@ -324,16 +347,26 @@ const Table = <T extends object>({
       };
 
       if (code in commandCodes) {
-        // enter and tab work even if we're editing
         event.preventDefault();
-        const [x1, y1] = navigate(commandCodes[code], code === "Tab");
+
+        if (
+          !isEditing &&
+          code === "Enter" &&
+          !shiftKey &&
+          isColumnEditable(selectedCell.column)
+        ) {
+          setIsEditing(true);
+          return;
+        }
+
+        let direction = commandCodes[code];
+        if (shiftKey) direction = [-direction[0], -direction[1]];
+        const [x1, y1] = navigate(direction, code === "Tab");
         setSelectedCell({
           row: y1,
           column: x1,
         });
-
         if (isEditing) {
-          focusOnSelectedCell();
           setIsEditing(false);
         }
       } else if (code in navigationCodes) {
@@ -346,9 +379,10 @@ const Table = <T extends object>({
           row: y1,
           column: x1,
         });
-        // any other key activates editing
+        // any other key (besides shift) activates editing
         // if the column is editable and a cell is selected
       } else if (
+        !["ShiftLeft", "ShiftRight"].includes(code) &&
         !isEditing &&
         selectedCell &&
         isColumnEditable(selectedCell.column)
@@ -357,7 +391,6 @@ const Table = <T extends object>({
       }
     },
     [
-      focusOnSelectedCell,
       isColumnEditable,
       isEditing,
       selectedCell,
@@ -393,7 +426,11 @@ const Table = <T extends object>({
 
   return (
     <VStack w="full" h="full" spacing={0}>
-      {(withColumnOrdering || withFilters || withSelectableRows) && (
+      {(withColumnOrdering ||
+        withFilters ||
+        withSelectableRows ||
+        withInlineEditing ||
+        withSimpleSorting) && (
         <TableHeader
           actions={actions}
           columnAccessors={columnAccessors}
@@ -444,7 +481,6 @@ const Table = <T extends object>({
                       const sortable =
                         withSimpleSorting &&
                         accessorKey &&
-                        accessorKey !== "id" &&
                         !accessorKey.endsWith(".id") &&
                         header.column.columnDef.enableSorting !== false;
 
@@ -514,6 +550,10 @@ const Table = <T extends object>({
                             isEditing={isEditing}
                             isEditMode={editMode}
                             isFrozenColumn
+                            isRowSelected={
+                              row.index in rowSelection &&
+                              !!rowSelection[row.index]
+                            }
                             selectedCell={selectedCell}
                             // @ts-ignore
                             row={row}
@@ -538,6 +578,9 @@ const Table = <T extends object>({
                         isEditing={isEditing}
                         isEditMode={editMode}
                         isFrozenColumn
+                        isRowSelected={
+                          row.index in rowSelection && !!rowSelection[row.index]
+                        }
                         selectedCell={selectedCell}
                         // @ts-ignore
                         row={row}
@@ -571,7 +614,6 @@ const Table = <T extends object>({
                     const sortable =
                       withSimpleSorting &&
                       accessorKey &&
-                      accessorKey !== "id" &&
                       !accessorKey.endsWith(".id") &&
                       header.column.columnDef.enableSorting !== false;
                     const sorted = isSorted(accessorKey ?? "");
@@ -647,6 +689,10 @@ const Table = <T extends object>({
                           editableComponents={editableComponents}
                           isEditing={isEditing}
                           isEditMode={editMode}
+                          isRowSelected={
+                            row.index in rowSelection &&
+                            !!rowSelection[row.index]
+                          }
                           pinnedColumns={
                             columnPinning?.left
                               ? columnPinning.left?.length -
@@ -678,6 +724,9 @@ const Table = <T extends object>({
                       editableComponents={editableComponents}
                       isEditing={isEditing}
                       isEditMode={editMode}
+                      isRowSelected={
+                        row.index in rowSelection && !!rowSelection[row.index]
+                      }
                       pinnedColumns={
                         columnPinning?.left
                           ? columnPinning.left?.length -

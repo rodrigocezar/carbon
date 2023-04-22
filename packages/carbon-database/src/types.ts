@@ -44,6 +44,94 @@ export interface Database {
           createdAt?: string;
         };
       };
+      account: {
+        Row: {
+          number: string;
+          name: string;
+          description: string | null;
+          accountCategoryId: string | null;
+          consolidatedRate:
+            | Database["public"]["Enums"]["consolidatedRate"]
+            | null;
+          currencyCode: string | null;
+          parentAccountNumber: string | null;
+          createdBy: string;
+          updatedBy: string | null;
+          updatedAt: string | null;
+          controlAccount: boolean;
+          cashAccount: boolean;
+          active: boolean;
+          createdAt: string;
+        };
+        Insert: {
+          number: string;
+          name: string;
+          description?: string | null;
+          accountCategoryId?: string | null;
+          consolidatedRate?:
+            | Database["public"]["Enums"]["consolidatedRate"]
+            | null;
+          currencyCode?: string | null;
+          parentAccountNumber?: string | null;
+          createdBy: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          controlAccount?: boolean;
+          cashAccount?: boolean;
+          active?: boolean;
+          createdAt?: string;
+        };
+        Update: {
+          number?: string;
+          name?: string;
+          description?: string | null;
+          accountCategoryId?: string | null;
+          consolidatedRate?:
+            | Database["public"]["Enums"]["consolidatedRate"]
+            | null;
+          currencyCode?: string | null;
+          parentAccountNumber?: string | null;
+          createdBy?: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          controlAccount?: boolean;
+          cashAccount?: boolean;
+          active?: boolean;
+          createdAt?: string;
+        };
+      };
+      accountCategory: {
+        Row: {
+          category: Database["public"]["Enums"]["glAccountCategory"];
+          type: Database["public"]["Enums"]["glAccountType"];
+          normalBalance: Database["public"]["Enums"]["glNormalBalance"];
+          createdBy: string;
+          updatedBy: string | null;
+          updatedAt: string | null;
+          id: string;
+          createdAt: string;
+        };
+        Insert: {
+          category: Database["public"]["Enums"]["glAccountCategory"];
+          type: Database["public"]["Enums"]["glAccountType"];
+          normalBalance: Database["public"]["Enums"]["glNormalBalance"];
+          createdBy: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          id?: string;
+          createdAt?: string;
+        };
+        Update: {
+          category?: Database["public"]["Enums"]["glAccountCategory"];
+          type?: Database["public"]["Enums"]["glAccountType"];
+          normalBalance?: Database["public"]["Enums"]["glNormalBalance"];
+          createdBy?: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          id?: string;
+          createdAt?: string;
+        };
+      };
       address: {
         Row: {
           addressLine1: string | null;
@@ -280,6 +368,50 @@ export interface Database {
           abilityId?: string;
           id?: string;
           active?: boolean;
+        };
+      };
+      currency: {
+        Row: {
+          name: string;
+          code: string;
+          symbol: string | null;
+          createdBy: string;
+          updatedBy: string | null;
+          updatedAt: string | null;
+          id: string;
+          symbolPlacementBefore: boolean;
+          exchangeRate: number;
+          currencyPrecision: number;
+          isBaseCurrency: boolean;
+          createdAt: string;
+        };
+        Insert: {
+          name: string;
+          code: string;
+          symbol?: string | null;
+          createdBy: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          id?: string;
+          symbolPlacementBefore?: boolean;
+          exchangeRate?: number;
+          currencyPrecision?: number;
+          isBaseCurrency?: boolean;
+          createdAt?: string;
+        };
+        Update: {
+          name?: string;
+          code?: string;
+          symbol?: string | null;
+          createdBy?: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          id?: string;
+          symbolPlacementBefore?: boolean;
+          exchangeRate?: number;
+          currencyPrecision?: number;
+          isBaseCurrency?: boolean;
+          createdAt?: string;
         };
       };
       customer: {
@@ -841,6 +973,200 @@ export interface Database {
           id?: number;
         };
       };
+      part: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          replenishmentSystem: Database["public"]["Enums"]["partReplenishmentSystem"];
+          partGroupId: string;
+          partType: Database["public"]["Enums"]["partType"];
+          manufacturerPartNumber: string | null;
+          unitOfMeasureCode: string;
+          approvedBy: string | null;
+          fromDate: string | null;
+          toDate: string | null;
+          createdBy: string;
+          updatedBy: string | null;
+          updatedAt: string | null;
+          blocked: boolean;
+          active: boolean;
+          approved: boolean;
+          createdAt: string;
+        };
+        Insert: {
+          id: string;
+          name: string;
+          description?: string | null;
+          replenishmentSystem: Database["public"]["Enums"]["partReplenishmentSystem"];
+          partGroupId: string;
+          partType: Database["public"]["Enums"]["partType"];
+          manufacturerPartNumber?: string | null;
+          unitOfMeasureCode: string;
+          approvedBy?: string | null;
+          fromDate?: string | null;
+          toDate?: string | null;
+          createdBy: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          blocked?: boolean;
+          active?: boolean;
+          approved?: boolean;
+          createdAt?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string | null;
+          replenishmentSystem?: Database["public"]["Enums"]["partReplenishmentSystem"];
+          partGroupId?: string;
+          partType?: Database["public"]["Enums"]["partType"];
+          manufacturerPartNumber?: string | null;
+          unitOfMeasureCode?: string;
+          approvedBy?: string | null;
+          fromDate?: string | null;
+          toDate?: string | null;
+          createdBy?: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          blocked?: boolean;
+          active?: boolean;
+          approved?: boolean;
+          createdAt?: string;
+        };
+      };
+      partCost: {
+        Row: {
+          partId: string;
+          costingMethod: Database["public"]["Enums"]["partCostingMethod"];
+          salesAccountId: string | null;
+          discountAccountId: string | null;
+          inventoryAccountId: string | null;
+          createdBy: string;
+          updatedBy: string | null;
+          updatedAt: string | null;
+          standardCost: number;
+          unitCost: number;
+          costIsAdjusted: boolean;
+          createdAt: string;
+        };
+        Insert: {
+          partId: string;
+          costingMethod: Database["public"]["Enums"]["partCostingMethod"];
+          salesAccountId?: string | null;
+          discountAccountId?: string | null;
+          inventoryAccountId?: string | null;
+          createdBy: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          standardCost?: number;
+          unitCost?: number;
+          costIsAdjusted?: boolean;
+          createdAt?: string;
+        };
+        Update: {
+          partId?: string;
+          costingMethod?: Database["public"]["Enums"]["partCostingMethod"];
+          salesAccountId?: string | null;
+          discountAccountId?: string | null;
+          inventoryAccountId?: string | null;
+          createdBy?: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          standardCost?: number;
+          unitCost?: number;
+          costIsAdjusted?: boolean;
+          createdAt?: string;
+        };
+      };
+      partGroup: {
+        Row: {
+          name: string;
+          description: string | null;
+          salesAccountId: string | null;
+          discountAccountId: string | null;
+          inventoryAccountId: string | null;
+          costOfGoodsSoldLaborAccountId: string | null;
+          costOfGoodsSoldMaterialAccountId: string | null;
+          costOfGoodsSoldOverheadAccountId: string | null;
+          costOfGoodsSoldSubcontractorAccountId: string | null;
+          createdBy: string;
+          updatedBy: string | null;
+          updatedAt: string | null;
+          id: string;
+          active: boolean;
+          createdAt: string;
+        };
+        Insert: {
+          name: string;
+          description?: string | null;
+          salesAccountId?: string | null;
+          discountAccountId?: string | null;
+          inventoryAccountId?: string | null;
+          costOfGoodsSoldLaborAccountId?: string | null;
+          costOfGoodsSoldMaterialAccountId?: string | null;
+          costOfGoodsSoldOverheadAccountId?: string | null;
+          costOfGoodsSoldSubcontractorAccountId?: string | null;
+          createdBy: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          id?: string;
+          active?: boolean;
+          createdAt?: string;
+        };
+        Update: {
+          name?: string;
+          description?: string | null;
+          salesAccountId?: string | null;
+          discountAccountId?: string | null;
+          inventoryAccountId?: string | null;
+          costOfGoodsSoldLaborAccountId?: string | null;
+          costOfGoodsSoldMaterialAccountId?: string | null;
+          costOfGoodsSoldOverheadAccountId?: string | null;
+          costOfGoodsSoldSubcontractorAccountId?: string | null;
+          createdBy?: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          id?: string;
+          active?: boolean;
+          createdAt?: string;
+        };
+      };
+      partInventory: {
+        Row: {
+          partId: string;
+          shelfId: string | null;
+          createdBy: string;
+          updatedBy: string | null;
+          updatedAt: string | null;
+          stockoutWarning: boolean;
+          unitVolume: number;
+          unitWeight: number;
+          createdAt: string;
+        };
+        Insert: {
+          partId: string;
+          shelfId?: string | null;
+          createdBy: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          stockoutWarning?: boolean;
+          unitVolume?: number;
+          unitWeight?: number;
+          createdAt?: string;
+        };
+        Update: {
+          partId?: string;
+          shelfId?: string | null;
+          createdBy?: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          stockoutWarning?: boolean;
+          unitVolume?: number;
+          unitWeight?: number;
+          createdAt?: string;
+        };
+      };
       partner: {
         Row: {
           id: string;
@@ -890,11 +1216,176 @@ export interface Database {
           createdAt?: string;
         };
       };
+      partPlanning: {
+        Row: {
+          partId: string;
+          createdBy: string;
+          updatedBy: string | null;
+          updatedAt: string | null;
+          reorderingPolicy: Database["public"]["Enums"]["partReorderingPolicy"];
+          critical: boolean;
+          safetyStockQuantity: number;
+          safetyStockLeadTime: number;
+          demandAccumulationPeriod: number;
+          demandReschedulingPeriod: number;
+          demandAccumulationIncludesInventory: boolean;
+          reorderPoint: number;
+          reorderQuantity: number;
+          reorderMaximumInventory: number;
+          reorderOverflowLevel: number;
+          reorderTimeBucket: number;
+          minimumOrderQuantity: number;
+          maximumOrderQuantity: number;
+          orderMultiple: number;
+          createdAt: string;
+        };
+        Insert: {
+          partId: string;
+          createdBy: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          reorderingPolicy?: Database["public"]["Enums"]["partReorderingPolicy"];
+          critical?: boolean;
+          safetyStockQuantity?: number;
+          safetyStockLeadTime?: number;
+          demandAccumulationPeriod?: number;
+          demandReschedulingPeriod?: number;
+          demandAccumulationIncludesInventory?: boolean;
+          reorderPoint?: number;
+          reorderQuantity?: number;
+          reorderMaximumInventory?: number;
+          reorderOverflowLevel?: number;
+          reorderTimeBucket?: number;
+          minimumOrderQuantity?: number;
+          maximumOrderQuantity?: number;
+          orderMultiple?: number;
+          createdAt?: string;
+        };
+        Update: {
+          partId?: string;
+          createdBy?: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          reorderingPolicy?: Database["public"]["Enums"]["partReorderingPolicy"];
+          critical?: boolean;
+          safetyStockQuantity?: number;
+          safetyStockLeadTime?: number;
+          demandAccumulationPeriod?: number;
+          demandReschedulingPeriod?: number;
+          demandAccumulationIncludesInventory?: boolean;
+          reorderPoint?: number;
+          reorderQuantity?: number;
+          reorderMaximumInventory?: number;
+          reorderOverflowLevel?: number;
+          reorderTimeBucket?: number;
+          minimumOrderQuantity?: number;
+          maximumOrderQuantity?: number;
+          orderMultiple?: number;
+          createdAt?: string;
+        };
+      };
+      partReplenishment: {
+        Row: {
+          partId: string;
+          supplierId: string | null;
+          supplierPartNumber: string | null;
+          purchasingUnitOfMeasureCode: string | null;
+          lotSize: number | null;
+          createdBy: string;
+          updatedBy: string | null;
+          updatedAt: string | null;
+          purchasingLeadTime: number;
+          purchasingBlocked: boolean;
+          manufacturingPolicy: Database["public"]["Enums"]["partManufacturingPolicy"];
+          manufacturingLeadTime: number;
+          manufacturingBlocked: boolean;
+          requiresConfiguration: boolean;
+          scrapPercentage: number;
+          createdAt: string;
+        };
+        Insert: {
+          partId: string;
+          supplierId?: string | null;
+          supplierPartNumber?: string | null;
+          purchasingUnitOfMeasureCode?: string | null;
+          lotSize?: number | null;
+          createdBy: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          purchasingLeadTime?: number;
+          purchasingBlocked?: boolean;
+          manufacturingPolicy?: Database["public"]["Enums"]["partManufacturingPolicy"];
+          manufacturingLeadTime?: number;
+          manufacturingBlocked?: boolean;
+          requiresConfiguration?: boolean;
+          scrapPercentage?: number;
+          createdAt?: string;
+        };
+        Update: {
+          partId?: string;
+          supplierId?: string | null;
+          supplierPartNumber?: string | null;
+          purchasingUnitOfMeasureCode?: string | null;
+          lotSize?: number | null;
+          createdBy?: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          purchasingLeadTime?: number;
+          purchasingBlocked?: boolean;
+          manufacturingPolicy?: Database["public"]["Enums"]["partManufacturingPolicy"];
+          manufacturingLeadTime?: number;
+          manufacturingBlocked?: boolean;
+          requiresConfiguration?: boolean;
+          scrapPercentage?: number;
+          createdAt?: string;
+        };
+      };
+      partUnitSalePrice: {
+        Row: {
+          partId: string;
+          currencyCode: string;
+          salesUnitOfMeasureCode: string | null;
+          createdBy: string;
+          updatedBy: string | null;
+          updatedAt: string | null;
+          unitSalePrice: number;
+          salesBlocked: boolean;
+          priceIncludesTax: boolean;
+          allowInvoiceDiscount: boolean;
+          createdAt: string;
+        };
+        Insert: {
+          partId: string;
+          currencyCode: string;
+          salesUnitOfMeasureCode?: string | null;
+          createdBy: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          unitSalePrice?: number;
+          salesBlocked?: boolean;
+          priceIncludesTax?: boolean;
+          allowInvoiceDiscount?: boolean;
+          createdAt?: string;
+        };
+        Update: {
+          partId?: string;
+          currencyCode?: string;
+          salesUnitOfMeasureCode?: string | null;
+          createdBy?: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          unitSalePrice?: number;
+          salesBlocked?: boolean;
+          priceIncludesTax?: boolean;
+          allowInvoiceDiscount?: boolean;
+          createdAt?: string;
+        };
+      };
       search: {
         Row: {
           id: number;
           name: string;
-          entity: Database["public"]["Enums"]["search_entity"] | null;
+          entity: Database["public"]["Enums"]["searchEntity"] | null;
           uuid: string | null;
           link: string;
           description: string | null;
@@ -903,7 +1394,7 @@ export interface Database {
         Insert: {
           id?: number;
           name: string;
-          entity?: Database["public"]["Enums"]["search_entity"] | null;
+          entity?: Database["public"]["Enums"]["searchEntity"] | null;
           uuid?: string | null;
           link: string;
           description?: string | null;
@@ -912,11 +1403,40 @@ export interface Database {
         Update: {
           id?: number;
           name?: string;
-          entity?: Database["public"]["Enums"]["search_entity"] | null;
+          entity?: Database["public"]["Enums"]["searchEntity"] | null;
           uuid?: string | null;
           link?: string;
           description?: string | null;
           fts?: unknown | null;
+        };
+      };
+      shelf: {
+        Row: {
+          id: string;
+          locationId: string | null;
+          createdBy: string;
+          updatedBy: string | null;
+          updatedAt: string | null;
+          active: boolean;
+          createdAt: string;
+        };
+        Insert: {
+          id: string;
+          locationId?: string | null;
+          createdBy: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          active?: boolean;
+          createdAt?: string;
+        };
+        Update: {
+          id?: string;
+          locationId?: string | null;
+          createdBy?: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          active?: boolean;
+          createdAt?: string;
         };
       };
       shift: {
@@ -1110,6 +1630,38 @@ export interface Database {
           createdAt?: string;
         };
       };
+      unitOfMeasure: {
+        Row: {
+          code: string;
+          name: string;
+          createdBy: string;
+          updatedBy: string | null;
+          updatedAt: string | null;
+          id: string;
+          active: boolean;
+          createdAt: string;
+        };
+        Insert: {
+          code: string;
+          name: string;
+          createdBy: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          id?: string;
+          active?: boolean;
+          createdAt?: string;
+        };
+        Update: {
+          code?: string;
+          name?: string;
+          createdBy?: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          id?: string;
+          active?: boolean;
+          createdAt?: string;
+        };
+      };
       user: {
         Row: {
           id: string;
@@ -1278,32 +1830,32 @@ export interface Database {
         Row: {
           userId: string;
           note: string;
-          createdBy: string;
           id: string;
+          createdBy: string;
+          updatedAt: string | null;
           noteRichText: Json;
           active: boolean;
           createdAt: string;
-          updatedAt: string | null;
         };
         Insert: {
           userId: string;
           note: string;
-          createdBy: string;
           id?: string;
+          createdBy: string;
+          updatedAt?: string | null;
           noteRichText?: Json;
           active?: boolean;
           createdAt?: string;
-          updatedAt?: string | null;
         };
         Update: {
           userId?: string;
           note?: string;
-          createdBy?: string;
           id?: string;
+          createdBy?: string;
+          updatedAt?: string | null;
           noteRichText?: Json;
           active?: boolean;
           createdAt?: string;
-          updatedAt?: string | null;
         };
       };
       workCell: {
@@ -1552,6 +2104,7 @@ export interface Database {
       };
     };
     Enums: {
+      consolidatedRate: "Average" | "Current" | "Historical";
       factor:
         | "Hours/Piece"
         | "Hours/100 Pieces"
@@ -1564,7 +2117,37 @@ export interface Database {
         | "Seconds/Piece"
         | "Total Hours"
         | "Total Minutes";
-      search_entity:
+      glAccountCategory:
+        | "Bank"
+        | "Accounts Receivable"
+        | "Inventory"
+        | "Other Current Asset"
+        | "Fixed Asset"
+        | "Accumulated Depreciation"
+        | "Other Asset"
+        | "Accounts Payable"
+        | "Other Current Liability"
+        | "Long Term Liability"
+        | "Equity - No Close"
+        | "Equity - Close"
+        | "Retained Earnings"
+        | "Income"
+        | "Cost of Goods Sold"
+        | "Expense"
+        | "Other Income"
+        | "Other Expense";
+      glAccountType: "Balance Sheet" | "Income Statement";
+      glNormalBalance: "Debit" | "Credit";
+      partCostingMethod: "Standard" | "Average" | "LIFO" | "FIFO";
+      partManufacturingPolicy: "Make to Order" | "Make to Stock";
+      partReorderingPolicy:
+        | "Manual Reorder"
+        | "Demand-Based Reorder"
+        | "Fixed Reorder Quantity"
+        | "Maximum Quantity";
+      partReplenishmentSystem: "Buy" | "Make" | "Buy and Make";
+      partType: "Inventory" | "Non-Inventory" | "Service";
+      searchEntity:
         | "Resource"
         | "Person"
         | "Customer"

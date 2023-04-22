@@ -28,8 +28,8 @@ const CustomerTypeForm = ({ initialValues }: CustomerTypeFormProps) => {
 
   const isEditing = initialValues.id !== undefined;
   const isDisabled = isEditing
-    ? !permissions.can("update", "purchasing")
-    : !permissions.can("create", "purchasing");
+    ? !permissions.can("update", "sales")
+    : !permissions.can("create", "sales");
 
   return (
     <Drawer onClose={onClose} isOpen={true} size="sm">

@@ -3,8 +3,10 @@ import Ability from "./Ability";
 import Array from "./Array";
 import Boolean from "./Boolean";
 import Color from "./Color";
+import CreatableSelect from "./CreatableSelect";
 import Customer from "./Customer";
 import CustomerContact from "./CustomerContact";
+import Currency from "./Currency";
 import DatePicker from "./DatePicker";
 import Department from "./Department";
 import Employee from "./Employee";
@@ -34,6 +36,8 @@ export {
   Array,
   Boolean,
   Color,
+  CreatableSelect,
+  Currency,
   Customer,
   CustomerContact,
   DatePicker,
