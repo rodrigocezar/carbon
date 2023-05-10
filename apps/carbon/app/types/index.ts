@@ -40,6 +40,7 @@ export type Route = {
   name: string;
   to: string;
   icon?: any;
+  q?: string;
 };
 
 export type RouteGroup = {

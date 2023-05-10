@@ -590,6 +590,107 @@ export interface Database {
           createdAt?: string;
         };
       };
+      document: {
+        Row: {
+          path: string;
+          name: string;
+          size: number;
+          readGroups: string[] | null;
+          writeGroups: string[] | null;
+          createdBy: string;
+          updatedBy: string | null;
+          updatedAt: string | null;
+          id: string;
+          description: string | null;
+          type: string | null;
+          active: boolean;
+          createdAt: string;
+        };
+        Insert: {
+          path: string;
+          name: string;
+          size: number;
+          readGroups?: string[] | null;
+          writeGroups?: string[] | null;
+          createdBy: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          id?: string;
+          description?: string | null;
+          type?: string | null;
+          active?: boolean;
+          createdAt?: string;
+        };
+        Update: {
+          path?: string;
+          name?: string;
+          size?: number;
+          readGroups?: string[] | null;
+          writeGroups?: string[] | null;
+          createdBy?: string;
+          updatedBy?: string | null;
+          updatedAt?: string | null;
+          id?: string;
+          description?: string | null;
+          type?: string | null;
+          active?: boolean;
+          createdAt?: string;
+        };
+      };
+      documentFavorite: {
+        Row: {
+          documentId: string;
+          userId: string;
+        };
+        Insert: {
+          documentId: string;
+          userId: string;
+        };
+        Update: {
+          documentId?: string;
+          userId?: string;
+        };
+      };
+      documentLabel: {
+        Row: {
+          documentId: string;
+          userId: string;
+          label: string;
+        };
+        Insert: {
+          documentId: string;
+          userId: string;
+          label: string;
+        };
+        Update: {
+          documentId?: string;
+          userId?: string;
+          label?: string;
+        };
+      };
+      documentTransaction: {
+        Row: {
+          documentId: string;
+          type: Database["public"]["Enums"]["documentTransactionType"];
+          userId: string;
+          id: string;
+          createdAt: string;
+        };
+        Insert: {
+          documentId: string;
+          type: Database["public"]["Enums"]["documentTransactionType"];
+          userId: string;
+          id?: string;
+          createdAt?: string;
+        };
+        Update: {
+          documentId?: string;
+          type?: Database["public"]["Enums"]["documentTransactionType"];
+          userId?: string;
+          id?: string;
+          createdAt?: string;
+        };
+      };
       employee: {
         Row: {
           id: string;
@@ -1958,6 +2059,36 @@ export interface Database {
           abilityIds: string[] | null;
         };
       };
+      documents_labels_view: {
+        Row: {
+          label: string | null;
+          userId: string | null;
+        };
+      };
+      documents_view: {
+        Row: {
+          id: string | null;
+          path: string | null;
+          name: string | null;
+          description: string | null;
+          size: number | null;
+          type: string | null;
+          active: boolean | null;
+          readGroups: string[] | null;
+          writeGroups: string[] | null;
+          createdBy: string | null;
+          createdByAvatar: string | null;
+          createdByFullName: string | null;
+          createdAt: string | null;
+          updatedBy: string | null;
+          updatedByAvatar: string | null;
+          updatedByFullName: string | null;
+          updatedAt: string | null;
+          labels: string[] | null;
+          favorite: boolean | null;
+          lastActivityAt: string | null;
+        };
+      };
       group_member: {
         Row: {
           id: number | null;
@@ -2046,7 +2177,7 @@ export interface Database {
       };
       groups_for_user: {
         Args: { uid: string };
-        Returns: Json;
+        Returns: string[];
       };
       groups_query: {
         Args: { _name: string; _uid: string };
@@ -2105,6 +2236,13 @@ export interface Database {
     };
     Enums: {
       consolidatedRate: "Average" | "Current" | "Historical";
+      documentTransactionType:
+        | "Download"
+        | "Edit"
+        | "Favorite"
+        | "Label"
+        | "Unfavorite"
+        | "Upload";
       factor:
         | "Hours/Piece"
         | "Hours/100 Pieces"

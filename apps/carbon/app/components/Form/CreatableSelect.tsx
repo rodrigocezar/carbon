@@ -1,6 +1,5 @@
 import { CreatableSelect } from "@carbon/react";
 import {
-  Box,
   FormControl,
   FormErrorMessage,
   FormHelperText,
@@ -61,7 +60,7 @@ const Select = ({
   );
 
   // TODO: hack for default value
-  return optionsWithCreation.length > 0 ? (
+  return (
     <FormControl isInvalid={!!error}>
       {label && <FormLabel htmlFor={name}>{label}</FormLabel>}
       <CreatableSelect
@@ -86,17 +85,6 @@ const Select = ({
         helperText && <FormHelperText>{helperText}</FormHelperText>
       )}
     </FormControl>
-  ) : (
-    <Box>
-      {label && <FormLabel>{label}</FormLabel>}
-      <CreatableSelect
-        isDisabled
-        isLoading={isLoading}
-        options={[]}
-        // @ts-ignore
-        w="full"
-      />
-    </Box>
   );
 };
 
