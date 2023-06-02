@@ -29,7 +29,7 @@ export async function loader({ request, params }: LoaderArgs) {
   return json(partSummary.data);
 }
 
-export default function PartsNewRoute() {
+export default function PartRoute() {
   return (
     <>
       <PartPreview />

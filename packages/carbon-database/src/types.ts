@@ -1482,6 +1482,179 @@ export interface Database {
           createdAt?: string;
         };
       };
+      paymentTerm: {
+        Row: {
+          name: string;
+          createdBy: string;
+          updatedAt: string | null;
+          updatedBy: string | null;
+          id: string;
+          daysDue: number;
+          daysDiscount: number;
+          discountPercentage: number;
+          calculationMethod: Database["public"]["Enums"]["paymentTermCalculationMethod"];
+          active: boolean;
+          createdAt: string;
+        };
+        Insert: {
+          name: string;
+          createdBy: string;
+          updatedAt?: string | null;
+          updatedBy?: string | null;
+          id?: string;
+          daysDue?: number;
+          daysDiscount?: number;
+          discountPercentage?: number;
+          calculationMethod?: Database["public"]["Enums"]["paymentTermCalculationMethod"];
+          active?: boolean;
+          createdAt?: string;
+        };
+        Update: {
+          name?: string;
+          createdBy?: string;
+          updatedAt?: string | null;
+          updatedBy?: string | null;
+          id?: string;
+          daysDue?: number;
+          daysDiscount?: number;
+          discountPercentage?: number;
+          calculationMethod?: Database["public"]["Enums"]["paymentTermCalculationMethod"];
+          active?: boolean;
+          createdAt?: string;
+        };
+      };
+      purchaseOrder: {
+        Row: {
+          purchaseOrderId: string;
+          type: Database["public"]["Enums"]["purchaseOrderType"];
+          status: Database["public"]["Enums"]["purchaseOrderApprovalStatus"];
+          orderDueDate: string | null;
+          receivedDate: string | null;
+          notes: string | null;
+          supplierId: string;
+          supplierContactId: string | null;
+          supplierReference: string | null;
+          invoiceSupplierId: string | null;
+          invoiceSupplierLocationId: string | null;
+          invoiceSupplierContactId: string | null;
+          paymentTermId: string | null;
+          shippingMethodId: string | null;
+          currencyCode: string;
+          closedAt: string | null;
+          closedBy: string | null;
+          createdBy: string;
+          updatedAt: string | null;
+          updatedBy: string | null;
+          id: string;
+          orderDate: string;
+          orderSubTotal: number;
+          orderTax: number;
+          orderDiscount: number;
+          orderShipping: number;
+          orderTotal: number;
+          closed: boolean;
+          createdAt: string;
+        };
+        Insert: {
+          purchaseOrderId: string;
+          type: Database["public"]["Enums"]["purchaseOrderType"];
+          status: Database["public"]["Enums"]["purchaseOrderApprovalStatus"];
+          orderDueDate?: string | null;
+          receivedDate?: string | null;
+          notes?: string | null;
+          supplierId: string;
+          supplierContactId?: string | null;
+          supplierReference?: string | null;
+          invoiceSupplierId?: string | null;
+          invoiceSupplierLocationId?: string | null;
+          invoiceSupplierContactId?: string | null;
+          paymentTermId?: string | null;
+          shippingMethodId?: string | null;
+          currencyCode: string;
+          closedAt?: string | null;
+          closedBy?: string | null;
+          createdBy: string;
+          updatedAt?: string | null;
+          updatedBy?: string | null;
+          id?: string;
+          orderDate?: string;
+          orderSubTotal?: number;
+          orderTax?: number;
+          orderDiscount?: number;
+          orderShipping?: number;
+          orderTotal?: number;
+          closed?: boolean;
+          createdAt?: string;
+        };
+        Update: {
+          purchaseOrderId?: string;
+          type?: Database["public"]["Enums"]["purchaseOrderType"];
+          status?: Database["public"]["Enums"]["purchaseOrderApprovalStatus"];
+          orderDueDate?: string | null;
+          receivedDate?: string | null;
+          notes?: string | null;
+          supplierId?: string;
+          supplierContactId?: string | null;
+          supplierReference?: string | null;
+          invoiceSupplierId?: string | null;
+          invoiceSupplierLocationId?: string | null;
+          invoiceSupplierContactId?: string | null;
+          paymentTermId?: string | null;
+          shippingMethodId?: string | null;
+          currencyCode?: string;
+          closedAt?: string | null;
+          closedBy?: string | null;
+          createdBy?: string;
+          updatedAt?: string | null;
+          updatedBy?: string | null;
+          id?: string;
+          orderDate?: string;
+          orderSubTotal?: number;
+          orderTax?: number;
+          orderDiscount?: number;
+          orderShipping?: number;
+          orderTotal?: number;
+          closed?: boolean;
+          createdAt?: string;
+        };
+      };
+      purchaseOrderFavorite: {
+        Row: {
+          purchaseOrderId: string;
+          userId: string;
+        };
+        Insert: {
+          purchaseOrderId: string;
+          userId: string;
+        };
+        Update: {
+          purchaseOrderId?: string;
+          userId?: string;
+        };
+      };
+      purchaseOrderTransaction: {
+        Row: {
+          purchaseOrderId: string;
+          type: Database["public"]["Enums"]["purchaseOrderTransactionType"];
+          userId: string;
+          id: string;
+          createdAt: string;
+        };
+        Insert: {
+          purchaseOrderId: string;
+          type: Database["public"]["Enums"]["purchaseOrderTransactionType"];
+          userId: string;
+          id?: string;
+          createdAt?: string;
+        };
+        Update: {
+          purchaseOrderId?: string;
+          type?: Database["public"]["Enums"]["purchaseOrderTransactionType"];
+          userId?: string;
+          id?: string;
+          createdAt?: string;
+        };
+      };
       search: {
         Row: {
           id: number;
@@ -1509,6 +1682,41 @@ export interface Database {
           link?: string;
           description?: string | null;
           fts?: unknown | null;
+        };
+      };
+      sequence: {
+        Row: {
+          table: string;
+          name: string;
+          prefix: string | null;
+          suffix: string | null;
+          updatedAt: string | null;
+          updatedBy: string | null;
+          next: number;
+          size: number;
+          step: number;
+        };
+        Insert: {
+          table: string;
+          name: string;
+          prefix?: string | null;
+          suffix?: string | null;
+          updatedAt?: string | null;
+          updatedBy?: string | null;
+          next?: number;
+          size?: number;
+          step?: number;
+        };
+        Update: {
+          table?: string;
+          name?: string;
+          prefix?: string | null;
+          suffix?: string | null;
+          updatedAt?: string | null;
+          updatedBy?: string | null;
+          next?: number;
+          size?: number;
+          step?: number;
         };
       };
       shelf: {
@@ -1585,6 +1793,44 @@ export interface Database {
           friday?: boolean;
           saturday?: boolean;
           active?: boolean;
+        };
+      };
+      shippingMethod: {
+        Row: {
+          name: string;
+          carrierAccountId: string | null;
+          trackingUrl: string | null;
+          createdBy: string;
+          updatedAt: string | null;
+          updatedBy: string | null;
+          id: string;
+          carrier: Database["public"]["Enums"]["shippingCarrier"];
+          active: boolean;
+          createdAt: string;
+        };
+        Insert: {
+          name: string;
+          carrierAccountId?: string | null;
+          trackingUrl?: string | null;
+          createdBy: string;
+          updatedAt?: string | null;
+          updatedBy?: string | null;
+          id?: string;
+          carrier?: Database["public"]["Enums"]["shippingCarrier"];
+          active?: boolean;
+          createdAt?: string;
+        };
+        Update: {
+          name?: string;
+          carrierAccountId?: string | null;
+          trackingUrl?: string | null;
+          createdBy?: string;
+          updatedAt?: string | null;
+          updatedBy?: string | null;
+          id?: string;
+          carrier?: Database["public"]["Enums"]["shippingCarrier"];
+          active?: boolean;
+          createdAt?: string;
         };
       };
       supplier: {
@@ -2149,6 +2395,32 @@ export interface Database {
           abilityIds: string[] | null;
         };
       };
+      purchase_order_view: {
+        Row: {
+          id: string | null;
+          purchaseOrderId: string | null;
+          status:
+            | Database["public"]["Enums"]["purchaseOrderApprovalStatus"]
+            | null;
+          type: Database["public"]["Enums"]["purchaseOrderType"] | null;
+          orderDate: string | null;
+          orderDueDate: string | null;
+          createdBy: string | null;
+          supplierName: string | null;
+          createdByAvatar: string | null;
+          createdByFullName: string | null;
+          createdAt: string | null;
+          updatedBy: string | null;
+          updatedByAvatar: string | null;
+          updatedByFullName: string | null;
+          updatedAt: string | null;
+          closed: boolean | null;
+          closedAt: string | null;
+          closedByAvatar: string | null;
+          closedByFullName: string | null;
+          favorite: boolean | null;
+        };
+      };
     };
     Functions: {
       _xid_machine_id: {
@@ -2285,6 +2557,22 @@ export interface Database {
         | "Maximum Quantity";
       partReplenishmentSystem: "Buy" | "Make" | "Buy and Make";
       partType: "Inventory" | "Non-Inventory" | "Service";
+      paymentTermCalculationMethod: "Net" | "End of Month" | "Day of Month";
+      purchaseOrderApprovalStatus:
+        | "Draft"
+        | "In Review"
+        | "In External Review"
+        | "Approved"
+        | "Rejected"
+        | "Confirmed";
+      purchaseOrderTransactionType:
+        | "Edit"
+        | "Favorite"
+        | "Unfavorite"
+        | "Approved"
+        | "Reject"
+        | "Request Approval";
+      purchaseOrderType: "Draft" | "Purchase" | "Return";
       searchEntity:
         | "Resource"
         | "Person"
@@ -2295,6 +2583,7 @@ export interface Database {
         | "Purchase Order"
         | "Sales Order"
         | "Document";
+      shippingCarrier: "UPS" | "FedEx" | "USPS" | "DHL" | "Other";
     };
   };
 }

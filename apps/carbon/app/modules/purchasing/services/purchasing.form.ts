@@ -3,6 +3,46 @@ import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { address, contact } from "~/types/validators";
 
+export const purchaseOrderValidator = withZod(
+  z.object({
+    id: zfd.text(z.string().optional()),
+    purchaseOrderId: zfd.text(z.string().optional()),
+    orderDate: z.string().min(1, { message: "Order Date is required" }),
+    type: z.enum(["Draft", "Purchase", "Return"], {
+      errorMap: (issue, ctx) => ({
+        message: "Type is required",
+      }),
+    }),
+    status: z.enum(
+      [
+        "Draft",
+        "In Review",
+        "In External Review",
+        "Approved",
+        "Rejected",
+        "Confirmed",
+      ],
+      {
+        errorMap: (issue, ctx) => ({
+          message: "Status is required",
+        }),
+      }
+    ),
+    orderDueDate: zfd.text(z.string().optional()),
+    receivedDate: zfd.text(z.string().optional()),
+    notes: zfd.text(z.string().optional()),
+    supplierId: z.string().min(36, { message: "Supplier is required" }),
+    supplierContactId: zfd.text(z.string().optional()),
+    supplierReference: zfd.text(z.string().optional()),
+    invoiceSupplierId: zfd.text(z.string().optional()),
+    invoiceSupplierLocationId: zfd.text(z.string().optional()),
+    invoiceSupplierContactId: zfd.text(z.string().optional()),
+    paymentTermId: zfd.text(z.string().optional()),
+    shippingMethodId: zfd.text(z.string().optional()),
+    currencyCode: zfd.text(z.string().optional()),
+  })
+);
+
 export const supplierValidator = withZod(
   z.object({
     id: zfd.text(z.string().optional()),

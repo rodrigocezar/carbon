@@ -115,13 +115,13 @@ CREATE TABLE "documentTransaction" (
   "userId" TEXT NOT NULL,
   "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 
-  CONSTRAINT "documentActivity_pkey" PRIMARY KEY ("id"),
-  CONSTRAINT "documentActivity_documentId_fkey" FOREIGN KEY ("documentId") REFERENCES "document"("id") ON DELETE CASCADE,
-  CONSTRAINT "documentActivity_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE
+  CONSTRAINT "documentTransaction_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "documentTransaction_documentId_fkey" FOREIGN KEY ("documentId") REFERENCES "document"("id") ON DELETE CASCADE,
+  CONSTRAINT "documentTransaction_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE
 );
 
-CREATE INDEX "documentActivity_documentId_idx" ON "documentTransaction" ("documentId");
-CREATE INDEX "documentActivity_userId_idx" ON "documentTransaction" ("userId");
+CREATE INDEX "documentTransaction_documentId_idx" ON "documentTransaction" ("documentId");
+CREATE INDEX "documentTransaction_userId_idx" ON "documentTransaction" ("userId");
 
 CREATE TABLE "documentFavorite" (
   "documentId" TEXT NOT NULL,
@@ -137,17 +137,17 @@ CREATE INDEX "documentFavorites_documentId_idx" ON "documentFavorite" ("document
 
 ALTER TABLE "documentFavorite" ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view their own favorites" ON "documentFavorite" 
+CREATE POLICY "Users can view their own document favorites" ON "documentFavorite" 
   FOR SELECT USING (
     auth.uid()::text = "userId"
   );
 
-CREATE POLICY "Users can create their own favorites" ON "documentFavorite" 
+CREATE POLICY "Users can create their own document favorites" ON "documentFavorite" 
   FOR INSERT WITH CHECK (
     auth.uid()::text = "userId"
   );
 
-CREATE POLICY "Users can delete their own favorites" ON "documentFavorite"
+CREATE POLICY "Users can delete their own document favorites" ON "documentFavorite"
   FOR DELETE USING (
     auth.uid()::text = "userId"
   ); 

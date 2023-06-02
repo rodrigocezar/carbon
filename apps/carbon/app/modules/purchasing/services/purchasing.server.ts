@@ -1,8 +1,26 @@
 import type { Database } from "@carbon/database";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseServiceRole } from "~/lib/supabase";
+import type { TypeOfValidator } from "~/types/validators";
 import type { GenericQueryFilters } from "~/utils/query";
 import { setGenericQueryFilters } from "~/utils/query";
+import type { purchaseOrderValidator } from "./purchasing.form";
+
+export async function closePurchaseOrder(
+  client: SupabaseClient<Database>,
+  purchaseOrderId: string,
+  userId: string
+) {
+  return client
+    .from("purchaseOrder")
+    .update({
+      closed: true,
+      closedAt: new Date().toISOString(),
+      closedBy: userId,
+    })
+    .eq("id", purchaseOrderId)
+    .select("id");
+}
 
 export async function deleteSupplierContact(
   client: SupabaseClient<Database>,
@@ -34,7 +52,6 @@ export async function deleteSupplierType(
 ) {
   return client.from("supplierType").delete().eq("id", supplierTypeId);
 }
-
 export async function getSupplier(
   client: SupabaseClient<Database>,
   supplierId: string
@@ -46,6 +63,64 @@ export async function getSupplier(
     )
     .eq("id", supplierId)
     .single();
+}
+
+export async function getPurchaseOrder(
+  client: SupabaseClient<Database>,
+  purchaseOrderId: string
+) {
+  return client
+    .from("purchase_order_view")
+    .select("*")
+    .eq("id", purchaseOrderId)
+    .single();
+}
+
+export async function getPurchaseOrders(
+  client: SupabaseClient<Database>,
+  args: GenericQueryFilters & {
+    search: string | null;
+    status: string | null;
+    supplierId: string | null;
+  }
+) {
+  let query = client
+    .from("purchase_order_view")
+    .select("*", { count: "exact" });
+
+  if (args.search) {
+    query = query.ilike("purchaseOrderId", `%${args.search}%`);
+  }
+
+  if (args.status) {
+    if (args.status === "closed") {
+      query = query.eq("closed", true);
+    } else {
+      query = query.eq("status", args.status);
+    }
+  }
+
+  if (args.supplierId) {
+    query = query.eq("supplierId", args.supplierId);
+  }
+
+  query = setGenericQueryFilters(query, args, "purchaseOrderId");
+  return query;
+}
+
+export function getPurchaseOrderApprovalStatuses(): Database["public"]["Enums"]["purchaseOrderApprovalStatus"][] {
+  return [
+    "Draft",
+    "In Review",
+    "In External Review",
+    "Approved",
+    "Rejected",
+    "Confirmed",
+  ];
+}
+
+export function getPurchaseOrderTypes(): Database["public"]["Enums"]["purchaseOrderType"][] {
+  return ["Draft", "Purchase", "Return"];
 }
 
 export async function getSupplierLocations(
@@ -341,6 +416,40 @@ export async function updateSupplierLocation(
     .update(supplierLocation.address)
     .eq("id", supplierLocation.addressId)
     .select("id");
+}
+
+export async function upsertPurchaseOrder(
+  client: SupabaseClient<Database>,
+  purchaseOrder:
+    | (Omit<
+        TypeOfValidator<typeof purchaseOrderValidator>,
+        "id" | "purchaseOrderId"
+      > & {
+        purchaseOrderId: string;
+        createdBy: string;
+      })
+    | (Omit<
+        TypeOfValidator<typeof purchaseOrderValidator>,
+        "id" | "purchaseOrderId"
+      > & {
+        id: string;
+        purchaseOrderId: string;
+        updatedBy: string;
+      })
+) {
+  if ("id" in purchaseOrder) {
+    return client
+      .from("purchaseOrder")
+      .update(purchaseOrder)
+      .eq("id", purchaseOrder.id)
+      .select("id, purchaseOrderId");
+  }
+  return client
+    .from("purchaseOrder")
+    .insert([
+      { ...purchaseOrder, currencyCode: purchaseOrder.currencyCode || "USD" },
+    ])
+    .select("id, purchaseOrderId");
 }
 
 export async function upsertSupplierType(
