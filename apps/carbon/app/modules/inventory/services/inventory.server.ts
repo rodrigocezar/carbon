@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { TypeOfValidator } from "~/types/validators";
 import type { GenericQueryFilters } from "~/utils/query";
 import { setGenericQueryFilters } from "~/utils/query";
+import { sanitize } from "~/utils/supabase";
 import type { shippingMethodValidator } from "./inventory.form";
 
 export async function deleteShippingMethod(
@@ -47,6 +48,22 @@ export async function getShippingMethods(
   return query;
 }
 
+export async function getShippingMethodsList(client: SupabaseClient<Database>) {
+  return client
+    .from("shippingMethod")
+    .select("id, name")
+    .eq("active", true)
+    .order("name", { ascending: true });
+}
+
+export async function getShippingTermsList(client: SupabaseClient<Database>) {
+  return client
+    .from("shippingTerm")
+    .select("id, name")
+    .eq("active", true)
+    .order("name", { ascending: true });
+}
+
 export async function upsertShippingMethod(
   client: SupabaseClient<Database>,
   shippingMethod:
@@ -63,7 +80,7 @@ export async function upsertShippingMethod(
   }
   return client
     .from("shippingMethod")
-    .update(shippingMethod)
+    .update(sanitize(shippingMethod))
     .eq("id", shippingMethod.id)
     .select("id");
 }

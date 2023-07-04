@@ -80,8 +80,8 @@ const PurchaseOrdersTable = memo(
           cell: (item) => item.getValue(),
         },
         {
-          accessorKey: "orderDueDate",
-          header: "Due Date",
+          accessorKey: "receiptPromisedDate",
+          header: "Promised Date",
           cell: (item) => item.getValue(),
         },
         {
@@ -144,10 +144,10 @@ const PurchaseOrdersTable = memo(
         <>
           <MenuItem
             icon={<BsPencilSquare />}
-            isDisabled={!permissions.can("update", "purchasing")}
+            isDisabled={!permissions.can("view", "purchasing")}
             onClick={() => edit(row)}
           >
-            Edit
+            View
           </MenuItem>
           <MenuItem
             icon={<BsStar />}

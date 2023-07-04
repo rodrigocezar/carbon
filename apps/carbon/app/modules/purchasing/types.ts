@@ -1,5 +1,7 @@
 import type { Database } from "@carbon/database";
 import type {
+  getExternalDocuments,
+  getPurchaseOrderLines,
   getPurchaseOrders,
   getSupplierContacts,
   getSupplierLocations,
@@ -8,9 +10,21 @@ import type {
   getSupplierTypes,
 } from "./services";
 
+// TODO: we should just use the FileObject type from supabase
+export type PurchaseOrderAttachment = NonNullable<
+  Awaited<ReturnType<typeof getExternalDocuments>>["data"]
+>[number];
+
 export type PurchaseOrder = NonNullable<
   Awaited<ReturnType<typeof getPurchaseOrders>>["data"]
 >[number];
+
+export type PurchaseOrderLine = NonNullable<
+  Awaited<ReturnType<typeof getPurchaseOrderLines>>["data"]
+>[number];
+
+export type PurchaseOrderLineType =
+  Database["public"]["Enums"]["purchaseOrderLineType"];
 
 export type PurchaseOrderApprovalStatus =
   Database["public"]["Enums"]["purchaseOrderApprovalStatus"];

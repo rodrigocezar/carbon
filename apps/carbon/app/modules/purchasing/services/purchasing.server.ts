@@ -1,10 +1,18 @@
 import type { Database } from "@carbon/database";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseServiceRole } from "~/lib/supabase";
+import { getEmployeeJob } from "~/modules/resources";
 import type { TypeOfValidator } from "~/types/validators";
+import { sanitize } from "~/utils/supabase";
 import type { GenericQueryFilters } from "~/utils/query";
 import { setGenericQueryFilters } from "~/utils/query";
-import type { purchaseOrderValidator } from "./purchasing.form";
+import type {
+  purchaseOrderDeliveryValidator,
+  purchaseOrderLineValidator,
+  purchaseOrderPaymentValidator,
+  purchaseOrderValidator,
+  supplierValidator,
+} from "./purchasing.form";
 
 export async function closePurchaseOrder(
   client: SupabaseClient<Database>,
@@ -20,6 +28,17 @@ export async function closePurchaseOrder(
     })
     .eq("id", purchaseOrderId)
     .select("id");
+}
+
+export async function deletePurchaseOrder(
+  client: SupabaseClient<Database>,
+  purchaseOrderId: string
+) {
+  return Promise.all([
+    client.from("purchaseOrder").delete().eq("id", purchaseOrderId),
+    client.from("purchaseOrderDelivery").delete().eq("id", purchaseOrderId),
+    client.from("purchaseOrderPayment").delete().eq("id", purchaseOrderId),
+  ]);
 }
 
 export async function deleteSupplierContact(
@@ -52,17 +71,19 @@ export async function deleteSupplierType(
 ) {
   return client.from("supplierType").delete().eq("id", supplierTypeId);
 }
-export async function getSupplier(
+
+export async function getExternalDocuments(
   client: SupabaseClient<Database>,
-  supplierId: string
+  purchaseOrderId: string
 ) {
-  return client
-    .from("supplier")
-    .select(
-      "id, name, description, supplierTypeId, supplierStatusId, taxId, accountManagerId"
-    )
-    .eq("id", supplierId)
-    .single();
+  return client.storage.from("purchasing-external").list(purchaseOrderId);
+}
+
+export async function getInternalDocuments(
+  client: SupabaseClient<Database>,
+  purchaseOrderId: string
+) {
+  return client.storage.from("purchasing-internal").list(purchaseOrderId);
 }
 
 export async function getPurchaseOrder(
@@ -108,6 +129,28 @@ export async function getPurchaseOrders(
   return query;
 }
 
+export async function getPurchaseOrderDelivery(
+  client: SupabaseClient<Database>,
+  purchaseOrderId: string
+) {
+  return client
+    .from("purchaseOrderDelivery")
+    .select("*")
+    .eq("id", purchaseOrderId)
+    .single();
+}
+
+export async function getPurchaseOrderPayment(
+  client: SupabaseClient<Database>,
+  purchaseOrderId: string
+) {
+  return client
+    .from("purchaseOrderPayment")
+    .select("*")
+    .eq("id", purchaseOrderId)
+    .single();
+}
+
 export function getPurchaseOrderApprovalStatuses(): Database["public"]["Enums"]["purchaseOrderApprovalStatus"][] {
   return [
     "Draft",
@@ -119,8 +162,40 @@ export function getPurchaseOrderApprovalStatuses(): Database["public"]["Enums"][
   ];
 }
 
+export async function getPurchaseOrderLines(
+  client: SupabaseClient<Database>,
+  purchaseOrderId: string
+) {
+  return client
+    .from("purchaseOrderLine")
+    .select("*")
+    .eq("purchaseOrderId", purchaseOrderId);
+}
+
+export async function getPurchaseOrderLine(
+  client: SupabaseClient<Database>,
+  purchaseOrderLineId: string
+) {
+  return client
+    .from("purchaseOrderLine")
+    .select("*")
+    .eq("id", purchaseOrderLineId)
+    .single();
+}
+
+export function getPurchaseOrderLineTypes(): Database["public"]["Enums"]["purchaseOrderLineType"][] {
+  return ["Part", "G/L Account", "Fixed Asset", "Comment"];
+}
+
 export function getPurchaseOrderTypes(): Database["public"]["Enums"]["purchaseOrderType"][] {
   return ["Draft", "Purchase", "Return"];
+}
+
+export async function getSupplier(
+  client: SupabaseClient<Database>,
+  supplierId: string
+) {
+  return client.from("supplier").select("*").eq("id", supplierId).single();
 }
 
 export async function getSupplierLocations(
@@ -170,7 +245,7 @@ export async function getSuppliers(
 ) {
   let query = client
     .from("supplier")
-    .select("id, name, description, supplierType(name), supplierStatus(name)", {
+    .select("id, name, supplierType(name), supplierStatus(name)", {
       count: "exact",
     });
 
@@ -245,13 +320,7 @@ export async function getSupplierTypes(
 
 export async function insertSupplier(
   client: SupabaseClient<Database>,
-  supplier: {
-    name: string;
-    supplierTypeId?: string;
-    supplierStatusId?: string;
-    taxId?: string;
-    accountManagerId?: string;
-    description?: string;
+  supplier: TypeOfValidator<typeof supplierValidator> & {
     createdBy: string;
   }
 ) {
@@ -275,7 +344,6 @@ export async function insertSupplierContact(
       addressLine2?: string;
       city?: string;
       state?: string;
-      // countryId: string;
       postalCode?: string;
       birthday?: string;
       notes?: string;
@@ -348,20 +416,14 @@ export async function insertSupplierLocation(
 
 export async function updateSupplier(
   client: SupabaseClient<Database>,
-  supplier: {
+  supplier: Omit<TypeOfValidator<typeof supplierValidator>, "id"> & {
     id: string;
-    name: string;
-    supplierTypeId?: string;
-    supplierStatusId?: string;
-    taxId?: string;
-    accountManagerId?: string;
-    description?: string;
     updatedBy: string;
   }
 ) {
   return client
     .from("supplier")
-    .update(supplier)
+    .update(sanitize(supplier))
     .eq("id", supplier.id)
     .select("id");
 }
@@ -392,7 +454,7 @@ export async function updateSupplierContact(
 ) {
   return client
     .from("contact")
-    .update(supplierContact.contact)
+    .update(sanitize(supplierContact.contact))
     .eq("id", supplierContact.contactId)
     .select("id");
 }
@@ -413,7 +475,7 @@ export async function updateSupplierLocation(
 ) {
   return client
     .from("address")
-    .update(supplierLocation.address)
+    .update(sanitize(supplierLocation.address))
     .eq("id", supplierLocation.addressId)
     .select("id");
 }
@@ -440,16 +502,137 @@ export async function upsertPurchaseOrder(
   if ("id" in purchaseOrder) {
     return client
       .from("purchaseOrder")
-      .update(purchaseOrder)
+      .update(sanitize(purchaseOrder))
       .eq("id", purchaseOrder.id)
       .select("id, purchaseOrderId");
   }
-  return client
+
+  const [supplier, purchaser] = await Promise.all([
+    getSupplier(client, purchaseOrder.supplierId),
+    getEmployeeJob(client, purchaseOrder.createdBy),
+  ]);
+
+  if (supplier.error) return supplier;
+
+  const {
+    defaultCurrencyCode,
+    defaultPaymentTermId,
+    defaultShippingMethodId,
+    defaultShippingTermId,
+  } = supplier.data;
+
+  const locationId = purchaser?.data?.locationId ?? null;
+
+  const order = await client
     .from("purchaseOrder")
-    .insert([
-      { ...purchaseOrder, currencyCode: purchaseOrder.currencyCode || "USD" },
-    ])
+    .insert([{ ...purchaseOrder }])
     .select("id, purchaseOrderId");
+
+  if (order.error) return order;
+
+  const purchaseOrderId = order.data[0].id;
+
+  const [delivery, payment] = await Promise.all([
+    client.from("purchaseOrderDelivery").insert([
+      {
+        id: purchaseOrderId,
+        locationId: locationId,
+        shippingMethodId: defaultShippingMethodId,
+        shippingTermId: defaultShippingTermId,
+      },
+    ]),
+    client.from("purchaseOrderPayment").insert([
+      {
+        id: purchaseOrderId,
+        currencyCode: defaultCurrencyCode ?? "USD",
+        invoiceSupplierId: purchaseOrder.supplierId,
+        paymentTermId: defaultPaymentTermId,
+      },
+    ]),
+  ]);
+
+  if (delivery.error) {
+    await deletePurchaseOrder(client, purchaseOrderId);
+    return payment;
+  }
+  if (payment.error) {
+    await deletePurchaseOrder(client, purchaseOrderId);
+    return payment;
+  }
+
+  return order;
+}
+
+export async function upsertPurchaseOrderDelivery(
+  client: SupabaseClient<Database>,
+  purchaseOrderDelivery:
+    | (TypeOfValidator<typeof purchaseOrderDeliveryValidator> & {
+        createdBy: string;
+      })
+    | (TypeOfValidator<typeof purchaseOrderDeliveryValidator> & {
+        id: string;
+        updatedBy: string;
+      })
+) {
+  if ("id" in purchaseOrderDelivery) {
+    return client
+      .from("purchaseOrderDelivery")
+      .update(sanitize(purchaseOrderDelivery))
+      .eq("id", purchaseOrderDelivery.id)
+      .select("id");
+  }
+  return client
+    .from("purchaseOrderDelivery")
+    .insert([purchaseOrderDelivery])
+    .select("id");
+}
+
+export async function upsertPurchaseOrderLine(
+  client: SupabaseClient<Database>,
+  purchaseOrderLine:
+    | (Omit<TypeOfValidator<typeof purchaseOrderLineValidator>, "id"> & {
+        createdBy: string;
+      })
+    | (Omit<TypeOfValidator<typeof purchaseOrderLineValidator>, "id"> & {
+        id: string;
+        updatedBy: string;
+      })
+) {
+  if ("id" in purchaseOrderLine) {
+    return client
+      .from("purchaseOrderLine")
+      .update(sanitize(purchaseOrderLine))
+      .eq("id", purchaseOrderLine.id)
+      .select("id");
+  }
+  return client
+    .from("purchaseOrderLine")
+    .insert([purchaseOrderLine])
+    .select("id");
+}
+
+export async function upsertPurchaseOrderPayment(
+  client: SupabaseClient<Database>,
+  purchaseOrderPayment:
+    | (TypeOfValidator<typeof purchaseOrderPaymentValidator> & {
+        createdBy: string;
+      })
+    | (TypeOfValidator<typeof purchaseOrderPaymentValidator> & {
+        id: string;
+        updatedBy: string;
+      })
+) {
+  if ("id" in purchaseOrderPayment) {
+    return client
+      .from("purchaseOrderPayment")
+      .update(sanitize(purchaseOrderPayment))
+      .eq("id", purchaseOrderPayment.id)
+      .select("id");
+  }
+  return client
+    .from("purchaseOrderPayment")
+    .insert([purchaseOrderPayment])
+    .select("id");
 }
 
 export async function upsertSupplierType(

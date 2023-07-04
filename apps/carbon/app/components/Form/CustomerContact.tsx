@@ -1,6 +1,5 @@
 import { Select } from "@carbon/react";
 import {
-  Box,
   FormControl,
   FormErrorMessage,
   FormHelperText,
@@ -20,7 +19,7 @@ type CustomerContactSelectProps = Omit<SelectProps, "options" | "onChange"> & {
 
 const CustomerContact = ({
   name,
-  label = "CustomerContact",
+  label = "Customer Contact",
   customer,
   helperText,
   isLoading,
@@ -93,8 +92,7 @@ const CustomerContact = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controlledValue?.value]);
 
-  // TODO: hack for default value
-  return customerContactFetcher.state !== "loading" ? (
+  return (
     <FormControl isInvalid={!!error}>
       {label && <FormLabel htmlFor={name}>{label}</FormLabel>}
       <input type="hidden" name={name} id={name} value={value} />
@@ -114,11 +112,6 @@ const CustomerContact = ({
         helperText && <FormHelperText>{helperText}</FormHelperText>
       )}
     </FormControl>
-  ) : (
-    <Box>
-      {label && <FormLabel>{label}</FormLabel>}
-      <Select isDisabled isLoading={isLoading} options={[]} />
-    </Box>
   );
 };
 

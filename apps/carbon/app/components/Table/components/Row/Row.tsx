@@ -4,12 +4,16 @@ import type { Row as RowType } from "@tanstack/react-table";
 import type { MutableRefObject } from "react";
 import { memo } from "react";
 import Cell from "../Cell";
-import type { EditableTableCellComponent, Position } from "../../types";
+import type {
+  EditableTableCellComponent,
+  Position,
+} from "~/components/Editable";
 
 type RowProps<T> = {
   borderColor: string;
   backgroundColor: string;
   editableComponents?: Record<string, EditableTableCellComponent<T> | object>;
+  editedCells?: string[];
   isEditing: boolean;
   isEditMode: boolean;
   isFrozenColumn?: boolean;
@@ -18,10 +22,11 @@ type RowProps<T> = {
   selectedCell: Position;
   row: RowType<T>;
   rowIsClickable?: boolean;
+  rowIsSelected: boolean;
   rowRef?: MutableRefObject<HTMLTableRowElement | null>;
   withColumnOrdering: boolean;
   onCellClick: (row: number, column: number) => void;
-  onCellUpdate: (row: number, columnId: string) => (value: unknown) => void;
+  onCellUpdate: (row: number) => (columnId: string, value: unknown) => void;
   onRowClick?: () => void;
 };
 
@@ -29,6 +34,7 @@ const Row = <T extends object>({
   borderColor,
   backgroundColor,
   editableComponents,
+  editedCells,
   isEditing,
   isEditMode,
   isFrozenColumn = false,
@@ -36,6 +42,7 @@ const Row = <T extends object>({
   pinnedColumns = 0,
   row,
   rowIsClickable = false,
+  rowIsSelected,
   rowRef,
   selectedCell,
   withColumnOrdering,
@@ -75,6 +82,7 @@ const Row = <T extends object>({
             columnIndex={columnIndex}
             // @ts-ignore
             editableComponents={editableComponents}
+            editedCells={editedCells}
             isRowSelected={isRowSelected}
             isSelected={isSelected}
             isEditing={isEditing}
@@ -90,11 +98,7 @@ const Row = <T extends object>({
                     )
                 : undefined
             }
-            onUpdate={
-              isEditMode
-                ? onCellUpdate(cell.row.index, cell.column.id)
-                : undefined
-            }
+            onUpdate={isEditMode ? onCellUpdate(cell.row.index) : undefined}
           />
         );
       })}
@@ -105,6 +109,8 @@ const Row = <T extends object>({
 const MemoizedRow = memo(
   Row,
   (prev, next) =>
+    next.rowIsSelected === false &&
+    prev.rowIsSelected === false &&
     next.isRowSelected === prev.isRowSelected &&
     next.selectedCell?.row === prev.row.index &&
     next.row.index === prev.selectedCell?.row &&

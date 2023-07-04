@@ -83,7 +83,7 @@ export const contractorValidator = withZod(
     ),
     abilities: z
       .array(z.string().min(20, { message: "Invalid ability" }))
-      .min(1, { message: "An ability is required" }),
+      .optional(),
   })
 );
 
@@ -107,7 +107,7 @@ export const employeeAbilityValidator = withZod(
 
 export const employeeJobValidator = withZod(
   z.object({
-    title: z.string().min(1, { message: "Title is required" }),
+    title: zfd.text(z.string().optional()),
     startDate: zfd.text(z.string().optional()),
     locationId: zfd.text(z.string().optional()),
     shiftId: zfd.text(z.string().optional()),
@@ -151,6 +151,12 @@ export const locationValidator = withZod(
     .object({
       id: zfd.text(z.string().optional()),
       name: z.string().min(1, { message: "Name is required" }),
+      addressLine1: z.string().min(1, { message: "Address is required" }),
+      addressLine2: z.string().optional(),
+      city: z.string().min(1, { message: "City is required" }),
+      state: z.string().min(1, { message: "State is required" }),
+      postalCode: z.string().min(1, { message: "Postal Code is required" }),
+      // country: z.string().min(1, { message: "Country is required" }),
       timezone: z.string().min(1, { message: "Timezone is required" }),
       latitude: zfd.numeric(z.number().optional()),
       longitude: zfd.numeric(z.number().optional()),

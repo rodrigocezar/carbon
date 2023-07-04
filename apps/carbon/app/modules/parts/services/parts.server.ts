@@ -3,12 +3,15 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { TypeOfValidator } from "~/types/validators";
 import type { GenericQueryFilters } from "~/utils/query";
 import { setGenericQueryFilters } from "~/utils/query";
+import { sanitize } from "~/utils/supabase";
+import type { PartReplenishmentSystem } from "../types";
 import type {
   partCostValidator,
   partInventoryValidator,
   partManufacturingValidator,
   partPlanningValidator,
   partPurchasingValidator,
+  partSupplierValidator,
   partUnitSalePriceValidator,
   partValidator,
 } from "./parts.form";
@@ -157,6 +160,19 @@ export async function getParts(
   return query;
 }
 
+export async function getPartsList(
+  client: SupabaseClient<Database>,
+  replenishmentSystem: PartReplenishmentSystem | null
+) {
+  let query = client.from("part").select("id, name");
+  if (replenishmentSystem) {
+    query = query.or(
+      `replenishmentSystem.eq.${replenishmentSystem},replenishmentSystem.eq.Buy and Make`
+    );
+  }
+  return query;
+}
+
 export async function getPartSummary(
   client: SupabaseClient<Database>,
   id: string
@@ -168,6 +184,23 @@ export async function getPartSummary(
     )
     .eq("id", id)
     .single();
+}
+
+export async function getPartSuppliers(
+  client: SupabaseClient<Database>,
+  id: string
+) {
+  return client
+    .from("partSupplier")
+    .select(
+      `
+      id, supplier(id, name),
+      supplierPartId, supplierUnitOfMeasureCode,
+      minimumOrderQuantity, conversionFactor
+    `
+    )
+    .eq("active", true)
+    .eq("partId", id);
 }
 
 export async function getPartUnitSalePrice(
@@ -271,14 +304,17 @@ export async function upsertPart(
   if ("createdBy" in part) {
     return client.from("part").insert(part).select("id");
   }
-  return client.from("part").update(part).eq("id", part.id);
+  return client.from("part").update(sanitize(part)).eq("id", part.id);
 }
 
 export async function upsertPartCost(
   client: SupabaseClient<Database>,
   partCost: TypeOfValidator<typeof partCostValidator> & { updatedBy: string }
 ) {
-  return client.from("partCost").update(partCost).eq("partId", partCost.partId);
+  return client
+    .from("partCost")
+    .update(sanitize(partCost))
+    .eq("partId", partCost.partId);
 }
 
 export async function upsertPartInventory(
@@ -292,10 +328,7 @@ export async function upsertPartInventory(
 ) {
   return client
     .from("partInventory")
-    .update({
-      ...partInventory,
-      shelfId: partInventory.shelfId || null,
-    })
+    .update(sanitize(partInventory))
     .eq("partId", partInventory.partId);
 }
 
@@ -307,7 +340,7 @@ export async function upsertPartManufacturing(
 ) {
   return client
     .from("partReplenishment")
-    .update(partManufacturing)
+    .update(sanitize(partManufacturing))
     .eq("partId", partManufacturing.partId);
 }
 
@@ -319,7 +352,7 @@ export async function upsertPartPlanning(
 ) {
   return client
     .from("partPlanning")
-    .update(partPlanning)
+    .update(sanitize(partPlanning))
     .eq("partId", partPlanning.partId);
 }
 
@@ -331,7 +364,7 @@ export async function upsertPartPurchasing(
 ) {
   return client
     .from("partReplenishment")
-    .update(partPurchasing)
+    .update(sanitize(partPurchasing))
     .eq("partId", partPurchasing.partId);
 }
 
@@ -362,11 +395,32 @@ export async function upsertPartGroup(
   return (
     client
       .from("partGroup")
-      .update(partGroup)
+      .update(sanitize(partGroup))
       // @ts-ignore
       .eq("id", partGroup.id)
       .select("id")
   );
+}
+
+export async function upsertPartSupplier(
+  client: SupabaseClient<Database>,
+  partSupplier:
+    | (Omit<TypeOfValidator<typeof partSupplierValidator>, "id"> & {
+        createdBy: string;
+      })
+    | (Omit<TypeOfValidator<typeof partSupplierValidator>, "id"> & {
+        id: string;
+        updatedBy: string;
+      })
+) {
+  if ("createdBy" in partSupplier) {
+    return client.from("partSupplier").insert([partSupplier]).select("id");
+  }
+  return client
+    .from("partSupplier")
+    .update(sanitize(partSupplier))
+    .eq("id", partSupplier.id)
+    .select("id");
 }
 
 export async function upsertPartUnitSalePrice(
@@ -377,7 +431,7 @@ export async function upsertPartUnitSalePrice(
 ) {
   return client
     .from("partUnitSalePrice")
-    .update(partUnitSalePrice)
+    .update(sanitize(partUnitSalePrice))
     .eq("partId", partUnitSalePrice.partId);
 }
 
@@ -390,7 +444,7 @@ export async function upsertUnitOfMeasure(
   if ("id" in unitOfMeasure) {
     return client
       .from("unitOfMeasure")
-      .update(unitOfMeasure)
+      .update(sanitize(unitOfMeasure))
       .eq("id", unitOfMeasure.id)
       .select("id");
   }

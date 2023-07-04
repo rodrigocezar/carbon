@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { TypeOfValidator } from "~/types/validators";
 import type { GenericQueryFilters } from "~/utils/query";
 import { setGenericQueryFilters } from "~/utils/query";
+import { sanitize } from "~/utils/supabase";
 import type { paymentTermValidator } from "./accounting.form";
 
 export async function deletePaymentTerm(
@@ -62,6 +63,14 @@ export async function getPaymentTerms(
   return query;
 }
 
+export async function getPaymentTermsList(client: SupabaseClient<Database>) {
+  return client
+    .from("paymentTerm")
+    .select("id, name")
+    .eq("active", true)
+    .order("name", { ascending: true });
+}
+
 export async function upsertPaymentTerm(
   client: SupabaseClient<Database>,
   paymentTerm:
@@ -78,7 +87,7 @@ export async function upsertPaymentTerm(
   }
   return client
     .from("paymentTerm")
-    .update(paymentTerm)
+    .update(sanitize(paymentTerm))
     .eq("id", paymentTerm.id)
     .select("id");
 }

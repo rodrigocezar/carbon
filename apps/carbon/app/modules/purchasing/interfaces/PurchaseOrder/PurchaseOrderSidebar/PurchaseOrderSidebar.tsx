@@ -1,15 +1,31 @@
+import { Count, useColor } from "@carbon/react";
 import { Button, Box, VStack } from "@chakra-ui/react";
 import { Link, useMatches, useParams } from "@remix-run/react";
+import { useRouteData } from "~/hooks";
+import type {
+  PurchaseOrder,
+  PurchaseOrderAttachment,
+} from "~/modules/purchasing";
 import { usePurchaseOrderSidebar } from "./usePurchaseOrderSidebar";
 
 const PurchaseOrderSidebar = () => {
   const { orderId } = useParams();
+  const borderColor = useColor("gray.200");
   if (!orderId)
     throw new Error(
       "PurchaseOrderSidebar requires an orderId and could not find orderId in params"
     );
 
-  const links = usePurchaseOrderSidebar();
+  const routeData = useRouteData<{
+    purchaseOrder: PurchaseOrder;
+    internalDocuments: PurchaseOrderAttachment[];
+    externalDocuments: PurchaseOrderAttachment[];
+  }>(`/x/purchase-order/${orderId}`);
+  const links = usePurchaseOrderSidebar({
+    lines: routeData?.purchaseOrder?.lineCount ?? 0,
+    internalDocuments: routeData?.internalDocuments.length ?? 0,
+    externalDocuments: routeData?.externalDocuments.length ?? 0,
+  });
   const matches = useMatches();
 
   return (
@@ -30,13 +46,17 @@ const PurchaseOrderSidebar = () => {
                   as={Link}
                   to={route.to}
                   variant={isActive ? "solid" : "ghost"}
-                  border="none"
+                  border={isActive ? "1px solid" : "none"}
+                  borderColor={borderColor}
                   fontWeight={isActive ? "bold" : "normal"}
-                  justifyContent="start"
+                  justifyContent={
+                    route.count === undefined ? "start" : "space-between"
+                  }
                   size="md"
                   w="full"
                 >
-                  {route.name}
+                  <span>{route.name}</span>
+                  {route.count !== undefined && <Count count={route.count} />}
                 </Button>
               );
             })}

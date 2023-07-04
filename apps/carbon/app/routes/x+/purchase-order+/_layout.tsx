@@ -1,8 +1,10 @@
 import { VStack } from "@chakra-ui/react";
 import type { LoaderArgs, MetaFunction } from "@remix-run/node";
 import { Outlet } from "@remix-run/react";
+
 import {
   getPurchaseOrderApprovalStatuses,
+  getPurchaseOrderLineTypes,
   getPurchaseOrderTypes,
 } from "~/modules/purchasing";
 import { requirePermissions } from "~/services/auth";
@@ -16,10 +18,23 @@ export async function loader({ request }: LoaderArgs) {
     view: "purchasing",
   });
 
-  // const [] = await Promise.all([]);
+  // const [paymentTerms] = await Promise.all([
+  //   getPaymentTermsList(client),
+  // ]);
+
+  // if (paymentTerms.error) {
+  //   return redirect(
+  //     "/x/purchasing/orders",
+  //     await flash(
+  //       request,
+  //       error(paymentTerms.error, "Failed to load payment terms")
+  //     )
+  //   );
+  // }
 
   return {
     purchaseOrderApprovalStatuses: getPurchaseOrderApprovalStatuses(),
+    purchaseOrderLineTypes: getPurchaseOrderLineTypes(),
     purchaseOrderTypes: getPurchaseOrderTypes(),
   };
 }

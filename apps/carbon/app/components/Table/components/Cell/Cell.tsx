@@ -1,17 +1,9 @@
-import {
-  Box,
-  HStack,
-  Popover,
-  PopoverAnchor,
-  PopoverBody,
-  PopoverContent,
-  Td,
-} from "@chakra-ui/react";
+import { Box, Td } from "@chakra-ui/react";
 import type { Cell as CellType } from "@tanstack/react-table";
 import { flexRender } from "@tanstack/react-table";
-import { useMovingCellRef } from "../../hooks/useMovingCellRef";
-import { memo } from "react";
-import type { EditableTableCellComponent } from "../../types";
+import { memo, useState } from "react";
+import { useMovingCellRef } from "~/hooks";
+import type { EditableTableCellComponent } from "~/components/Editable";
 import { getAccessorKey } from "../../utils";
 
 type CellProps<T> = {
@@ -19,12 +11,13 @@ type CellProps<T> = {
   cell: CellType<T, unknown>;
   columnIndex: number;
   editableComponents?: Record<string, EditableTableCellComponent<T>>;
+  editedCells?: string[];
   isEditing: boolean;
   isEditMode: boolean;
   isRowSelected: boolean;
   isSelected: boolean;
   onClick?: () => void;
-  onUpdate?: (value: unknown) => void;
+  onUpdate?: (columnId: string, value: unknown) => void;
 };
 
 const Cell = <T extends object>({
@@ -32,6 +25,7 @@ const Cell = <T extends object>({
   cell,
   columnIndex,
   editableComponents,
+  editedCells,
   isEditing,
   isEditMode,
   isSelected,
@@ -39,7 +33,11 @@ const Cell = <T extends object>({
   onUpdate,
 }: CellProps<T>) => {
   const { ref, tabIndex, onFocus } = useMovingCellRef(isSelected);
+  const [hasError, setHasError] = useState(false);
   const accessorKey = getAccessorKey(cell.column.columnDef);
+
+  const wasEdited =
+    !!editedCells && !!accessorKey && editedCells.includes(accessorKey);
 
   const hasEditableTableCellComponent =
     accessorKey !== undefined &&
@@ -47,16 +45,7 @@ const Cell = <T extends object>({
     accessorKey in editableComponents;
 
   const editableCell = hasEditableTableCellComponent
-    ? editableComponents[accessorKey]({
-        accessorKey,
-        value: cell.getValue(),
-        row: cell.row.original,
-        onUpdate:
-          onUpdate ||
-          (() => {
-            console.error("failed to pass an onUpdate function to the popover");
-          }),
-      })
+    ? editableComponents[accessorKey]
     : null;
 
   return (
@@ -65,14 +54,21 @@ const Cell = <T extends object>({
       data-row={cell.row.index}
       data-column={columnIndex}
       tabIndex={tabIndex}
+      position="relative"
       bgColor={
-        isEditMode && !hasEditableTableCellComponent ? "gray.50" : undefined
+        wasEdited
+          ? "yellow.100"
+          : isEditMode && !hasEditableTableCellComponent
+          ? "gray.50"
+          : undefined
       }
       borderRightColor={borderColor}
       borderRightStyle="solid"
       borderRightWidth={isEditMode ? 1 : undefined}
       boxShadow={
-        isSelected
+        hasError
+          ? "inset 0 0 0 3px var(--chakra-colors-red-500)"
+          : isSelected
           ? "inset 0 0 0 3px var(--chakra-ui-focus-ring-color)"
           : undefined
       }
@@ -84,31 +80,27 @@ const Cell = <T extends object>({
       onClick={onClick}
       onFocus={onFocus}
     >
-      <Box ref={ref}>
-        {isSelected && isEditing && hasEditableTableCellComponent ? (
-          <Popover
-            isOpen
-            onOpen={() => console.log("opened")}
-            onClose={() => console.log("closed")}
-            closeOnBlur
-            isLazy
-          >
-            <PopoverAnchor>
-              <Box>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </Box>
-            </PopoverAnchor>
-
-            <PopoverContent>
-              <PopoverBody>
-                <HStack spacing={2}>{editableCell}</HStack>
-              </PopoverBody>
-            </PopoverContent>
-          </Popover>
-        ) : (
-          flexRender(cell.column.columnDef.cell, cell.getContext())
-        )}
-      </Box>
+      {isSelected && isEditing && hasEditableTableCellComponent ? (
+        <Box position="absolute" w="full" left={0} top="2px">
+          {hasEditableTableCellComponent
+            ? flexRender(editableCell, {
+                accessorKey,
+                value: cell.renderValue(),
+                row: cell.row.original,
+                onUpdate: onUpdate
+                  ? onUpdate
+                  : () => console.error("No update function provided"),
+                onError: () => {
+                  setHasError(true);
+                },
+              })
+            : null}
+        </Box>
+      ) : (
+        <div ref={ref}>
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        </div>
+      )}
     </Td>
   );
 };

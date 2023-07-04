@@ -1,17 +1,28 @@
 import { usePermissions } from "~/hooks";
 import type { Role } from "~/types";
 
-export function usePurchaseOrderSidebar() {
+type Props = {
+  lines?: number;
+  externalDocuments?: number;
+  internalDocuments?: number;
+};
+
+export function usePurchaseOrderSidebar({
+  lines = 0,
+  internalDocuments = 0,
+  externalDocuments = 0,
+}: Props) {
   const permissions = usePermissions();
   return [
     {
-      name: "Header",
+      name: "Summary",
       to: "",
     },
     {
-      name: "Line Items",
-      to: "items",
+      name: "Lines",
+      to: "lines",
       role: ["employee", "supplier"],
+      count: lines,
     },
     {
       name: "Delivery",
@@ -19,24 +30,21 @@ export function usePurchaseOrderSidebar() {
       role: ["employee", "supplier"],
     },
     {
-      name: "Taxes",
-      to: "taxes",
-      role: ["employee"],
-    },
-    {
-      name: "Approvals",
-      to: "approvals",
+      name: "Payment",
+      to: "payment",
       role: ["employee"],
     },
     {
       name: "Internal Attachments",
-      to: "internal-attachments",
+      to: "internal",
       role: ["employee"],
+      count: internalDocuments,
     },
     {
       name: "External Attachments",
-      to: "external-attachments",
+      to: "external",
       role: ["employee", "supplier"],
+      count: externalDocuments,
     },
   ].filter(
     (item) =>

@@ -1,6 +1,5 @@
 import { Select } from "@carbon/react";
 import {
-  Box,
   FormControl,
   FormErrorMessage,
   FormHelperText,
@@ -72,8 +71,7 @@ const Supplier = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controlledValue?.value]);
 
-  // TODO: hack for default value
-  return supplierFetcher.state !== "loading" ? (
+  return (
     <FormControl isInvalid={!!error}>
       {label && <FormLabel htmlFor={name}>{label}</FormLabel>}
       <Select
@@ -97,17 +95,6 @@ const Supplier = ({
         helperText && <FormHelperText>{helperText}</FormHelperText>
       )}
     </FormControl>
-  ) : (
-    <Box>
-      {label && <FormLabel>{label}</FormLabel>}
-      <Select
-        isDisabled
-        isLoading={isLoading}
-        options={[]}
-        // @ts-ignore
-        w="full"
-      />
-    </Box>
   );
 };
 

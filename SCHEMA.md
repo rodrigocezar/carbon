@@ -742,7 +742,6 @@ CREATE TABLE "supplierType" (
 CREATE TABLE "supplier" (
     "id" TEXT NOT NULL DEFAULT uuid_generate_v4(),
     "name" TEXT NOT NULL,
-    "description" TEXT,
     "supplierTypeId" TEXT,
     "supplierStatusId" TEXT,
     "taxId" TEXT,
@@ -825,7 +824,6 @@ CREATE TABLE "customerType" (
 CREATE TABLE "customer" (
     "id" TEXT NOT NULL DEFAULT uuid_generate_v4(),
     "name" TEXT NOT NULL,
-    "description" TEXT,
     "customerTypeId" TEXT,
     "customerStatusId" TEXT,
     "taxId" TEXT,
@@ -1493,29 +1491,18 @@ CREATE POLICY "Employees with sales_view can search for customers and sales orde
 --     AND entity = 'Sales Order' 
 --     AND (get_my_claim('role'::text)) = '"customer"'::jsonb
 --     AND uuid IN (
---         SELECT "customerId" FROM "salesOrder" WHERE "customerId" IN (
---           SELECT "customerId" FROM "customerAccount" WHERE id::uuid = auth.uid()
---         )
---       )
+--        SELECT id FROM "salesOrder" WHERE "customerId" IN (
+--          SELECT "customerId" FROM "salesOrder" WHERE "customerId" IN (
+--            SELECT "customerId" FROM "customerAccount" WHERE id::uuid = auth.uid()
+--          )
+--        )
+--      )
 --   )
 
 CREATE POLICY "Employees with purchasing_view can search for suppliers and purchase orders" ON "search"
   FOR SELECT
   USING (coalesce(get_my_claim('purchasing_view')::boolean, false) = true AND entity IN ('Supplier', 'Purchase Order') AND (get_my_claim('role'::text)) = '"employee"'::jsonb);
 
--- TODO: suppliers should be able to search for their purchase orders
--- CREATE POLICY "Suppliers with purchasing_view can search for their own purchase orders" ON "search"
---   FOR SELECT
---   USING (
---     coalesce(get_my_claim('purchasing_view')::boolean, false) = true 
---     AND entity = 'Purchase Order' 
---     AND (get_my_claim('role'::text)) = '"supplier"'::jsonb
---     AND uuid IN (
---         SELECT "supplierId" FROM "purchaseOrder" WHERE "supplierId" IN (
---           SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
---         )
---       )
---   )
 
 CREATE POLICY "Employees with resources_view can search for resources" ON "search"
   FOR SELECT
@@ -2120,6 +2107,12 @@ CREATE POLICY "Employees with resources_delete can delete employeeAbilities" ON 
 CREATE TABLE "location" (
   "id" TEXT NOT NULL DEFAULT xid(),
   "name" TEXT NOT NULL,
+  "addressLine1" TEXT NOT NULL,
+  "addressLine2" TEXT,
+  "city" TEXT NOT NULL,
+  "state" TEXT NOT NULL,
+  "postalCode" TEXT NOT NULL,
+  "country" TEXT,
   "timezone" TEXT NOT NULL,
   "latitude" NUMERIC,
   "longitude" NUMERIC,
@@ -2799,7 +2792,7 @@ CREATE TABLE "partnerAbility" (
   CONSTRAINT "partnerAbility_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id")
 );
 
-CREATE VIEW "partners_query" AS
+CREATE VIEW "partners_view" AS
   SELECT 
     p.id AS "supplierLocationId", 
     p."active", 
@@ -2917,7 +2910,7 @@ CREATE POLICY "Employees with resources_delete can delete contractorAbilities" O
   );
 
 
-CREATE VIEW "contractors_query" AS
+CREATE VIEW "contractors_view" AS
   SELECT 
     p.id AS "supplierContactId", 
     p."active", 
@@ -3522,12 +3515,96 @@ CREATE POLICY "Employees with parts_update can update part sale prices" ON "part
     AND (get_my_claim('role'::text)) = '"employee"'::jsonb
   );
 
+CREATE TABLE "partSupplier" (
+  "id" TEXT NOT NULL DEFAULT xid(),
+  "partId" TEXT NOT NULL,
+  "supplierId" TEXT NOT NULL,
+  "supplierPartId" TEXT,
+  "supplierUnitOfMeasureCode" TEXT,
+  "minimumOrderQuantity" INTEGER DEFAULT 1,
+  "conversionFactor" NUMERIC(15,5) NOT NULL DEFAULT 1,
+  "active" BOOLEAN NOT NULL DEFAULT true,
+  "createdBy" TEXT NOT NULL,
+  "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  "updatedBy" TEXT,
+  "updatedAt" TIMESTAMP WITH TIME ZONE,
+
+  CONSTRAINT "partSupplier_id_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "partSupplier_partId_fkey" FOREIGN KEY ("partId") REFERENCES "part"("id") ON DELETE CASCADE,
+  CONSTRAINT "partSupplier_supplierId_fkey" FOREIGN KEY ("supplierId") REFERENCES "supplier"("id") ON DELETE CASCADE,
+  CONSTRAINT "partSupplier_part_supplier_unique" UNIQUE ("partId", "supplierId"),
+  CONSTRAINT "partSupplier_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id"),
+  CONSTRAINT "partSupplier_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id")
+);
+
+CREATE INDEX "partSupplier_partId_index" ON "partSupplier"("partId");
+
+ALTER TABLE "partSupplier" ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Employees with part_view can view part suppliers" ON "partSupplier"
+  FOR SELECT
+  USING (
+    coalesce(get_my_claim('parts_view')::boolean,false) 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+CREATE POLICY "Employees with parts_update can update part suppliers" ON "partSupplier"
+  FOR UPDATE
+  USING (
+    coalesce(get_my_claim('parts_update')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+CREATE POLICY "Employees with parts_create can create part suppliers" ON "partSupplier"
+  FOR INSERT
+  WITH CHECK (
+    coalesce(get_my_claim('parts_create')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+CREATE POLICY "Employees with parts_delete can delete part suppliers" ON "partSupplier"
+  FOR DELETE
+  USING (
+    coalesce(get_my_claim('parts_delete')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+CREATE POLICY "Suppliers with parts_view can view their own part suppliers" ON "partSupplier"
+  FOR SELECT
+  USING (
+    coalesce(get_my_claim('parts_view')::boolean,false) 
+    AND (get_my_claim('role'::text)) = '"supplier"'::jsonb
+    AND  "supplierId" IN (
+      SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
+    )
+  );
+
+CREATE POLICY "Suppliers with parts_update can update their own part suppliers" ON "partSupplier"
+  FOR UPDATE
+  USING (
+    coalesce(get_my_claim('parts_update')::boolean,false) 
+    AND (get_my_claim('role'::text)) = '"supplier"'::jsonb
+    AND  "supplierId" IN (
+      SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
+    )
+  );
+
+CREATE POLICY "Suppliers with parts_create can create part suppliers" ON "partSupplier"
+  FOR INSERT
+  WITH CHECK (
+    coalesce(get_my_claim('parts_create')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"supplier"'::jsonb
+    AND  "supplierId" IN (
+      SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
+    )
+  );
+
 CREATE TABLE "partReplenishment" (
   "partId" TEXT NOT NULL,
-  "supplierId" TEXT,
-  "supplierPartNumber" TEXT,
+  "preferredSupplierId" TEXT,
   "purchasingLeadTime" INTEGER NOT NULL DEFAULT 0,
   "purchasingUnitOfMeasureCode" TEXT,
+  "conversionFactor" NUMERIC(15,5) NOT NULL DEFAULT 1,
   "purchasingBlocked" BOOLEAN NOT NULL DEFAULT false,
   "manufacturingPolicy" "partManufacturingPolicy" NOT NULL DEFAULT 'Make to Stock',
   "manufacturingLeadTime" INTEGER NOT NULL DEFAULT 0,
@@ -3541,14 +3618,14 @@ CREATE TABLE "partReplenishment" (
   "updatedAt" TIMESTAMP WITH TIME ZONE,
   
   CONSTRAINT "partReplenishment_partId_fkey" FOREIGN KEY ("partId") REFERENCES "part"("id") ON DELETE CASCADE,
-  CONSTRAINT "partReplenishment_supplierId_fkey" FOREIGN KEY ("supplierId") REFERENCES "supplier"("id") ON DELETE SET NULL,
-  CONSTRAINT "partReplenishment_purchaseUnitOfMeasureId_fkey" FOREIGN KEY ("purchasingUnitOfMeasureCode") REFERENCES "unitOfMeasure"("code") ON DELETE SET NULL,
+  CONSTRAINT "partReplenishment_preferredSupplierId_fkey" FOREIGN KEY ("preferredSupplierId") REFERENCES "supplier"("id") ON DELETE SET NULL,
+  CONSTRAINT "partReplenishment_purchaseUnitOfMeasureCode_fkey" FOREIGN KEY ("purchasingUnitOfMeasureCode") REFERENCES "unitOfMeasure"("code") ON DELETE SET NULL,
   CONSTRAINT "partReplenishment_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id"),
   CONSTRAINT "partReplenishment_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id")
 );
 
 CREATE INDEX "partReplenishment_partId_index" ON "partReplenishment" ("partId");
-CREATE INDEX "partReplenishment_supplierId_index" ON "partReplenishment" ("supplierId");
+CREATE INDEX "partReplenishment_preferredSupplierId_index" ON "partReplenishment" ("preferredSupplierId");
 
 ALTER TABLE "partReplenishment" ENABLE ROW LEVEL SECURITY;
 
@@ -3566,6 +3643,7 @@ CREATE POLICY "Employees with parts_update can update part costs" ON "partReplen
     AND (get_my_claim('role'::text)) = '"employee"'::jsonb
   );
 
+
 CREATE POLICY "Suppliers with parts_view can view parts they created or supply" ON "part"
   FOR SELECT
   USING (
@@ -3575,7 +3653,7 @@ CREATE POLICY "Suppliers with parts_view can view parts they created or supply" 
       "createdBy" = auth.uid()::text
       OR (
         id IN (
-          SELECT "partId" FROM "partReplenishment" WHERE "supplierId" IN (
+          SELECT "partId" FROM "partSupplier" WHERE "supplierId" IN (
               SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
           )
         )              
@@ -3599,7 +3677,7 @@ CREATE POLICY "Suppliers with parts_update can update parts that they created or
       "createdBy" = auth.uid()::text
       OR (
         id IN (
-          SELECT "partId" FROM "partReplenishment" WHERE "supplierId" IN (
+          SELECT "partId" FROM "partSupplier" WHERE "supplierId" IN (
               SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
           )
         )              
@@ -3616,7 +3694,7 @@ CREATE POLICY "Suppliers with parts_delete can delete parts that they created or
       "createdBy" = auth.uid()::text
       OR (
         id IN (
-          SELECT "partId" FROM "partReplenishment" WHERE "supplierId" IN (
+          SELECT "partId" FROM "partSupplier" WHERE "supplierId" IN (
               SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
           )
         )              
@@ -3631,7 +3709,7 @@ CREATE POLICY "Suppliers with parts_view can view part costs they supply" ON "pa
     AND (get_my_claim('role'::text)) = '"supplier"'::jsonb 
     AND (
       "partId" IN (
-        SELECT "partId" FROM "partReplenishment" WHERE "supplierId" IN (
+        SELECT "partId" FROM "partSupplier" WHERE "supplierId" IN (
             SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
         )
       )                 
@@ -3645,7 +3723,7 @@ CREATE POLICY "Suppliers with parts_update can update parts costs that they supp
     AND (get_my_claim('role'::text)) = '"employee"'::jsonb
     AND (
       "partId" IN (
-        SELECT "partId" FROM "partReplenishment" WHERE "supplierId" IN (
+        SELECT "partId" FROM "partSupplier" WHERE "supplierId" IN (
             SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
         )
       )                 
@@ -3658,8 +3736,10 @@ CREATE POLICY "Suppliers with parts_view can view part replenishments they suppl
     coalesce(get_my_claim('parts_view')::boolean, false) = true 
     AND (get_my_claim('role'::text)) = '"supplier"'::jsonb 
     AND (
-      "supplierId" IN (
-          SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
+      "partId" IN (
+        SELECT "partId" FROM "partSupplier" WHERE "supplierId" IN (
+            SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
+        )
       )               
     )
   );
@@ -3670,9 +3750,11 @@ CREATE POLICY "Suppliers with parts_update can update parts replenishments that 
     coalesce(get_my_claim('parts_update')::boolean, false) = true 
     AND (get_my_claim('role'::text)) = '"employee"'::jsonb
     AND (
-      "supplierId" IN (
-          SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
-      )               
+      "partId" IN (
+        SELECT "partId" FROM "partSupplier" WHERE "supplierId" IN (
+            SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
+        )
+      )                
     )
   );
 
@@ -3806,33 +3888,33 @@ CREATE POLICY "Employees with parts_update can update part planning" ON "partInv
     AND (get_my_claim('role'::text)) = '"employee"'::jsonb
   );
 
-CREATE POLICY "Suppliers with parts_view can view part inventory they supply" ON "partInventory"
-  FOR SELECT
-  USING (
-    coalesce(get_my_claim('parts_view')::boolean, false) = true 
-    AND (get_my_claim('role'::text)) = '"supplier"'::jsonb 
-    AND (
-      "partId" IN (
-        SELECT "partId" FROM "partReplenishment" WHERE "supplierId" IN (
-            SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
-        )
-      )                 
-    )
-  );
+-- CREATE POLICY "Suppliers with parts_view can view part inventory they supply" ON "partInventory"
+--   FOR SELECT
+--   USING (
+--     coalesce(get_my_claim('parts_view')::boolean, false) = true 
+--     AND (get_my_claim('role'::text)) = '"supplier"'::jsonb 
+--     AND (
+--       "partId" IN (
+--         SELECT "partId" FROM "partReplenishment" WHERE "supplierId" IN (
+--             SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
+--         )
+--       )                 
+--     )
+--   );
 
-CREATE POLICY "Suppliers with parts_update can update part inventory that they supply" ON "partInventory"
-  FOR UPDATE
-  USING (
-    coalesce(get_my_claim('parts_update')::boolean, false) = true 
-    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
-    AND (
-      "partId" IN (
-        SELECT "partId" FROM "partReplenishment" WHERE "supplierId" IN (
-            SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
-        )
-      )                 
-    )
-  );
+-- CREATE POLICY "Suppliers with parts_update can update part inventory that they supply" ON "partInventory"
+--   FOR UPDATE
+--   USING (
+--     coalesce(get_my_claim('parts_update')::boolean, false) = true 
+--     AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+--     AND (
+--       "partId" IN (
+--         SELECT "partId" FROM "partReplenishment" WHERE "supplierId" IN (
+--             SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
+--         )
+--       )                 
+--     )
+--   );
 ```
 
 
@@ -4159,6 +4241,22 @@ CREATE TABLE "shippingMethod" (
 
 CREATE INDEX "shippingMethod_name_idx" ON "shippingMethod" ("name");
 
+CREATE TABLE "shippingTerm" (
+  "id" TEXT NOT NULL DEFAULT xid(),
+  "name" TEXT NOT NULL,
+  "active" BOOLEAN NOT NULL DEFAULT TRUE,
+  "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  "createdBy" TEXT NOT NULL,
+  "updatedAt" TIMESTAMP WITH TIME ZONE,
+  "updatedBy" TEXT,
+
+  CONSTRAINT "shippingTerm_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "shippingTerm_name_key" UNIQUE ("name"),
+  CONSTRAINT "shippingTerm_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE CASCADE,
+  CONSTRAINT "shippingTerm_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE CASCADE
+);
+
+
 CREATE TYPE "purchaseOrderType" AS ENUM (
   'Draft',
   'Purchase', 
@@ -4180,27 +4278,10 @@ CREATE TABLE "purchaseOrder" (
   "type" "purchaseOrderType" NOT NULL,
   "status" "purchaseOrderApprovalStatus" NOT NULL,
   "orderDate" DATE NOT NULL DEFAULT CURRENT_DATE,
-  "orderDueDate" DATE,
-  "receivedDate" DATE,
-  "orderSubTotal" NUMERIC(10,5) NOT NULL DEFAULT 0,
-  "orderTax" NUMERIC(10,5) NOT NULL DEFAULT 0,
-  "orderDiscount" NUMERIC(10,5) NOT NULL DEFAULT 0,
-  "orderShipping" NUMERIC(10,5) NOT NULL DEFAULT 0,
-  "orderTotal" NUMERIC(10,5) NOT NULL DEFAULT 0,
   "notes" TEXT,
   "supplierId" TEXT NOT NULL,
   "supplierContactId" TEXT,
   "supplierReference" TEXT,
-  "invoiceSupplierId" TEXT,
-  "invoiceSupplierLocationId" TEXT,
-  "invoiceSupplierContactId" TEXT,
-  "paymentTermId" TEXT,
-  "shippingMethodId" TEXT,
-  "currencyCode" TEXT NOT NULL,
-  -- "approvalRequestDate" DATE,
-  -- "approvalDecisionDate" DATE,
-  -- "approvalDecisionUserId" TEXT,
-  -- "approvalDecisionNotes" TEXT,
   "closed" BOOLEAN NOT NULL DEFAULT FALSE,
   "closedAt" DATE,
   "closedBy" TEXT,
@@ -4213,13 +4294,6 @@ CREATE TABLE "purchaseOrder" (
   CONSTRAINT "purchaseOrder_purchaseOrderId_key" UNIQUE ("purchaseOrderId"),
   CONSTRAINT "purchaseOrder_supplierId_fkey" FOREIGN KEY ("supplierId") REFERENCES "supplier" ("id") ON DELETE CASCADE,
   CONSTRAINT "purchaseOrder_supplierContactId_fkey" FOREIGN KEY ("supplierContactId") REFERENCES "supplierContact" ("id") ON DELETE CASCADE,
-  CONSTRAINT "purchaseOrder_invoiceSupplierId_fkey" FOREIGN KEY ("invoiceSupplierId") REFERENCES "supplier" ("id") ON DELETE CASCADE,
-  CONSTRAINT "purchaseOrder_invoiceSupplierLocationId_fkey" FOREIGN KEY ("invoiceSupplierLocationId") REFERENCES "supplierLocation" ("id") ON DELETE CASCADE,
-  CONSTRAINT "purchaseOrder_invoiceSupplierContactId_fkey" FOREIGN KEY ("invoiceSupplierContactId") REFERENCES "supplierContact" ("id") ON DELETE CASCADE,
-  CONSTRAINT "purchaseOrder_paymentTermId_fkey" FOREIGN KEY ("paymentTermId") REFERENCES "paymentTerm" ("id") ON DELETE CASCADE,
-  CONSTRAINT "purchaseOrder_shippingMethodId_fkey" FOREIGN KEY ("shippingMethodId") REFERENCES "shippingMethod" ("id") ON DELETE CASCADE,
-  CONSTRAINT "purchaseOrder_currencyCode_fkey" FOREIGN KEY ("currencyCode") REFERENCES "currency" ("code") ON DELETE CASCADE,
-  -- CONSTRAINT "purchaseOrder_approvalDecisionUserId_fkey" FOREIGN KEY ("approvalDecisionUserId") REFERENCES "user" ("id") ON DELETE CASCADE,
   CONSTRAINT "purchaseOrder_closedBy_fkey" FOREIGN KEY ("closedBy") REFERENCES "user" ("id") ON DELETE CASCADE,
   CONSTRAINT "purchaseOrder_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE CASCADE,
   CONSTRAINT "purchaseOrder_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE CASCADE
@@ -4228,10 +4302,124 @@ CREATE TABLE "purchaseOrder" (
 CREATE INDEX "purchaseOrder_purchaseOrderId_idx" ON "purchaseOrder" ("purchaseOrderId");
 CREATE INDEX "purchaseOrder_supplierId_idx" ON "purchaseOrder" ("supplierId");
 CREATE INDEX "purchaseOrder_supplierContactId_idx" ON "purchaseOrder" ("supplierContactId");
-CREATE INDEX "purchaseOrder_invoiceSupplierId_idx" ON "purchaseOrder" ("invoiceSupplierId");
-CREATE INDEX "purchaseOrder_invoiceSupplierLocationId_idx" ON "purchaseOrder" ("invoiceSupplierLocationId");
-CREATE INDEX "purchaseOrder_invoiceSupplierContactId_idx" ON "purchaseOrder" ("invoiceSupplierContactId");
--- CREATE INDEX "purchaseOrder_approvalDecisionUserId_idx" ON "purchaseOrder" ("approvalDecisionUserId");
+
+CREATE TYPE "purchaseOrderLineType" AS ENUM (
+  'Comment',
+  'G/L Account',
+  'Part',
+  'Fixed Asset'
+);
+
+CREATE TABLE "purchaseOrderLine" (
+  "id" TEXT NOT NULL DEFAULT xid(),
+  "purchaseOrderId" TEXT NOT NULL,
+  "purchaseOrderLineType" "purchaseOrderLineType" NOT NULL,
+  "partId" TEXT,
+  "accountNumber" TEXT,
+  "assetId" TEXT,
+  "description" TEXT,
+  "purchaseQuantity" NUMERIC(9,2) DEFAULT 0,
+  "unitPrice" NUMERIC(9,2),
+  "unitOfMeasureCode" TEXT,
+  "shelfId" TEXT,
+  "setupPrice" NUMERIC(9,2),
+  "receivedComplete" BOOLEAN NOT NULL DEFAULT FALSE,
+  "invoiceComplete" BOOLEAN NOT NULL DEFAULT FALSE,
+  "requiresInspection" BOOLEAN NOT NULL DEFAULT FALSE,
+  "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  "createdBy" TEXT NOT NULL,
+  "updatedAt" TIMESTAMP WITH TIME ZONE,
+  "updatedBy" TEXT,
+
+  CONSTRAINT "purchaseOrderLineType_number"
+    CHECK (
+      (
+        "purchaseOrderLineType" = 'Comment' AND
+        "partId" IS NULL AND
+        "accountNumber" IS NULL AND
+        "assetId" IS NULL AND
+        "description" IS NOT NULL
+      ) 
+      OR (
+        "purchaseOrderLineType" = 'G/L Account' AND
+        "partId" IS NULL AND
+        "accountNumber" IS NOT NULL AND
+        "assetId" IS NULL 
+      ) 
+      OR (
+        "purchaseOrderLineType" = 'Part' AND
+        "partId" IS NOT NULL AND
+        "accountNumber" IS NULL AND
+        "assetId" IS NULL 
+      ) 
+      OR (
+        "purchaseOrderLineType" = 'Fixed Asset' AND
+        "partId" IS NULL AND
+        "accountNumber" IS NULL AND
+        "assetId" IS NOT NULL 
+      ) 
+    ),
+
+  CONSTRAINT "purchaseOrderLine_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "purchaseOrderLine_purchaseOrderId_fkey" FOREIGN KEY ("purchaseOrderId") REFERENCES "purchaseOrder" ("id") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderLine_partId_fkey" FOREIGN KEY ("partId") REFERENCES "part" ("id") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderLine_accountNumber_fkey" FOREIGN KEY ("accountNumber") REFERENCES "account" ("number") ON DELETE CASCADE,
+  -- TODO: Add assetId foreign key
+  CONSTRAINT "purchaseOrderLine_shelfId_fkey" FOREIGN KEY ("shelfId") REFERENCES "shelf" ("id") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderLine_unitOfMeasureCode_fkey" FOREIGN KEY ("unitOfMeasureCode") REFERENCES "unitOfMeasure" ("code") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderLine_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderLine_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE CASCADE
+);
+
+CREATE TABLE "purchaseOrderPayment" (
+  "id" TEXT NOT NULL,
+  "invoiceSupplierId" TEXT,
+  "invoiceSupplierLocationId" TEXT,
+  "invoiceSupplierContactId" TEXT,
+  "paymentTermId" TEXT,
+  "paymentComplete" BOOLEAN NOT NULL DEFAULT FALSE,
+  "currencyCode" TEXT NOT NULL DEFAULT 'USD',
+  "updatedAt" TIMESTAMP WITH TIME ZONE,
+  "updatedBy" TEXT,
+
+  CONSTRAINT "purchaseOrderPayment_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "purchaseOrderPayment_id_fkey" FOREIGN KEY ("id") REFERENCES "purchaseOrder" ("id") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderPayment_invoiceSupplierId_fkey" FOREIGN KEY ("invoiceSupplierId") REFERENCES "supplier" ("id") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderPayment_invoiceSupplierLocationId_fkey" FOREIGN KEY ("invoiceSupplierLocationId") REFERENCES "supplierLocation" ("id") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderPayment_invoiceSupplierContactId_fkey" FOREIGN KEY ("invoiceSupplierContactId") REFERENCES "supplierContact" ("id") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderPayment_paymentTermId_fkey" FOREIGN KEY ("paymentTermId") REFERENCES "paymentTerm" ("id") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderPayment_currencyCode_fkey" FOREIGN KEY ("currencyCode") REFERENCES "currency" ("code") ON DELETE CASCADE
+);
+
+CREATE INDEX "purchaseOrderPayment_invoiceSupplierId_idx" ON "purchaseOrderPayment" ("invoiceSupplierId");
+CREATE INDEX "purchaseOrderPayment_invoiceSupplierLocationId_idx" ON "purchaseOrderPayment" ("invoiceSupplierLocationId");
+CREATE INDEX "purchaseOrderPayment_invoiceSupplierContactId_idx" ON "purchaseOrderPayment" ("invoiceSupplierContactId");
+
+CREATE TABLE "purchaseOrderDelivery" (
+  "id" TEXT NOT NULL,
+  "locationId" TEXT,
+  "shippingMethodId" TEXT,
+  "shippingTermId" TEXT,
+  "receiptRequestedDate" DATE,
+  "receiptPromisedDate" DATE,
+  "deliveryDate" DATE,
+  "notes" TEXT,
+  "trackingNumber" TEXT,
+  "dropShipment" BOOLEAN NOT NULL DEFAULT FALSE,
+  "customerId" TEXT,
+  "customerLocationId" TEXT,
+  "updatedBy" TEXT,
+  "updatedAt" TIMESTAMP WITH TIME ZONE,
+
+  CONSTRAINT "purchaseOrderDelivery_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "purchaseOrderDelivery_id_fkey" FOREIGN KEY ("id") REFERENCES "purchaseOrder" ("id") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderDelivery_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "location" ("id") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderDelivery_shippingMethodId_fkey" FOREIGN KEY ("shippingMethodId") REFERENCES "shippingMethod" ("id") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderDelivery_shippingTermId_fkey" FOREIGN KEY ("shippingTermId") REFERENCES "shippingTerm" ("id") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderDelivery_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "customer" ("id") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderDelivery_customerLocationId_fkey" FOREIGN KEY ("customerLocationId") REFERENCES "customerLocation" ("id") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderDelivery_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE CASCADE
+);
 
 CREATE TYPE "purchaseOrderTransactionType" AS ENUM (
   'Edit',
@@ -4293,8 +4481,16 @@ CREATE VIEW "purchase_order_view" AS
     p."status",
     p."type",
     p."orderDate",
-    p."orderDueDate",
+    p."notes",
+    p."supplierId",
+    p."supplierContactId",
+    p."supplierReference",
     p."createdBy",
+    pd."receiptRequestedDate",
+    pd."receiptPromisedDate",
+    pd."dropShipment",
+    pol."lineCount",
+    l."name" AS "locationName",
     s."name" AS "supplierName",
     u."avatarUrl" AS "createdByAvatar",
     u."fullName" AS "createdByFullName",
@@ -4309,10 +4505,28 @@ CREATE VIEW "purchase_order_view" AS
     u3."fullName" AS "closedByFullName",
     EXISTS(SELECT 1 FROM "purchaseOrderFavorite" pf WHERE pf."purchaseOrderId" = p.id AND pf."userId" = auth.uid()::text) AS favorite
   FROM "purchaseOrder" p
+  LEFT JOIN "purchaseOrderDelivery" pd ON pd."id" = p."id"
+  LEFT JOIN (
+    SELECT "purchaseOrderId", COUNT(*) AS "lineCount"
+    FROM "purchaseOrderLine"
+    GROUP BY "purchaseOrderId"
+  ) pol ON pol."purchaseOrderId" = p."id"
+  LEFT JOIN "location" l ON l."id" = pd."locationId"
   LEFT JOIN "supplier" s ON s."id" = p."supplierId"
   LEFT JOIN "user" u ON u."id" = p."createdBy"
   LEFT JOIN "user" u2 ON u2."id" = p."updatedBy"
   LEFT JOIN "user" u3 ON u3."id" = p."closedBy";
+
+ALTER TABLE "supplier" 
+  ADD COLUMN "defaultCurrencyCode" TEXT,
+  ADD COLUMN "defaultPaymentTermId" TEXT,
+  ADD COLUMN "defaultShippingMethodId" TEXT,
+  ADD COLUMN "defaultShippingTermId" TEXT;
+
+ALTER TABLE "supplier"
+  ADD CONSTRAINT "supplier_defaultPaymentTermId_fkey" FOREIGN KEY ("defaultPaymentTermId") REFERENCES "paymentTerm" ("id") ON DELETE SET NULL,
+  ADD CONSTRAINT "supplier_defaultShippingMethodId_fkey" FOREIGN KEY ("defaultShippingMethodId") REFERENCES "shippingMethod" ("id") ON DELETE SET NULL,
+  ADD CONSTRAINT "supplier_defaultShippingTermId_fkey" FOREIGN KEY ("defaultShippingTermId") REFERENCES "shippingTerm" ("id") ON DELETE SET NULL;
 
 
 ```
@@ -4334,15 +4548,218 @@ CREATE TABLE "sequence" (
   "updatedBy" TEXT,
 
   CONSTRAINT "sequence_pkey" PRIMARY KEY ("table"),
-  CONSTRAINT "sequence_next_check" CHECK ("next" >= 1),
+  CONSTRAINT "sequence_next_check" CHECK ("next" >= 0),
   CONSTRAINT "sequence_size_check" CHECK ("size" >= 1),
   CONSTRAINT "sequence_step_check" CHECK ("step" >= 1),
   CONSTRAINT "sequence_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 INSERT INTO "sequence" ("table", "name", "prefix", "suffix", "next", "size", "step")
-VALUES ('purchaseOrder', 'Purchase Order', 'PO', NULL, 1, 5, 1);
+VALUES ('purchaseOrder', 'Purchase Order', 'PO', NULL, 0, 5, 1);
 
 
+```
+
+
+
+## `purchasing-files`
+
+```sql
+INSERT INTO storage.buckets (id, name, public)
+VALUES 
+  ('purchasing-internal', 'purchasing-internal', false),
+  ('purchasing-external', 'purchasing-external', false);
+
+-- Internal purchasing documents
+
+CREATE POLICY "Internal purchasing documents view requires purchasing_view" ON storage.objects 
+FOR SELECT USING (
+    bucket_id = 'purchasing-internal'
+    AND (auth.role() = 'authenticated')
+    AND coalesce(get_my_claim('purchasing_view')::boolean, false) = true
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+);
+
+CREATE POLICY "Internal purchasing documents insert requires purchasing_create" ON storage.objects 
+FOR INSERT WITH CHECK (
+    bucket_id = 'purchasing-internal'
+    AND (auth.role() = 'authenticated')
+    AND coalesce(get_my_claim('purchasing_create')::boolean, false) = true
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+);
+
+CREATE POLICY "Internal purchasing documents update requires purchasing_update" ON storage.objects 
+FOR UPDATE USING (
+    bucket_id = 'purchasing-internal'
+    AND (auth.role() = 'authenticated')
+    AND coalesce(get_my_claim('purchasing_update')::boolean, false) = true
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+);
+
+CREATE POLICY "Internal purchasing documents delete requires purchasing_delete" ON storage.objects 
+FOR DELETE USING (
+    bucket_id = 'purchasing-internal'
+    AND (auth.role() = 'authenticated')
+    AND coalesce(get_my_claim('purchasing_delete')::boolean, false) = true
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+);
+
+-- External purchasing documents
+
+CREATE POLICY "External purchasing documents view requires purchasing_view" ON storage.objects 
+FOR SELECT USING (
+    bucket_id = 'purchasing-external'
+    AND (auth.role() = 'authenticated')
+    AND coalesce(get_my_claim('purchasing_view')::boolean, false) = true
+    AND (
+      (get_my_claim('role'::text)) = '"employee"'::jsonb OR
+      (
+        (get_my_claim('role'::text)) = '"supplier"'::jsonb
+      )
+    )
+);
+
+CREATE POLICY "External purchasing documents insert requires purchasing_view" ON storage.objects 
+FOR INSERT WITH CHECK (
+    bucket_id = 'purchasing-external'
+    AND (auth.role() = 'authenticated')
+    AND coalesce(get_my_claim('purchasing_view')::boolean, false) = true
+    AND (
+      (get_my_claim('role'::text)) = '"employee"'::jsonb OR
+      (
+        (get_my_claim('role'::text)) = '"supplier"'::jsonb
+      )
+    )
+);
+
+CREATE POLICY "External purchasing documents update requires purchasing_update" ON storage.objects 
+FOR UPDATE USING (
+    bucket_id = 'purchasing-external'
+    AND (auth.role() = 'authenticated')
+    AND coalesce(get_my_claim('purchasing_update')::boolean, false) = true
+    AND (
+      (get_my_claim('role'::text)) = '"employee"'::jsonb OR
+      (
+        (get_my_claim('role'::text)) = '"supplier"'::jsonb
+      )
+    )
+);
+
+CREATE POLICY "External purchasing documents delete requires purchasing_delete" ON storage.objects 
+FOR DELETE USING (
+    bucket_id = 'purchasing-external'
+    AND (auth.role() = 'authenticated')
+    AND coalesce(get_my_claim('purchasing_delete')::boolean, false) = true
+    AND (
+      (get_my_claim('role'::text)) = '"employee"'::jsonb OR
+      (
+        (get_my_claim('role'::text)) = '"supplier"'::jsonb
+      )
+    )
+);
+```
+
+
+
+## `view-rls`
+
+```sql
+-- TODO: after Postgres 15, we can use security_invoker = on
+-- ALTER VIEW "contractors_view" SET (security_invoker = on);
+-- ALTER VIEW "partners_view" SET (security_invoker = on);
+-- ALTER VIEW "documents_labels_view" SET (security_invoker = on);
+-- ALTER VIEW "documents_view" SET (security_invoker = on);
+-- ALTER VIEW "purchase_order_view" SET (security_invoker = on);
+```
+
+
+
+## `purchasing-rls`
+
+```sql
+ALTER TABLE "purchaseOrder" ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Employees with purchasing_view can view purchase orders" ON "purchaseOrder"
+  FOR SELECT
+  USING (coalesce(get_my_claim('purchasing_view')::boolean, false) = true AND (get_my_claim('role'::text)) = '"employee"'::jsonb);
+
+CREATE POLICY "Suppliers with purchasing_view can their own organization" ON "purchaseOrder"
+  FOR SELECT
+  USING (
+    coalesce(get_my_claim('purchasing_view')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"supplier"'::jsonb 
+    AND "supplierId" IN (
+      SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
+    )
+  );
+
+CREATE POLICY "Employees with purchasing_create can create purchase orders" ON "purchaseOrder"
+  FOR INSERT
+  WITH CHECK (coalesce(get_my_claim('purchasing_create')::boolean,false) AND (get_my_claim('role'::text)) = '"employee"'::jsonb);
+
+
+CREATE POLICY "Employees with purchasing_update can update purchase orders" ON "purchaseOrder"
+  FOR UPDATE
+  USING (coalesce(get_my_claim('purchasing_update')::boolean,false) AND (get_my_claim('role'::text)) = '"employee"'::jsonb);
+
+CREATE POLICY "Suppliers with purchasing_update can their own purchase orders" ON "purchaseOrder"
+  FOR UPDATE
+  USING (
+    coalesce(get_my_claim('purchasing_update')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"supplier"'::jsonb 
+    AND "supplierId" IN (
+      SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
+    )
+  );
+
+CREATE POLICY "Employees with purchasing_delete can delete purchase orders" ON "purchaseOrder"
+  FOR DELETE
+  USING (coalesce(get_my_claim('purchasing_delete')::boolean, false) = true AND (get_my_claim('role'::text)) = '"employee"'::jsonb);
+
+-- Search
+
+CREATE FUNCTION public.create_purchase_order_search_result()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.search(name, entity, uuid, link)
+  VALUES (new."purchaseOrderId", 'Purchase Order', new.id, '/x/purchase-order/' || new.id);
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER create_purchase_order_search_result
+  AFTER INSERT on public."purchaseOrder"
+  FOR EACH ROW EXECUTE PROCEDURE public.create_purchase_order_search_result();
+
+CREATE FUNCTION public.update_purchase_order_search_result()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF (old."purchaseOrderId" <> new."purchaseOrderId") THEN
+    UPDATE public.search SET name = new."purchaseOrderId"
+    WHERE entity = 'Purchase Order' AND uuid = new.id;
+  END IF;
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER update_purchase_order_search_result
+  AFTER UPDATE on public.customer
+  FOR EACH ROW EXECUTE PROCEDURE public.update_purchase_order_search_result();
+
+
+CREATE POLICY "Suppliers with purchasing_view can search for their own purchase orders" ON "search"
+  FOR SELECT
+  USING (
+    coalesce(get_my_claim('purchasing_view')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"supplier"'::jsonb
+    AND entity = 'Purchase Order' 
+    AND uuid IN (
+        SELECT id FROM "purchaseOrder" WHERE "supplierId" IN (
+          SELECT "supplierId" FROM "purchaseOrder" WHERE "supplierId" IN (
+            SELECT "supplierId" FROM "supplierAccount" WHERE id::uuid = auth.uid()
+          )
+        )
+      )
+  );
 ```
 
