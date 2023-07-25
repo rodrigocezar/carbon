@@ -34,6 +34,43 @@ VALUES
   ('2% 10 Net 30', 30, 'Net', 10, 2, 'system'),
   ('Due on Receipt', 0, 'Net', 0, 0, 'system'),
   ('Net EOM 10', 10, 'End of Month', 0, 0, 'system');
+
+ALTER TABLE "paymentTerm" ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Certain employees can view payment terms" ON "paymentTerm"
+  FOR SELECT
+  USING (
+    (
+      coalesce(get_my_claim('accounting_view')::boolean, false) = true OR
+      coalesce(get_my_claim('parts_view')::boolean, false) = true OR
+      coalesce(get_my_claim('resources_view')::boolean, false) = true OR
+      coalesce(get_my_claim('sales_view')::boolean, false) = true OR
+      coalesce(get_my_claim('purchasing_view')::boolean, false) = true
+    )
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+  
+
+CREATE POLICY "Employees with accounting_create can insert payment terms" ON "paymentTerm"
+  FOR INSERT
+  WITH CHECK (   
+    coalesce(get_my_claim('accounting_create')::boolean,false) 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+);
+
+CREATE POLICY "Employees with accounting_update can update payment terms" ON "paymentTerm"
+  FOR UPDATE
+  USING (
+    coalesce(get_my_claim('accounting_update')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+CREATE POLICY "Employees with accounting_delete can delete payment terms" ON "paymentTerm"
+  FOR DELETE
+  USING (
+    coalesce(get_my_claim('accounting_delete')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
   
 
 CREATE TYPE "shippingCarrier" AS ENUM (
@@ -58,12 +95,48 @@ CREATE TABLE "shippingMethod" (
 
   CONSTRAINT "shippingMethod_pkey" PRIMARY KEY ("id"),
   CONSTRAINT "shippingMethod_name_key" UNIQUE ("name"),
-  CONSTRAINT "shippingMethod_carrierAccountId_fkey" FOREIGN KEY ("carrierAccountId") REFERENCES "account" ("number") ON DELETE CASCADE,
+  CONSTRAINT "shippingMethod_carrierAccountId_fkey" FOREIGN KEY ("carrierAccountId") REFERENCES "account" ("number") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "shippingMethod_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE CASCADE,
   CONSTRAINT "shippingMethod_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE CASCADE
 );
 
 CREATE INDEX "shippingMethod_name_idx" ON "shippingMethod" ("name");
+
+
+CREATE POLICY "Certain employees can view shipping methods" ON "shippingMethod"
+  FOR SELECT
+  USING (
+    (
+      coalesce(get_my_claim('accounting_view')::boolean, false) = true OR
+      coalesce(get_my_claim('inventory_view')::boolean, false) = true OR
+      coalesce(get_my_claim('parts_view')::boolean, false) = true OR
+      coalesce(get_my_claim('purchasing_view')::boolean, false) = true OR
+      coalesce(get_my_claim('sales_view')::boolean, false) = true
+    )
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+  
+
+CREATE POLICY "Employees with inventory_create can insert shipping methods" ON "shippingMethod"
+  FOR INSERT
+  WITH CHECK (   
+    coalesce(get_my_claim('inventory_create')::boolean,false) 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+);
+
+CREATE POLICY "Employees with inventory_update can update shipping methods" ON "shippingMethod"
+  FOR UPDATE
+  USING (
+    coalesce(get_my_claim('inventory_update')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+CREATE POLICY "Employees with inventory_delete can delete shipping methods" ON "shippingMethod"
+  FOR DELETE
+  USING (
+    coalesce(get_my_claim('inventory_delete')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
 
 CREATE TABLE "shippingTerm" (
   "id" TEXT NOT NULL DEFAULT xid(),
@@ -186,11 +259,11 @@ CREATE TABLE "purchaseOrderLine" (
 
   CONSTRAINT "purchaseOrderLine_pkey" PRIMARY KEY ("id"),
   CONSTRAINT "purchaseOrderLine_purchaseOrderId_fkey" FOREIGN KEY ("purchaseOrderId") REFERENCES "purchaseOrder" ("id") ON DELETE CASCADE,
-  CONSTRAINT "purchaseOrderLine_partId_fkey" FOREIGN KEY ("partId") REFERENCES "part" ("id") ON DELETE CASCADE,
-  CONSTRAINT "purchaseOrderLine_accountNumber_fkey" FOREIGN KEY ("accountNumber") REFERENCES "account" ("number") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderLine_partId_fkey" FOREIGN KEY ("partId") REFERENCES "part" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "purchaseOrderLine_accountNumber_fkey" FOREIGN KEY ("accountNumber") REFERENCES "account" ("number") ON DELETE CASCADE ON UPDATE CASCADE,
   -- TODO: Add assetId foreign key
   CONSTRAINT "purchaseOrderLine_shelfId_fkey" FOREIGN KEY ("shelfId") REFERENCES "shelf" ("id") ON DELETE CASCADE,
-  CONSTRAINT "purchaseOrderLine_unitOfMeasureCode_fkey" FOREIGN KEY ("unitOfMeasureCode") REFERENCES "unitOfMeasure" ("code") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderLine_unitOfMeasureCode_fkey" FOREIGN KEY ("unitOfMeasureCode") REFERENCES "unitOfMeasure" ("code") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "purchaseOrderLine_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE CASCADE,
   CONSTRAINT "purchaseOrderLine_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE CASCADE
 );
@@ -212,7 +285,7 @@ CREATE TABLE "purchaseOrderPayment" (
   CONSTRAINT "purchaseOrderPayment_invoiceSupplierLocationId_fkey" FOREIGN KEY ("invoiceSupplierLocationId") REFERENCES "supplierLocation" ("id") ON DELETE CASCADE,
   CONSTRAINT "purchaseOrderPayment_invoiceSupplierContactId_fkey" FOREIGN KEY ("invoiceSupplierContactId") REFERENCES "supplierContact" ("id") ON DELETE CASCADE,
   CONSTRAINT "purchaseOrderPayment_paymentTermId_fkey" FOREIGN KEY ("paymentTermId") REFERENCES "paymentTerm" ("id") ON DELETE CASCADE,
-  CONSTRAINT "purchaseOrderPayment_currencyCode_fkey" FOREIGN KEY ("currencyCode") REFERENCES "currency" ("code") ON DELETE CASCADE
+  CONSTRAINT "purchaseOrderPayment_currencyCode_fkey" FOREIGN KEY ("currencyCode") REFERENCES "currency" ("code") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE INDEX "purchaseOrderPayment_invoiceSupplierId_idx" ON "purchaseOrderPayment" ("invoiceSupplierId");

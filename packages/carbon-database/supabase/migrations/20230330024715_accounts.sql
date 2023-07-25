@@ -3,10 +3,9 @@ CREATE TABLE "currency" (
   "name" TEXT NOT NULL,
   "code" TEXT NOT NULL,
   "symbol" TEXT,
-  "symbolPlacementBefore" BOOLEAN NOT NULL DEFAULT true,
   "exchangeRate" NUMERIC(10,4) NOT NULL DEFAULT 1.0000,
-  "currencyPrecision" INTEGER NOT NULL DEFAULT 2,
   "isBaseCurrency" BOOLEAN NOT NULL DEFAULT false,
+  "active" BOOLEAN NOT NULL DEFAULT true,
   "createdBy" TEXT NOT NULL,
   "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   "updatedBy" TEXT,
@@ -14,12 +13,13 @@ CREATE TABLE "currency" (
 
   CONSTRAINT "currency_pkey" PRIMARY KEY ("id"),
   CONSTRAINT "currency_code_key" UNIQUE ("code"),
+  CONSTRAINT "currency_exchangeRate_check" CHECK ("exchangeRate" > 0),
   CONSTRAINT "currency_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id"),
   CONSTRAINT "currency_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id")
 );
 
-INSERT INTO "currency" ("name", "code", "symbol", "symbolPlacementBefore", "exchangeRate", "currencyPrecision", "isBaseCurrency", "createdBy")
-VALUES ('US Dollar', 'USD', '$', true, 1.0000, 2, true, 'system');
+INSERT INTO "currency" ("name", "code", "symbol", "exchangeRate", "isBaseCurrency", "createdBy")
+VALUES ('US Dollar', 'USD', '$', 1.0000, true, 'system');
 
 CREATE INDEX "currency_code_index" ON "currency" ("code");
 
@@ -73,20 +73,29 @@ CREATE TYPE "glAccountCategory" AS ENUM (
   'Other Expense'
 );
 
-CREATE TYPE "glAccountType" AS ENUM (
+CREATE TYPE "glIncomeBalance" AS ENUM (
   'Balance Sheet',
   'Income Statement'
 );
 
 CREATE TYPE "glNormalBalance" AS ENUM (
   'Debit',
-  'Credit'
+  'Credit',
+  'Both'
+);
+
+CREATE TYPE "glAccountType" AS ENUM (
+  'Posting',
+  'Heading',
+  -- 'Total',
+  'Begin Total',
+  'End Total'
 );
 
 CREATE TABLE "accountCategory" (
   "id" TEXT NOT NULL DEFAULT xid(),
-  "category" "glAccountCategory" NOT NULL,
-  "type" "glAccountType" NOT NULL,
+  "category" TEXT NOT NULL,
+  "incomeBalance" "glIncomeBalance" NOT NULL,
   "normalBalance" "glNormalBalance" NOT NULL,
   "createdBy" TEXT NOT NULL,
   "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -94,12 +103,12 @@ CREATE TABLE "accountCategory" (
   "updatedAt" TIMESTAMP WITH TIME ZONE,
 
   CONSTRAINT "accountCategory_pkey" PRIMARY KEY ("id"),
-  CONSTRAINT "accountCategory_category_type_key" UNIQUE ("category"),
+  CONSTRAINT "accountCategory_unique_category" UNIQUE ("category"),
   CONSTRAINT "accountCategory_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id"),
   CONSTRAINT "accountCategory_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id")
 );
 
-INSERT INTO "accountCategory" ("category", "type", "normalBalance", "createdBy")
+INSERT INTO "accountCategory" ("category", "incomeBalance", "normalBalance", "createdBy")
 VALUES 
   ('Bank', 'Balance Sheet', 'Credit', 'system'),
   ('Accounts Receivable', 'Balance Sheet', 'Credit', 'system'),
@@ -151,39 +160,93 @@ CREATE POLICY "Employees with accounting_delete can delete account categories" O
     AND (get_my_claim('role'::text)) = '"employee"'::jsonb
   );
 
-CREATE TYPE "consolidatedRate" AS ENUM (
+CREATE TYPE "glConsolidatedRate" AS ENUM (
   'Average',
   'Current',
   'Historical'
 );
 
-CREATE TABLE "account" (
-  "number" TEXT NOT NULL,
+CREATE TABLE "accountSubcategory" (
+  "id" TEXT NOT NULL DEFAULT xid(),
   "name" TEXT NOT NULL,
-  "description" TEXT,
-  "accountCategoryId" TEXT,
-  "controlAccount" BOOLEAN NOT NULL DEFAULT false,
-  "cashAccount" BOOLEAN NOT NULL DEFAULT false,
-  "consolidatedRate" "consolidatedRate",
-  "currencyCode" TEXT,
-  "parentAccountNumber" TEXT,
+  "accountCategoryId" TEXT NOT NULL,
   "active" BOOLEAN NOT NULL DEFAULT true,
   "createdBy" TEXT NOT NULL,
   "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   "updatedBy" TEXT,
   "updatedAt" TIMESTAMP WITH TIME ZONE,
 
-  CONSTRAINT "account_pkey" PRIMARY KEY ("number"),
+  CONSTRAINT "accountSubcategory_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "accountSubcategory_name_key" UNIQUE ("name"),
+  CONSTRAINT "accountSubcategory_accountCategoryId_fkey" FOREIGN KEY ("accountCategoryId") REFERENCES "accountCategory"("id"),
+  CONSTRAINT "accountSubcategory_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id"),
+  CONSTRAINT "accountSubcategory_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id")
+);
+
+CREATE INDEX "accountSubcategory_accountCategoryId_idx" ON "accountSubcategory" ("accountCategoryId");
+
+ALTER TABLE "accountSubcategory" ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Employees with accounting_view can view account subcategories" ON "accountSubcategory"
+  FOR SELECT
+  USING (
+    coalesce(get_my_claim('accounting_view')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+  
+
+CREATE POLICY "Employees with accounting_create can insert account subcategories" ON "accountSubcategory"
+  FOR INSERT
+  WITH CHECK (   
+    coalesce(get_my_claim('accounting_create')::boolean,false) 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+);
+
+CREATE POLICY "Employees with accounting_update can update account subcategories" ON "accountSubcategory"
+  FOR UPDATE
+  USING (
+    coalesce(get_my_claim('accounting_update')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+CREATE POLICY "Employees with accounting_delete can delete account subcategories" ON "accountSubcategory"
+  FOR DELETE
+  USING (
+    coalesce(get_my_claim('accounting_delete')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+CREATE TABLE "account" (
+  "id" TEXT NOT NULL DEFAULT xid(),
+  "number" TEXT NOT NULL,
+  "name" TEXT NOT NULL,
+  "type" "glAccountType" NOT NULL,
+  "accountCategoryId" TEXT,
+  "accountSubcategoryId" TEXT,
+  "incomeBalance" "glIncomeBalance" NOT NULL,
+  "normalBalance" "glNormalBalance" NOT NULL,
+  "consolidatedRate" "glConsolidatedRate",
+  "directPosting" BOOLEAN NOT NULL DEFAULT false,
+  "active" BOOLEAN NOT NULL DEFAULT true,
+  "createdBy" TEXT NOT NULL,
+  "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  "updatedBy" TEXT,
+  "updatedAt" TIMESTAMP WITH TIME ZONE,
+
+  CONSTRAINT "account_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "account_number_key" UNIQUE ("number"),
   CONSTRAINT "account_name_key" UNIQUE ("name"),
   CONSTRAINT "account_accountCategoryId_fkey" FOREIGN KEY ("accountCategoryId") REFERENCES "accountCategory"("id"),
-  CONSTRAINT "account_currencyCode_fkey" FOREIGN KEY ("currencyCode") REFERENCES "currency"("code") ON DELETE SET NULL,
-  CONSTRAINT "account_parentAccountNumber_fkey" FOREIGN KEY ("parentAccountNumber") REFERENCES "account"("number"),
   CONSTRAINT "account_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id"),
   CONSTRAINT "account_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id")
 );
 
-INSERT INTO "account" ("number", "name", "consolidatedRate", "currencyCode", "createdBy")
-VALUES ('999999', 'Unassigned', 'Average', 'USD', 'system');
+CREATE INDEX "account_number_idx" ON "account" ("number");
+CREATE INDEX "account_type_idx" ON "account" ("type");
+CREATE INDEX "account_incomeBalance_idx" ON "account" ("incomeBalance");
+CREATE INDEX "account_accountCategoryId_idx" ON "account" ("accountCategoryId");
+CREATE INDEX "account_accountSubcategoryId_idx" ON "account" ("accountSubcategoryId");
+
 
 ALTER TABLE "account" ENABLE ROW LEVEL SECURITY;
 
@@ -221,3 +284,39 @@ CREATE POLICY "Employees with accounting_delete can delete accounts" ON "account
     coalesce(get_my_claim('accounting_delete')::boolean, false) = true 
     AND (get_my_claim('role'::text)) = '"employee"'::jsonb
   );
+
+CREATE VIEW "account_categories_view" AS
+  SELECT
+    "id",
+    "category",
+    "incomeBalance",
+    "normalBalance",
+    "createdBy",
+    "createdAt",
+    "updatedBy",
+    "updatedAt",
+    (SELECT count(*) FROM "accountSubcategory" WHERE "accountSubcategory"."accountCategoryId" = "accountCategory"."id" AND "accountSubcategory"."active" = true) AS "subCategoriesCount"
+  FROM "accountCategory"
+;
+
+CREATE VIEW "accounts_view" AS
+  SELECT 
+    "id",
+    "number",
+    "name",
+    "type",
+    "accountCategoryId",
+    (SELECT "category" FROM "accountCategory" WHERE "accountCategory"."id" = "account"."accountCategoryId") AS "accountCategory",
+    "accountSubcategoryId",
+    (SELECT "name" FROM "accountSubcategory" WHERE "accountSubcategory"."id" = "account"."accountSubcategoryId") AS "accountSubCategory",
+    "incomeBalance",
+    "normalBalance",
+    "consolidatedRate",
+    "directPosting",
+    "active",
+    "createdBy",
+    "createdAt",
+    "updatedBy",
+    "updatedAt"
+  FROM "account"
+;

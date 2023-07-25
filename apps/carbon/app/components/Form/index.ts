@@ -1,6 +1,8 @@
 import Abilities from "./Abilities";
 import Ability from "./Ability";
 import Account from "./Account";
+import AccountCategory from "./AccountCategory";
+import AccountSubcategory from "./AccountSubcategory";
 import Array from "./Array";
 import Boolean from "./Boolean";
 import Color from "./Color";
@@ -24,6 +26,7 @@ import Phone from "./Phone";
 import Radios from "./Radios";
 import RichText from "./RichText";
 import Select from "./Select";
+import SelectControlled from "./SelectControlled";
 import Slider from "./Slider";
 import Submit from "./Submit";
 import Supplier from "./Supplier";
@@ -39,6 +42,8 @@ export {
   Abilities,
   Ability,
   Account,
+  AccountCategory,
+  AccountSubcategory,
   Array,
   Boolean,
   Color,
@@ -62,6 +67,7 @@ export {
   Radios,
   RichText,
   Select,
+  SelectControlled,
   Slider,
   Submit,
   Supplier,
