@@ -39,12 +39,12 @@ const EmployeesTableFilters = ({
           param="name"
           size="sm"
           minW={180}
-          placeholder="Filter by name"
+          placeholder="Search"
         />
         <Select
           // @ts-ignore
           size="sm"
-          value={employeeTypeOptions.filter(
+          value={employeeTypeOptions.find(
             (type) => type.value === params.get("type")
           )}
           isClearable

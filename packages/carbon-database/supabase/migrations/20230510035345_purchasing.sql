@@ -160,26 +160,26 @@ CREATE TYPE "purchaseOrderType" AS ENUM (
   'Return'
 );
 
-CREATE TYPE "purchaseOrderApprovalStatus" AS ENUM (
-  'Draft',
+CREATE TYPE "purchaseOrderStatus" AS ENUM (
+  'Open',
   'In Review',
   'In External Review',
   'Approved',
   'Rejected',
-  'Confirmed'
+  'Released',
+  'Closed'
 );
 
 CREATE TABLE "purchaseOrder" (
   "id" TEXT NOT NULL DEFAULT xid(),
   "purchaseOrderId" TEXT NOT NULL,
   "type" "purchaseOrderType" NOT NULL,
-  "status" "purchaseOrderApprovalStatus" NOT NULL,
+  "status" "purchaseOrderStatus" NOT NULL DEFAULT 'Open',
   "orderDate" DATE NOT NULL DEFAULT CURRENT_DATE,
   "notes" TEXT,
   "supplierId" TEXT NOT NULL,
   "supplierContactId" TEXT,
   "supplierReference" TEXT,
-  "closed" BOOLEAN NOT NULL DEFAULT FALSE,
   "closedAt" DATE,
   "closedBy" TEXT,
   "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -199,6 +199,7 @@ CREATE TABLE "purchaseOrder" (
 CREATE INDEX "purchaseOrder_purchaseOrderId_idx" ON "purchaseOrder" ("purchaseOrderId");
 CREATE INDEX "purchaseOrder_supplierId_idx" ON "purchaseOrder" ("supplierId");
 CREATE INDEX "purchaseOrder_supplierContactId_idx" ON "purchaseOrder" ("supplierContactId");
+CREATE INDEX "purchaseOrder_status_idx" ON "purchaseOrder" ("status");
 
 CREATE TYPE "purchaseOrderLineType" AS ENUM (
   'Comment',
@@ -216,8 +217,13 @@ CREATE TABLE "purchaseOrderLine" (
   "assetId" TEXT,
   "description" TEXT,
   "purchaseQuantity" NUMERIC(9,2) DEFAULT 0,
+  "quantityToReceive" NUMERIC(9,2) DEFAULT 0,
+  "quantityReceived" NUMERIC(9,2) DEFAULT 0,
+  "quantityToInvoice" NUMERIC(9,2) DEFAULT 0,
+  "quantityInvoiced" NUMERIC(9,2) DEFAULT 0,
   "unitPrice" NUMERIC(9,2),
   "unitOfMeasureCode" TEXT,
+  "locationId" TEXT,
   "shelfId" TEXT,
   "setupPrice" NUMERIC(9,2),
   "receivedComplete" BOOLEAN NOT NULL DEFAULT FALSE,
@@ -262,7 +268,7 @@ CREATE TABLE "purchaseOrderLine" (
   CONSTRAINT "purchaseOrderLine_partId_fkey" FOREIGN KEY ("partId") REFERENCES "part" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "purchaseOrderLine_accountNumber_fkey" FOREIGN KEY ("accountNumber") REFERENCES "account" ("number") ON DELETE CASCADE ON UPDATE CASCADE,
   -- TODO: Add assetId foreign key
-  CONSTRAINT "purchaseOrderLine_shelfId_fkey" FOREIGN KEY ("shelfId") REFERENCES "shelf" ("id") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderLine_shelfId_fkey" FOREIGN KEY ("shelfId", "locationId") REFERENCES "shelf" ("id", "locationId") ON DELETE CASCADE,
   CONSTRAINT "purchaseOrderLine_unitOfMeasureCode_fkey" FOREIGN KEY ("unitOfMeasureCode") REFERENCES "unitOfMeasure" ("code") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "purchaseOrderLine_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE CASCADE,
   CONSTRAINT "purchaseOrderLine_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE CASCADE
@@ -387,6 +393,7 @@ CREATE VIEW "purchase_order_view" AS
     pd."receiptPromisedDate",
     pd."dropShipment",
     pol."lineCount",
+    l."id" AS "locationId",
     l."name" AS "locationName",
     s."name" AS "supplierName",
     u."avatarUrl" AS "createdByAvatar",
@@ -396,7 +403,6 @@ CREATE VIEW "purchase_order_view" AS
     u2."avatarUrl" AS "updatedByAvatar",
     u2."fullName" AS "updatedByFullName",
     p."updatedAt",
-    p."closed",
     p."closedAt",
     u3."avatarUrl" AS "closedByAvatar",
     u3."fullName" AS "closedByFullName",

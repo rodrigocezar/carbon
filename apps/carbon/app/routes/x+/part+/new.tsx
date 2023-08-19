@@ -39,7 +39,7 @@ export async function action({ request }: ActionArgs) {
     );
   }
 
-  const partId = createPart.data[0]?.id;
+  const partId = createPart.data?.id;
 
   return redirect(
     `/x/part/${partId}`,
@@ -58,6 +58,9 @@ export default function PartsNewRoute() {
   const initialValues = {
     name: "",
     description: "",
+    partType: "Inventory" as "Inventory",
+    replenishmentSystem: "Buy" as "Buy",
+    unitOfMeasureCode: "EA",
   };
 
   return (

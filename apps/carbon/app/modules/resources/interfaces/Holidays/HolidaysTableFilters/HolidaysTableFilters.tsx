@@ -34,14 +34,14 @@ const HolidaysTableFilters = ({ years }: HolidaysTableFiltersProps) => {
           param="name"
           size="sm"
           minW={180}
-          placeholder="Filter by name"
+          placeholder="Search"
         />
         <Select
           // @ts-ignore
           size="sm"
           value={
             params.get("year")
-              ? yearsOptions.filter(
+              ? yearsOptions.find(
                   (year) => year.value.toString() === params.get("year")
                 )
               : {

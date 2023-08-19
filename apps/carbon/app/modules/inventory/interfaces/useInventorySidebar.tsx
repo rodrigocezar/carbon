@@ -3,6 +3,19 @@ import type { AuthenticatedRouteGroup } from "~/types";
 
 const inventoryRoutes: AuthenticatedRouteGroup[] = [
   {
+    name: "Manage",
+    routes: [
+      {
+        name: "Receipts",
+        to: "/x/inventory/receipts",
+      },
+      {
+        name: "Shipments",
+        to: "/x/inventory/shipments",
+      },
+    ],
+  },
+  {
     name: "Configure",
     routes: [
       {

@@ -76,10 +76,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "abilities_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "abilities_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "abilities_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -161,10 +173,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "account_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "account_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "account_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -207,10 +231,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "accountCategory_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "accountCategory_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "accountCategory_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -265,10 +301,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "accountSubcategory_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "accountSubcategory_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "accountSubcategory_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -451,6 +499,12 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "contractor_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "contractor_id_fkey";
             columns: ["id"];
             referencedRelation: "supplierContact";
@@ -461,6 +515,12 @@ export interface Database {
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contractor_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -507,6 +567,12 @@ export interface Database {
             columns: ["createdBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contractorAbility_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -559,6 +625,12 @@ export interface Database {
             columns: ["crewLeaderId"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "crew_crewLeaderId_fkey";
+            columns: ["crewLeaderId"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           },
           {
             foreignKeyName: "crew_groupId_fkey";
@@ -656,10 +728,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "currency_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "currency_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "currency_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -711,10 +795,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "customer_accountManagerId_fkey";
+            columns: ["accountManagerId"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "customer_createdBy_fkey";
             columns: ["createdBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "customer_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           },
           {
             foreignKeyName: "customer_customerStatusId_fkey";
@@ -733,6 +829,12 @@ export interface Database {
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "customer_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -761,6 +863,12 @@ export interface Database {
             columns: ["id"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "customerAccount_id_fkey";
+            columns: ["id"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -810,6 +918,12 @@ export interface Database {
             columns: ["userId"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "customerContact_userId_fkey";
+            columns: ["userId"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -986,10 +1100,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "document_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "document_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "document_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -1024,6 +1150,12 @@ export interface Database {
             columns: ["userId"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "documentFavorites_userId_fkey";
+            columns: ["userId"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -1061,6 +1193,12 @@ export interface Database {
             columns: ["userId"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "documentLabels_userId_fkey";
+            columns: ["userId"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -1104,6 +1242,12 @@ export interface Database {
             columns: ["userId"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "documentTransaction_userId_fkey";
+            columns: ["userId"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -1132,6 +1276,12 @@ export interface Database {
             columns: ["id"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "employee_id_fkey";
+            columns: ["id"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -1175,6 +1325,12 @@ export interface Database {
             columns: ["employeeId"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "employeeAbilities_employeeId_fkey";
+            columns: ["employeeId"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -1223,16 +1379,34 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "employeeJob_id_fkey";
+            columns: ["id"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "employeeJob_locationId_fkey";
             columns: ["locationId"];
             referencedRelation: "location";
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "employeeJob_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "purchase_order_view";
+            referencedColumns: ["locationId"];
+          },
+          {
             foreignKeyName: "employeeJob_managerId_fkey";
             columns: ["managerId"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "employeeJob_managerId_fkey";
+            columns: ["managerId"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           },
           {
             foreignKeyName: "employeeJob_shiftId_fkey";
@@ -1270,6 +1444,12 @@ export interface Database {
             columns: ["employeeId"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "employeeShift_employeeId_fkey";
+            columns: ["employeeId"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           },
           {
             foreignKeyName: "employeeShift_shiftId_fkey";
@@ -1409,6 +1589,12 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "equipment_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "equipment_equipmentTypeId_fkey";
             columns: ["equipmentTypeId"];
             referencedRelation: "equipmentType";
@@ -1421,10 +1607,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "equipment_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "purchase_order_view";
+            referencedColumns: ["locationId"];
+          },
+          {
             foreignKeyName: "equipment_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "equipment_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           },
           {
             foreignKeyName: "equipment_workCellId_fkey";
@@ -1479,6 +1677,12 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "equipmentType_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "equipmentType_requiredAbility_fkey";
             columns: ["requiredAbility"];
             referencedRelation: "ability";
@@ -1489,6 +1693,12 @@ export interface Database {
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "equipmentType_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -1649,10 +1859,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "holiday_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "holiday_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "holiday_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -1747,6 +1969,12 @@ export interface Database {
             columns: ["memberUserId"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "membership_memberUserId_fkey";
+            columns: ["memberUserId"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -1819,10 +2047,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "part_approvedBy_fkey";
+            columns: ["approvedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "part_createdBy_fkey";
             columns: ["createdBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "part_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           },
           {
             foreignKeyName: "part_partGroupId_fkey";
@@ -1841,6 +2081,12 @@ export interface Database {
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "part_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -1907,6 +2153,12 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "partGroup_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "partGroup_discountAccountId_fkey";
             columns: ["discountAccountId"];
             referencedRelation: "account";
@@ -1947,6 +2199,12 @@ export interface Database {
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "partGroup_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -2058,6 +2316,12 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "partGroup_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "partGroup_discountAccountId_fkey";
             columns: ["discountAccountId"];
             referencedRelation: "account";
@@ -2098,6 +2362,12 @@ export interface Database {
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "partGroup_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -2105,33 +2375,27 @@ export interface Database {
         Row: {
           createdAt: string;
           createdBy: string;
+          defaultShelfId: string | null;
+          locationId: string;
           partId: string;
-          shelfId: string | null;
-          stockoutWarning: boolean;
-          unitVolume: number;
-          unitWeight: number;
           updatedAt: string | null;
           updatedBy: string | null;
         };
         Insert: {
           createdAt?: string;
           createdBy: string;
+          defaultShelfId?: string | null;
+          locationId: string;
           partId: string;
-          shelfId?: string | null;
-          stockoutWarning?: boolean;
-          unitVolume?: number;
-          unitWeight?: number;
           updatedAt?: string | null;
           updatedBy?: string | null;
         };
         Update: {
           createdAt?: string;
           createdBy?: string;
+          defaultShelfId?: string | null;
+          locationId?: string;
           partId?: string;
-          shelfId?: string | null;
-          stockoutWarning?: boolean;
-          unitVolume?: number;
-          unitWeight?: number;
           updatedAt?: string | null;
           updatedBy?: string | null;
         };
@@ -2141,6 +2405,24 @@ export interface Database {
             columns: ["createdBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "partInventory_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
+            foreignKeyName: "partInventory_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "location";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "partInventory_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "purchase_order_view";
+            referencedColumns: ["locationId"];
           },
           {
             foreignKeyName: "partInventory_partId_fkey";
@@ -2156,15 +2438,21 @@ export interface Database {
           },
           {
             foreignKeyName: "partInventory_shelfId_fkey";
-            columns: ["shelfId"];
+            columns: ["defaultShelfId", "locationId"];
             referencedRelation: "shelf";
-            referencedColumns: ["id"];
+            referencedColumns: ["id", "locationId"];
           },
           {
             foreignKeyName: "partInventory_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "partInventory_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -2237,6 +2525,12 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "partLedger_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "purchase_order_view";
+            referencedColumns: ["locationId"];
+          },
+          {
             foreignKeyName: "partLedger_partId_fkey";
             columns: ["partId"];
             referencedRelation: "part";
@@ -2250,9 +2544,9 @@ export interface Database {
           },
           {
             foreignKeyName: "partLedger_shelfId_fkey";
-            columns: ["shelfId"];
+            columns: ["shelfId", "locationId"];
             referencedRelation: "shelf";
-            referencedColumns: ["id"];
+            referencedColumns: ["id", "locationId"];
           }
         ];
       };
@@ -2292,6 +2586,12 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "partner_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "partner_id_fkey";
             columns: ["id"];
             referencedRelation: "supplierLocation";
@@ -2302,6 +2602,12 @@ export interface Database {
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "partner_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -2338,6 +2644,12 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "partnerAbility_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "partnerAbility_partnerId_fkey";
             columns: ["partnerId"];
             referencedRelation: "partner";
@@ -2359,16 +2671,15 @@ export interface Database {
           demandAccumulationIncludesInventory: boolean;
           demandAccumulationPeriod: number;
           demandReschedulingPeriod: number;
+          locationId: string;
           maximumOrderQuantity: number;
           minimumOrderQuantity: number;
           orderMultiple: number;
           partId: string;
           reorderingPolicy: Database["public"]["Enums"]["partReorderingPolicy"];
           reorderMaximumInventory: number;
-          reorderOverflowLevel: number;
           reorderPoint: number;
           reorderQuantity: number;
-          reorderTimeBucket: number;
           safetyStockLeadTime: number;
           safetyStockQuantity: number;
           updatedAt: string | null;
@@ -2381,16 +2692,15 @@ export interface Database {
           demandAccumulationIncludesInventory?: boolean;
           demandAccumulationPeriod?: number;
           demandReschedulingPeriod?: number;
+          locationId: string;
           maximumOrderQuantity?: number;
           minimumOrderQuantity?: number;
           orderMultiple?: number;
           partId: string;
           reorderingPolicy?: Database["public"]["Enums"]["partReorderingPolicy"];
           reorderMaximumInventory?: number;
-          reorderOverflowLevel?: number;
           reorderPoint?: number;
           reorderQuantity?: number;
-          reorderTimeBucket?: number;
           safetyStockLeadTime?: number;
           safetyStockQuantity?: number;
           updatedAt?: string | null;
@@ -2403,16 +2713,15 @@ export interface Database {
           demandAccumulationIncludesInventory?: boolean;
           demandAccumulationPeriod?: number;
           demandReschedulingPeriod?: number;
+          locationId?: string;
           maximumOrderQuantity?: number;
           minimumOrderQuantity?: number;
           orderMultiple?: number;
           partId?: string;
           reorderingPolicy?: Database["public"]["Enums"]["partReorderingPolicy"];
           reorderMaximumInventory?: number;
-          reorderOverflowLevel?: number;
           reorderPoint?: number;
           reorderQuantity?: number;
-          reorderTimeBucket?: number;
           safetyStockLeadTime?: number;
           safetyStockQuantity?: number;
           updatedAt?: string | null;
@@ -2424,6 +2733,24 @@ export interface Database {
             columns: ["createdBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "partPlanning_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
+            foreignKeyName: "partPlanning_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "location";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "partPlanning_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "purchase_order_view";
+            referencedColumns: ["locationId"];
           },
           {
             foreignKeyName: "partPlanning_partId_fkey";
@@ -2442,6 +2769,12 @@ export interface Database {
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "partPlanning_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -2508,6 +2841,12 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "partReplenishment_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "partReplenishment_partId_fkey";
             columns: ["partId"];
             referencedRelation: "part";
@@ -2560,6 +2899,12 @@ export interface Database {
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "partReplenishment_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -2614,6 +2959,12 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "partSupplier_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "partSupplier_partId_fkey";
             columns: ["partId"];
             referencedRelation: "part";
@@ -2660,6 +3011,12 @@ export interface Database {
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "partSupplier_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -2711,6 +3068,12 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "partUnitSalePrice_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "partUnitSalePrice_currencyCode_fkey";
             columns: ["currencyCode"];
             referencedRelation: "currency";
@@ -2739,6 +3102,12 @@ export interface Database {
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "partUnitSalePrice_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -2790,16 +3159,27 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "paymentTerm_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "paymentTerm_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "paymentTerm_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
       purchaseOrder: {
         Row: {
-          closed: boolean;
           closedAt: string | null;
           closedBy: string | null;
           createdAt: string;
@@ -2808,7 +3188,7 @@ export interface Database {
           notes: string | null;
           orderDate: string;
           purchaseOrderId: string;
-          status: Database["public"]["Enums"]["purchaseOrderApprovalStatus"];
+          status: Database["public"]["Enums"]["purchaseOrderStatus"];
           supplierContactId: string | null;
           supplierId: string;
           supplierReference: string | null;
@@ -2817,7 +3197,6 @@ export interface Database {
           updatedBy: string | null;
         };
         Insert: {
-          closed?: boolean;
           closedAt?: string | null;
           closedBy?: string | null;
           createdAt?: string;
@@ -2826,7 +3205,7 @@ export interface Database {
           notes?: string | null;
           orderDate?: string;
           purchaseOrderId: string;
-          status: Database["public"]["Enums"]["purchaseOrderApprovalStatus"];
+          status?: Database["public"]["Enums"]["purchaseOrderStatus"];
           supplierContactId?: string | null;
           supplierId: string;
           supplierReference?: string | null;
@@ -2835,7 +3214,6 @@ export interface Database {
           updatedBy?: string | null;
         };
         Update: {
-          closed?: boolean;
           closedAt?: string | null;
           closedBy?: string | null;
           createdAt?: string;
@@ -2844,7 +3222,7 @@ export interface Database {
           notes?: string | null;
           orderDate?: string;
           purchaseOrderId?: string;
-          status?: Database["public"]["Enums"]["purchaseOrderApprovalStatus"];
+          status?: Database["public"]["Enums"]["purchaseOrderStatus"];
           supplierContactId?: string | null;
           supplierId?: string;
           supplierReference?: string | null;
@@ -2860,10 +3238,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "purchaseOrder_closedBy_fkey";
+            columns: ["closedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "purchaseOrder_createdBy_fkey";
             columns: ["createdBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "purchaseOrder_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           },
           {
             foreignKeyName: "purchaseOrder_supplierContactId_fkey";
@@ -2906,6 +3296,12 @@ export interface Database {
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "purchaseOrder_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -2990,6 +3386,12 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "purchaseOrderDelivery_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "purchase_order_view";
+            referencedColumns: ["locationId"];
+          },
+          {
             foreignKeyName: "purchaseOrderDelivery_shippingMethodId_fkey";
             columns: ["shippingMethodId"];
             referencedRelation: "shippingMethod";
@@ -3006,6 +3408,12 @@ export interface Database {
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "purchaseOrderDelivery_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -3040,6 +3448,12 @@ export interface Database {
             columns: ["userId"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "purchaseOrderFavorites_userId_fkey";
+            columns: ["userId"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -3052,10 +3466,15 @@ export interface Database {
           description: string | null;
           id: string;
           invoiceComplete: boolean;
+          locationId: string | null;
           partId: string | null;
           purchaseOrderId: string;
           purchaseOrderLineType: Database["public"]["Enums"]["purchaseOrderLineType"];
           purchaseQuantity: number | null;
+          quantityInvoiced: number | null;
+          quantityReceived: number | null;
+          quantityToInvoice: number | null;
+          quantityToReceive: number | null;
           receivedComplete: boolean;
           requiresInspection: boolean;
           setupPrice: number | null;
@@ -3073,10 +3492,15 @@ export interface Database {
           description?: string | null;
           id?: string;
           invoiceComplete?: boolean;
+          locationId?: string | null;
           partId?: string | null;
           purchaseOrderId: string;
           purchaseOrderLineType: Database["public"]["Enums"]["purchaseOrderLineType"];
           purchaseQuantity?: number | null;
+          quantityInvoiced?: number | null;
+          quantityReceived?: number | null;
+          quantityToInvoice?: number | null;
+          quantityToReceive?: number | null;
           receivedComplete?: boolean;
           requiresInspection?: boolean;
           setupPrice?: number | null;
@@ -3094,10 +3518,15 @@ export interface Database {
           description?: string | null;
           id?: string;
           invoiceComplete?: boolean;
+          locationId?: string | null;
           partId?: string | null;
           purchaseOrderId?: string;
           purchaseOrderLineType?: Database["public"]["Enums"]["purchaseOrderLineType"];
           purchaseQuantity?: number | null;
+          quantityInvoiced?: number | null;
+          quantityReceived?: number | null;
+          quantityToInvoice?: number | null;
+          quantityToReceive?: number | null;
           receivedComplete?: boolean;
           requiresInspection?: boolean;
           setupPrice?: number | null;
@@ -3127,6 +3556,12 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "purchaseOrderLine_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "purchaseOrderLine_partId_fkey";
             columns: ["partId"];
             referencedRelation: "part";
@@ -3152,9 +3587,9 @@ export interface Database {
           },
           {
             foreignKeyName: "purchaseOrderLine_shelfId_fkey";
-            columns: ["shelfId"];
+            columns: ["shelfId", "locationId"];
             referencedRelation: "shelf";
-            referencedColumns: ["id"];
+            referencedColumns: ["id", "locationId"];
           },
           {
             foreignKeyName: "purchaseOrderLine_unitOfMeasureCode_fkey";
@@ -3167,6 +3602,12 @@ export interface Database {
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "purchaseOrderLine_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -3313,6 +3754,245 @@ export interface Database {
             columns: ["userId"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "purchaseOrderTransaction_userId_fkey";
+            columns: ["userId"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          }
+        ];
+      };
+      receipt: {
+        Row: {
+          createdAt: string;
+          createdBy: string;
+          id: string;
+          locationId: string | null;
+          postingDate: string | null;
+          receiptId: string;
+          sourceDocument:
+            | Database["public"]["Enums"]["receiptSourceDocument"]
+            | null;
+          sourceDocumentId: string | null;
+          sourceDocumentReadableId: string | null;
+          supplierId: string | null;
+          updatedAt: string | null;
+          updatedBy: string | null;
+        };
+        Insert: {
+          createdAt?: string;
+          createdBy: string;
+          id?: string;
+          locationId?: string | null;
+          postingDate?: string | null;
+          receiptId: string;
+          sourceDocument?:
+            | Database["public"]["Enums"]["receiptSourceDocument"]
+            | null;
+          sourceDocumentId?: string | null;
+          sourceDocumentReadableId?: string | null;
+          supplierId?: string | null;
+          updatedAt?: string | null;
+          updatedBy?: string | null;
+        };
+        Update: {
+          createdAt?: string;
+          createdBy?: string;
+          id?: string;
+          locationId?: string | null;
+          postingDate?: string | null;
+          receiptId?: string;
+          sourceDocument?:
+            | Database["public"]["Enums"]["receiptSourceDocument"]
+            | null;
+          sourceDocumentId?: string | null;
+          sourceDocumentReadableId?: string | null;
+          supplierId?: string | null;
+          updatedAt?: string | null;
+          updatedBy?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "receipt_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "receipt_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
+            foreignKeyName: "receipt_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "location";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "receipt_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "purchase_order_view";
+            referencedColumns: ["locationId"];
+          },
+          {
+            foreignKeyName: "receipt_supplierId_fkey";
+            columns: ["supplierId"];
+            referencedRelation: "supplier";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "receipt_supplierId_fkey";
+            columns: ["supplierId"];
+            referencedRelation: "contractors_view";
+            referencedColumns: ["supplierId"];
+          },
+          {
+            foreignKeyName: "receipt_supplierId_fkey";
+            columns: ["supplierId"];
+            referencedRelation: "partners_view";
+            referencedColumns: ["supplierId"];
+          },
+          {
+            foreignKeyName: "receipt_supplierId_fkey";
+            columns: ["supplierId"];
+            referencedRelation: "purchase_order_suppliers_view";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "receipt_supplierId_fkey";
+            columns: ["supplierId"];
+            referencedRelation: "suppliers_view";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "receipt_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "receipt_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          }
+        ];
+      };
+      receiptLine: {
+        Row: {
+          createdAt: string;
+          createdBy: string;
+          id: string;
+          lineId: string | null;
+          locationId: string | null;
+          orderQuantity: number;
+          outstandingQuantity: number;
+          partId: string;
+          receiptId: string;
+          receivedQuantity: number;
+          shelfId: string | null;
+          unitOfMeasure: string;
+          unitPrice: number;
+          updatedAt: string | null;
+          updatedBy: string | null;
+        };
+        Insert: {
+          createdAt?: string;
+          createdBy: string;
+          id?: string;
+          lineId?: string | null;
+          locationId?: string | null;
+          orderQuantity: number;
+          outstandingQuantity?: number;
+          partId: string;
+          receiptId: string;
+          receivedQuantity?: number;
+          shelfId?: string | null;
+          unitOfMeasure: string;
+          unitPrice: number;
+          updatedAt?: string | null;
+          updatedBy?: string | null;
+        };
+        Update: {
+          createdAt?: string;
+          createdBy?: string;
+          id?: string;
+          lineId?: string | null;
+          locationId?: string | null;
+          orderQuantity?: number;
+          outstandingQuantity?: number;
+          partId?: string;
+          receiptId?: string;
+          receivedQuantity?: number;
+          shelfId?: string | null;
+          unitOfMeasure?: string;
+          unitPrice?: number;
+          updatedAt?: string | null;
+          updatedBy?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "receiptLine_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "receiptLine_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
+            foreignKeyName: "receiptLine_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "location";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "receiptLine_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "purchase_order_view";
+            referencedColumns: ["locationId"];
+          },
+          {
+            foreignKeyName: "receiptLine_partId_fkey";
+            columns: ["partId"];
+            referencedRelation: "part";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "receiptLine_partId_fkey";
+            columns: ["partId"];
+            referencedRelation: "parts_view";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "receiptLine_receiptId_fkey";
+            columns: ["receiptId"];
+            referencedRelation: "receipt";
+            referencedColumns: ["receiptId"];
+          },
+          {
+            foreignKeyName: "receiptLine_shelfId_fkey";
+            columns: ["shelfId", "locationId"];
+            referencedRelation: "shelf";
+            referencedColumns: ["id", "locationId"];
+          },
+          {
+            foreignKeyName: "receiptLine_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "receiptLine_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -3386,6 +4066,12 @@ export interface Database {
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "sequence_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -3395,7 +4081,7 @@ export interface Database {
           createdAt: string;
           createdBy: string;
           id: string;
-          locationId: string | null;
+          locationId: string;
           updatedAt: string | null;
           updatedBy: string | null;
           warehouseId: string | null;
@@ -3405,7 +4091,7 @@ export interface Database {
           createdAt?: string;
           createdBy: string;
           id: string;
-          locationId?: string | null;
+          locationId: string;
           updatedAt?: string | null;
           updatedBy?: string | null;
           warehouseId?: string | null;
@@ -3415,7 +4101,7 @@ export interface Database {
           createdAt?: string;
           createdBy?: string;
           id?: string;
-          locationId?: string | null;
+          locationId?: string;
           updatedAt?: string | null;
           updatedBy?: string | null;
           warehouseId?: string | null;
@@ -3428,16 +4114,34 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "shelf_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "shelf_locationId_fkey";
             columns: ["locationId"];
             referencedRelation: "location";
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "shelf_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "purchase_order_view";
+            referencedColumns: ["locationId"];
+          },
+          {
             foreignKeyName: "shelf_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "shelf_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           },
           {
             foreignKeyName: "shelf_warehouseId_fkey";
@@ -3499,6 +4203,12 @@ export interface Database {
             columns: ["locationId"];
             referencedRelation: "location";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "shifts_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "purchase_order_view";
+            referencedColumns: ["locationId"];
           }
         ];
       };
@@ -3559,10 +4269,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "shippingMethod_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "shippingMethod_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "shippingMethod_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -3602,10 +4324,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "shippingTerm_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "shippingTerm_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "shippingTerm_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -3669,10 +4403,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "supplier_accountManagerId_fkey";
+            columns: ["accountManagerId"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "supplier_createdBy_fkey";
             columns: ["createdBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "supplier_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           },
           {
             foreignKeyName: "supplier_defaultPaymentTermId_fkey";
@@ -3709,6 +4455,12 @@ export interface Database {
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "supplier_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -3731,6 +4483,12 @@ export interface Database {
             columns: ["id"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "supplierAccount_id_fkey";
+            columns: ["id"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           },
           {
             foreignKeyName: "supplierAccount_supplierId_fkey";
@@ -3834,6 +4592,12 @@ export interface Database {
             columns: ["userId"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "supplierContact_userId_fkey";
+            columns: ["userId"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -3979,10 +4743,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "unitOfMeasure_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "unitOfMeasure_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "unitOfMeasure_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -4085,10 +4861,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "userAttribute_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "userAttribute_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "userAttribute_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           },
           {
             foreignKeyName: "userAttribute_userAttributeCategoryId_fkey";
@@ -4140,10 +4928,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "userAttributeCategory_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "userAttributeCategory_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "userAttributeCategory_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -4198,10 +4998,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "userAttributeValue_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "userAttributeValue_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "userAttributeValue_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           },
           {
             foreignKeyName: "userAttributeValue_userAttributeId_fkey";
@@ -4216,10 +5028,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "userAttributeValue_userId_fkey";
+            columns: ["userId"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "userAttributeValue_valueUser_fkey";
             columns: ["valueUser"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "userAttributeValue_valueUser_fkey";
+            columns: ["valueUser"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -4262,10 +5086,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "notes_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "notes_userId_fkey";
             columns: ["userId"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notes_userId_fkey";
+            columns: ["userId"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -4405,16 +5241,34 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "warehouse_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "warehouse_locationId_fkey";
             columns: ["locationId"];
             referencedRelation: "location";
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "warehouse_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "purchase_order_view";
+            referencedColumns: ["locationId"];
+          },
+          {
             foreignKeyName: "warehouse_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "warehouse_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -4478,6 +5332,12 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "workCell_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "purchase_order_view";
+            referencedColumns: ["locationId"];
+          },
+          {
             foreignKeyName: "workCell_workCellTypeId_fkey";
             columns: ["workCellTypeId"];
             referencedRelation: "workCellType";
@@ -4530,6 +5390,12 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "workCellType_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "workCellType_requiredAbility_fkey";
             columns: ["requiredAbility"];
             referencedRelation: "ability";
@@ -4540,6 +5406,12 @@ export interface Database {
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "workCellType_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -4587,10 +5459,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "accountCategory_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "accountCategory_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "accountCategory_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -4678,10 +5562,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "account_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "account_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "account_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -4717,6 +5613,12 @@ export interface Database {
             columns: ["userId"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "documentLabels_userId_fkey";
+            columns: ["userId"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -4751,10 +5653,22 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "document_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
             foreignKeyName: "document_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "document_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -4791,6 +5705,12 @@ export interface Database {
             columns: ["memberUserId"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "membership_memberUserId_fkey";
+            columns: ["memberUserId"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
       };
@@ -4881,7 +5801,6 @@ export interface Database {
       };
       purchase_order_view: {
         Row: {
-          closed: boolean | null;
           closedAt: string | null;
           closedByAvatar: string | null;
           closedByFullName: string | null;
@@ -4893,15 +5812,14 @@ export interface Database {
           favorite: boolean | null;
           id: string | null;
           lineCount: number | null;
+          locationId: string | null;
           locationName: string | null;
           notes: string | null;
           orderDate: string | null;
           purchaseOrderId: string | null;
           receiptPromisedDate: string | null;
           receiptRequestedDate: string | null;
-          status:
-            | Database["public"]["Enums"]["purchaseOrderApprovalStatus"]
-            | null;
+          status: Database["public"]["Enums"]["purchaseOrderStatus"] | null;
           supplierContactId: string | null;
           supplierId: string | null;
           supplierName: string | null;
@@ -4918,6 +5836,12 @@ export interface Database {
             columns: ["createdBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "purchaseOrder_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           },
           {
             foreignKeyName: "purchaseOrder_supplierContactId_fkey";
@@ -4960,8 +5884,22 @@ export interface Database {
             columns: ["updatedBy"];
             referencedRelation: "user";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "purchaseOrder_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
           }
         ];
+      };
+      receipt_quantity_received_by_line: {
+        Row: {
+          lineId: string | null;
+          receivedQuantity: number | null;
+          sourceDocumentId: string | null;
+        };
+        Relationships: [];
       };
       suppliers_view: {
         Row: {
@@ -4986,6 +5924,26 @@ export interface Database {
             columns: ["supplierTypeId"];
             referencedRelation: "supplierType";
             referencedColumns: ["id"];
+          }
+        ];
+      };
+      user_default_view: {
+        Row: {
+          locationId: string | null;
+          userId: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "employeeJob_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "location";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "employeeJob_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "purchase_order_view";
+            referencedColumns: ["locationId"];
           }
         ];
       };
@@ -5216,14 +6174,15 @@ export interface Database {
       partReplenishmentSystem: "Buy" | "Make" | "Buy and Make";
       partType: "Inventory" | "Non-Inventory" | "Service";
       paymentTermCalculationMethod: "Net" | "End of Month" | "Day of Month";
-      purchaseOrderApprovalStatus:
-        | "Draft"
+      purchaseOrderLineType: "Comment" | "G/L Account" | "Part" | "Fixed Asset";
+      purchaseOrderStatus:
+        | "Open"
         | "In Review"
         | "In External Review"
         | "Approved"
         | "Rejected"
-        | "Confirmed";
-      purchaseOrderLineType: "Comment" | "G/L Account" | "Part" | "Fixed Asset";
+        | "Released"
+        | "Closed";
       purchaseOrderTransactionType:
         | "Edit"
         | "Favorite"
@@ -5232,6 +6191,15 @@ export interface Database {
         | "Reject"
         | "Request Approval";
       purchaseOrderType: "Draft" | "Purchase" | "Return";
+      receiptSourceDocument:
+        | "Sales Order"
+        | "Sales Return Order"
+        | "Purchase Order"
+        | "Purchase Return Order"
+        | "Inbound Transfer"
+        | "Outbound Transfer"
+        | "Manufacturing Consumption"
+        | "Manufacturing Output";
       searchEntity:
         | "Resource"
         | "Person"

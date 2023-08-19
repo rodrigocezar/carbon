@@ -1,25 +1,33 @@
 import {
-  Button,
   Box,
+  Button,
   Card,
   CardBody,
   CardHeader,
   Heading,
   HStack,
   IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
 } from "@chakra-ui/react";
-import { Link, Outlet, useNavigate } from "@remix-run/react";
+import { Link, Outlet, useNavigate, useParams } from "@remix-run/react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
-import Grid from "~/components/Grid";
+import { BsPencilSquare } from "react-icons/bs";
+import { IoMdTrash } from "react-icons/io";
+import { MdMoreHoriz } from "react-icons/md";
 import {
-  EditablePurchaseOrderLineNumber,
   EditableNumber,
+  EditablePurchaseOrderLineNumber,
   EditableText,
 } from "~/components/Editable";
-import type { PurchaseOrderLine } from "~/modules/purchasing";
+import Grid from "~/components/Grid";
+import { useRouteData, useUser } from "~/hooks";
+import type { PurchaseOrder, PurchaseOrderLine } from "~/modules/purchasing";
+import type { ListItem } from "~/types";
 import usePurchaseOrderLines from "./usePurchaseOrderLines";
-import { MdMoreHoriz } from "react-icons/md";
 
 type PurchaseOrderLinesProps = {
   purchaseOrderLines: PurchaseOrderLine[];
@@ -28,9 +36,28 @@ type PurchaseOrderLinesProps = {
 const PurchaseOrderLines = ({
   purchaseOrderLines,
 }: PurchaseOrderLinesProps) => {
+  const { orderId } = useParams();
+  if (!orderId) throw new Error("orderId not found");
+
   const navigate = useNavigate();
-  const { canEdit, supabase, partOptions, accountOptions, handleCellEdit } =
-    usePurchaseOrderLines();
+  const routeData = useRouteData<{
+    locations: ListItem[];
+    purchaseOrder: PurchaseOrder;
+  }>(`/x/purchase-order/${orderId}`);
+  const locations = routeData?.locations ?? [];
+  const { defaults } = useUser();
+  const {
+    canEdit,
+    canDelete,
+    supabase,
+    partOptions,
+    accountOptions,
+    handleCellEdit,
+  } = usePurchaseOrderLines();
+
+  const isEditable = ["Open", "In Review", "In External Review"].includes(
+    routeData?.purchaseOrder?.status ?? ""
+  );
 
   const columns = useMemo<ColumnDef<PurchaseOrderLine>[]>(() => {
     return [
@@ -42,21 +69,38 @@ const PurchaseOrderLines = ({
         accessorKey: "purchaseOrderLineType",
         header: "Type",
         cell: ({ row }) => (
-          <HStack justify="space-between">
+          <HStack justify="space-between" minW={100}>
             <span>{row.original.purchaseOrderLineType}</span>
             <Box position="relative" w={6} h={5}>
-              <IconButton
-                aria-label="Edit purchase order line type"
-                as={Link}
-                icon={<MdMoreHoriz />}
-                size="sm"
-                position="absolute"
-                right={-1}
-                top={-1}
-                to={`${row.original.id}`}
-                onClick={(e) => e.stopPropagation()}
-                variant="ghost"
-              />
+              <Menu>
+                <MenuButton
+                  as={IconButton}
+                  aria-label="Edit purchase order line type"
+                  icon={<MdMoreHoriz />}
+                  size="sm"
+                  position="absolute"
+                  right={-1}
+                  top="-6px"
+                  variant="ghost"
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <MenuList>
+                  <MenuItem
+                    icon={<BsPencilSquare />}
+                    onClick={() => navigate(row.original.id)}
+                    isDisabled={!isEditable || !canEdit}
+                  >
+                    Edit Line
+                  </MenuItem>
+                  <MenuItem
+                    icon={<IoMdTrash />}
+                    onClick={() => navigate(`delete/${row.original.id}`)}
+                    isDisabled={!isEditable || !canDelete}
+                  >
+                    Delete Line
+                  </MenuItem>
+                </MenuList>
+              </Menu>
             </Box>
           </HStack>
         ),
@@ -115,6 +159,20 @@ const PurchaseOrderLines = ({
         },
       },
       {
+        accessorKey: "locationId",
+        header: "Location",
+        cell: ({ row }) => {
+          switch (row.original.purchaseOrderLineType) {
+            case "Part":
+              return (
+                <span>
+                  {locations.find((l) => l.id == row.original.locationId)?.name}
+                </span>
+              );
+          }
+        },
+      },
+      {
         accessorKey: "shelfId",
         header: "Shelf",
         cell: ({ row }) => {
@@ -143,7 +201,8 @@ const PurchaseOrderLines = ({
         },
       },
     ];
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigate]);
 
   const editableComponents = useMemo(
     () => ({
@@ -154,9 +213,10 @@ const PurchaseOrderLines = ({
         client: supabase,
         parts: partOptions,
         accounts: accountOptions,
+        defaultLocationId: defaults.locationId,
       }),
     }),
-    [handleCellEdit, supabase, partOptions, accountOptions]
+    [handleCellEdit, supabase, partOptions, accountOptions, defaults.locationId]
   );
 
   return (
@@ -166,7 +226,7 @@ const PurchaseOrderLines = ({
           <Heading size="md" display="inline-flex">
             Purchase Order Lines
           </Heading>
-          {canEdit && (
+          {canEdit && isEditable && (
             <Button colorScheme="brand" as={Link} to="new">
               New
             </Button>
@@ -176,9 +236,9 @@ const PurchaseOrderLines = ({
           <Grid<PurchaseOrderLine>
             data={purchaseOrderLines}
             columns={columns}
-            canEdit={canEdit}
+            canEdit={canEdit && isEditable}
             editableComponents={editableComponents}
-            onNewRow={canEdit ? () => navigate("new") : undefined}
+            onNewRow={canEdit && isEditable ? () => navigate("new") : undefined}
           />
         </CardBody>
       </Card>

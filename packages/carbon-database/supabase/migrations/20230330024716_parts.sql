@@ -168,7 +168,7 @@ CREATE TABLE "part" (
 
   CONSTRAINT "part_pkey" PRIMARY KEY ("id"),
   CONSTRAINT "part_unitOfMeasureCode_fkey" FOREIGN KEY ("unitOfMeasureCode") REFERENCES "unitOfMeasure"("code") ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT "part_partGroupId_fkey" FOREIGN KEY ("partGroupId") REFERENCES "partGroup"("id") ON DELETE SET NULL,
+  CONSTRAINT "part_partGroupId_fkey" FOREIGN KEY ("partGroupId") REFERENCES "partGroup"("id"),
   CONSTRAINT "part_approvedBy_fkey" FOREIGN KEY ("approvedBy") REFERENCES "user"("id"),
   CONSTRAINT "part_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id"),
   CONSTRAINT "part_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id")
@@ -229,12 +229,6 @@ BEGIN
   VALUES (new.id, 'Standard', new."createdBy");
 
   INSERT INTO public."partReplenishment"("partId", "createdBy")
-  VALUES (new.id, new."createdBy");
-
-  INSERT INTO public."partPlanning"("partId", "createdBy")
-  VALUES (new.id, new."createdBy");
-
-  INSERT INTO public."partInventory"("partId", "createdBy")
   VALUES (new.id, new."createdBy");
 
   INSERT INTO public."partUnitSalePrice"("partId", "currencyCode", "createdBy")
@@ -610,7 +604,7 @@ CREATE TABLE "warehouse" (
 
 CREATE TABLE "shelf" (
   "id" TEXT NOT NULL,
-  "locationId" TEXT,
+  "locationId" TEXT NOT NULL,
   "warehouseId" TEXT,
   "active" BOOLEAN NOT NULL DEFAULT true,
   "createdBy" TEXT NOT NULL,
@@ -618,14 +612,14 @@ CREATE TABLE "shelf" (
   "updatedBy" TEXT,
   "updatedAt" TIMESTAMP WITH TIME ZONE,
 
-  CONSTRAINT "shelf_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "shelf_pkey" PRIMARY KEY ("id", "locationId"),
   CONSTRAINT "shelf_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "location"("id") ON DELETE CASCADE,
   CONSTRAINT "shelf_warehouseId_fkey" FOREIGN KEY ("warehouseId") REFERENCES "warehouse"("id") ON DELETE CASCADE,
   CONSTRAINT "shelf_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id"),
   CONSTRAINT "shelf_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id")
 );
 
-CREATE INDEX "shelf_locationId_index" ON "shelf" ("locationId");
+CREATE INDEX "shelf_id_locationId_index" ON "shelf" ("id", "locationId");
 CREATE INDEX "shelf_warehouseId_index" ON "shelf" ("warehouseId");
 
 ALTER TABLE "shelf" ENABLE ROW LEVEL SECURITY;
@@ -661,6 +655,7 @@ CREATE POLICY "Employees with parts_delete can delete shelves" ON "shelf"
 
 CREATE TABLE "partPlanning" (
   "partId" TEXT NOT NULL,
+  "locationId" TEXT NOT NULL,
   "reorderingPolicy" "partReorderingPolicy" NOT NULL DEFAULT 'Demand-Based Reorder',
   "critical" BOOLEAN NOT NULL DEFAULT false,
   "safetyStockQuantity" INTEGER NOT NULL DEFAULT 0,
@@ -671,8 +666,6 @@ CREATE TABLE "partPlanning" (
   "reorderPoint" INTEGER NOT NULL DEFAULT 0,
   "reorderQuantity" INTEGER NOT NULL DEFAULT 0,
   "reorderMaximumInventory" INTEGER NOT NULL DEFAULT 0,
-  "reorderOverflowLevel" INTEGER NOT NULL DEFAULT 0,
-  "reorderTimeBucket" INTEGER NOT NULL DEFAULT 5,
   "minimumOrderQuantity" INTEGER NOT NULL DEFAULT 0,
   "maximumOrderQuantity" INTEGER NOT NULL DEFAULT 0,
   "orderMultiple" INTEGER NOT NULL DEFAULT 1,
@@ -681,17 +674,28 @@ CREATE TABLE "partPlanning" (
   "updatedBy" TEXT,
   "updatedAt" TIMESTAMP WITH TIME ZONE,
 
+
+  CONSTRAINT "partPlanning_partId_locationId_key" UNIQUE ("partId", "locationId"),
   CONSTRAINT "partPlanning_partId_fkey" FOREIGN KEY ("partId") REFERENCES "part"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "partPlanning_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "location"("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "partPlanning_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id"),
   CONSTRAINT "partPlanning_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id")
 );
 
-CREATE INDEX "partPlanning_partId_index" ON "partPlanning" ("partId");
+CREATE INDEX "partPlanning_partId_locationId_index" ON "partPlanning" ("partId", "locationId");
 ALTER TABLE "partPlanning" ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Employees with part_view can view part planning" ON "partPlanning"
   FOR SELECT
   USING (
+    coalesce(get_my_claim('parts_view')::boolean,false) 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+-- these are records are created lazily when a user attempts to view them
+CREATE POLICY "Employees with part_view can insert part planning" ON "partPlanning"
+  FOR INSERT
+  WITH CHECK (
     coalesce(get_my_claim('parts_view')::boolean,false) 
     AND (get_my_claim('role'::text)) = '"employee"'::jsonb
   );
@@ -706,30 +710,37 @@ CREATE POLICY "Employees with parts_update can update part planning" ON "partPla
 
 CREATE TABLE "partInventory" (
   "partId" TEXT NOT NULL,
-  "shelfId" TEXT,
-  "stockoutWarning" BOOLEAN NOT NULL DEFAULT true,
-  "unitVolume" NUMERIC(15,5) NOT NULL DEFAULT 0,
-  "unitWeight" NUMERIC(15,5) NOT NULL DEFAULT 0,
+  "locationId" TEXT NOT NULL,
+  "defaultShelfId" TEXT,
   "createdBy" TEXT NOT NULL,
   "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   "updatedBy" TEXT,
   "updatedAt" TIMESTAMP WITH TIME ZONE,
 
-  CONSTRAINT "partInventory_partId_shelfId_key" UNIQUE ("partId", "shelfId"),
+  CONSTRAINT "partInventory_partId_locationId_key" UNIQUE ("partId", "locationId"),
   CONSTRAINT "partInventory_partId_fkey" FOREIGN KEY ("partId") REFERENCES "part"("id") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "partInventory_shelfId_fkey" FOREIGN KEY ("shelfId") REFERENCES "shelf"("id") ON DELETE SET NULL,
+  CONSTRAINT "partInventory_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "location"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "partInventory_shelfId_fkey" FOREIGN KEY ("defaultShelfId", "locationId") REFERENCES "shelf"("id", "locationId") ON DELETE SET NULL,
   CONSTRAINT "partInventory_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id"),
   CONSTRAINT "partInventory_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id")
 );
 
-CREATE INDEX "partInventory_partId_index" ON "partInventory" ("partId");
-CREATE INDEX "partInventory_shelfId_index" ON "partInventory" ("shelfId");
+CREATE INDEX "partInventory_partId_locationId_index" ON "partInventory" ("partId", "locationId");
+CREATE INDEX "partInventory_shelfId_index" ON "partInventory" ("defaultShelfId");
 
 ALTER TABLE "partInventory" ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Employees with part_view can view part planning" ON "partInventory"
   FOR SELECT
   USING (
+    coalesce(get_my_claim('parts_view')::boolean,false) 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+-- these are records are created lazily when a user attempts to view them
+CREATE POLICY "Employees with part_view can insert part planning" ON "partInventory"
+  FOR INSERT
+  WITH CHECK (
     coalesce(get_my_claim('parts_view')::boolean,false) 
     AND (get_my_claim('role'::text)) = '"employee"'::jsonb
   );

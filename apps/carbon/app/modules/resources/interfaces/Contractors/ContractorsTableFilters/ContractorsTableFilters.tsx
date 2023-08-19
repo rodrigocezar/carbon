@@ -38,12 +38,12 @@ const ContractorsTableFilters = ({
           param="name"
           size="sm"
           minW={180}
-          placeholder="Filter by name"
+          placeholder="Search"
         />
         <Select
           // @ts-ignore
           size="sm"
-          value={abilitiesOptions.filter(
+          value={abilitiesOptions.find(
             (type) => type.value === params.get("ability")
           )}
           isClearable

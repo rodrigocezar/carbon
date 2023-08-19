@@ -47,13 +47,13 @@ const CustomersTableFilters = ({
           param="name"
           size="sm"
           minW={180}
-          placeholder="Filter by name"
+          placeholder="Search"
         />
         {customerTypeOptions.length > 0 && (
           <Select
             // @ts-ignore
             size="sm"
-            value={customerTypeOptions.filter(
+            value={customerTypeOptions.find(
               (type) => type.value === params.get("type")
             )}
             isClearable
@@ -71,7 +71,7 @@ const CustomersTableFilters = ({
             // @ts-ignore
             size="sm"
             isClearable
-            value={customerStatusOptions.filter(
+            value={customerStatusOptions.find(
               (type) => type.value === params.get("status")
             )}
             options={customerStatusOptions}

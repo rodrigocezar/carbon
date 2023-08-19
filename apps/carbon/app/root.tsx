@@ -1,6 +1,7 @@
 // root.tsx
 import { ThemeProvider } from "@carbon/react";
 import { SkipNavLink } from "@chakra-ui/skip-nav";
+import { VStack, Heading } from "@chakra-ui/react";
 import {
   Links,
   LiveReload,
@@ -16,7 +17,6 @@ import React from "react";
 import { getBrowserEnv } from "~/config/env";
 import Background from "~/styles/background.css";
 import NProgress from "~/styles/nprogress.css";
-import { Box, Heading } from "@chakra-ui/react";
 
 export function links() {
   return [
@@ -48,7 +48,8 @@ function Document({
   children: React.ReactNode;
   title?: string;
 }) {
-  const { env } = useLoaderData<typeof loader>();
+  const loaderData = useLoaderData<typeof loader>();
+  const env = loaderData?.env ?? {};
 
   return (
     <html lang="en">
@@ -87,17 +88,18 @@ export function ErrorBoundary({ error }: { error: Error }) {
   return (
     <Document title="Error!">
       <ThemeProvider>
-        <Box
+        <VStack
           w="full"
           h="100vh"
           alignItems="center"
+          justifyContent="center"
           gap={4}
           bg="black"
           color="white"
         >
           <Heading as="h1">Something went wrong</Heading>
           <p>{error.message}</p>
-        </Box>
+        </VStack>
       </ThemeProvider>
     </Document>
   );

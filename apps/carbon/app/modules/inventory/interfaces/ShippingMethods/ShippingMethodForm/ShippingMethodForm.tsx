@@ -12,24 +12,16 @@ import {
 } from "@chakra-ui/react";
 import { useNavigate } from "@remix-run/react";
 import { ValidatedForm } from "remix-validated-form";
-import { Hidden, Input, Select, Submit } from "~/components/Form";
+import { Account, Hidden, Input, Select, Submit } from "~/components/Form";
 import { usePermissions } from "~/hooks";
 import { shippingMethodValidator } from "~/modules/inventory";
 import type { TypeOfValidator } from "~/types/validators";
-import { mapRowsToOptions } from "~/utils/form";
 
 type ShippingMethodFormProps = {
   initialValues: TypeOfValidator<typeof shippingMethodValidator>;
-  accounts: {
-    number: string;
-    name: string;
-  }[];
 };
 
-const ShippingMethodForm = ({
-  initialValues,
-  accounts,
-}: ShippingMethodFormProps) => {
+const ShippingMethodForm = ({ initialValues }: ShippingMethodFormProps) => {
   const permissions = usePermissions();
   const navigate = useNavigate();
   const onClose = () => navigate(-1);
@@ -45,12 +37,6 @@ const ShippingMethodForm = ({
       value: v,
     })
   );
-
-  const accountOptions = mapRowsToOptions({
-    data: accounts,
-    value: "number",
-    label: "name",
-  });
 
   return (
     <Drawer onClose={onClose} isOpen={true} size="sm">
@@ -79,11 +65,7 @@ const ShippingMethodForm = ({
                 label="Carrier"
                 options={shippingCarrierOptions}
               />
-              <Select
-                name="carrierAccountId"
-                label="Carrier Account"
-                options={accountOptions}
-              />
+              <Account name="carrierAccountId" label="Carrier Account" />
               <Input
                 name="trackingUrl"
                 label="Tracking URL"

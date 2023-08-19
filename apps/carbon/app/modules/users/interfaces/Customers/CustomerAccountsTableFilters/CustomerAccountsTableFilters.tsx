@@ -39,12 +39,12 @@ const CustomerAccountsTableFilters = ({
           param="name"
           size="sm"
           minW={180}
-          placeholder="Filter by name"
+          placeholder="Search"
         />
         <Select
           // @ts-ignore
           size="sm"
-          value={customerTypeOptions.filter(
+          value={customerTypeOptions.find(
             (type) => type.value === params.get("type")
           )}
           isClearable

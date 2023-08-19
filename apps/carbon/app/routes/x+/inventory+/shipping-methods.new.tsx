@@ -2,7 +2,6 @@ import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { validationError } from "remix-validated-form";
-import { useRouteData } from "~/hooks";
 import type { ShippingCarrier } from "~/modules/inventory";
 import {
   ShippingMethodForm,
@@ -55,7 +54,7 @@ export async function action({ request }: ActionArgs) {
     );
   }
 
-  const shippingMethodId = insertShippingMethod.data[0]?.id;
+  const shippingMethodId = insertShippingMethod.data?.id;
   if (!shippingMethodId) {
     return json(
       {},
@@ -73,19 +72,10 @@ export async function action({ request }: ActionArgs) {
 }
 
 export default function NewShippingMethodsRoute() {
-  const routeData = useRouteData<{
-    accounts: { name: string; number: string }[];
-  }>("/x/inventory/shipping-methods");
-
   const initialValues = {
     name: "",
     carrier: "" as ShippingCarrier,
   };
 
-  return (
-    <ShippingMethodForm
-      initialValues={initialValues}
-      accounts={routeData?.accounts ?? []}
-    />
-  );
+  return <ShippingMethodForm initialValues={initialValues} />;
 }

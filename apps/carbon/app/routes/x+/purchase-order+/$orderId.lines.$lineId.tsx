@@ -1,12 +1,10 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { redirect } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { validationError } from "remix-validated-form";
-import { useRouteData } from "~/hooks";
 import type { PurchaseOrderLineType } from "~/modules/purchasing";
-import { getPurchaseOrderLine } from "~/modules/purchasing";
 import {
+  getPurchaseOrderLine,
   PurchaseOrderLineForm,
   purchaseOrderLineValidator,
   upsertPurchaseOrderLine,
@@ -92,10 +90,6 @@ export async function action({ request, params }: ActionArgs) {
 export default function EditPurchaseOrderLineRoute() {
   const { purchaseOrderLine } = useLoaderData<typeof loader>();
 
-  const sharedPurchaseOrdersData = useRouteData<{
-    purchaseOrderLineTypes: PurchaseOrderLineType[];
-  }>("/x/purchase-order");
-
   const initialValues = {
     id: purchaseOrderLine?.id ?? undefined,
     purchaseOrderId: purchaseOrderLine?.purchaseOrderId ?? "",
@@ -103,6 +97,7 @@ export default function EditPurchaseOrderLineRoute() {
       purchaseOrderLine?.purchaseOrderLineType ??
       ("Part" as PurchaseOrderLineType),
     partId: purchaseOrderLine?.partId ?? "",
+    description: purchaseOrderLine?.description ?? "",
     purchaseQuantity: purchaseOrderLine?.purchaseQuantity ?? 1,
     unitPrice: purchaseOrderLine?.unitPrice ?? 0,
     setupPrice: purchaseOrderLine?.setupPrice ?? 0,
@@ -110,12 +105,5 @@ export default function EditPurchaseOrderLineRoute() {
     shelfId: purchaseOrderLine?.shelfId ?? "",
   };
 
-  return (
-    <PurchaseOrderLineForm
-      initialValues={initialValues}
-      purchaseOrderLineTypes={
-        sharedPurchaseOrdersData?.purchaseOrderLineTypes ?? []
-      }
-    />
-  );
+  return <PurchaseOrderLineForm initialValues={initialValues} />;
 }

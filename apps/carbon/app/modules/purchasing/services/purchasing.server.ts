@@ -3,9 +3,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseServiceRole } from "~/lib/supabase";
 import { getEmployeeJob } from "~/modules/resources";
 import type { TypeOfValidator } from "~/types/validators";
-import { sanitize } from "~/utils/supabase";
 import type { GenericQueryFilters } from "~/utils/query";
 import { setGenericQueryFilters } from "~/utils/query";
+import { sanitize } from "~/utils/supabase";
 import type {
   purchaseOrderDeliveryValidator,
   purchaseOrderLineValidator,
@@ -27,7 +27,8 @@ export async function closePurchaseOrder(
       closedBy: userId,
     })
     .eq("id", purchaseOrderId)
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function deletePurchaseOrder(
@@ -39,6 +40,16 @@ export async function deletePurchaseOrder(
     client.from("purchaseOrderDelivery").delete().eq("id", purchaseOrderId),
     client.from("purchaseOrderPayment").delete().eq("id", purchaseOrderId),
   ]);
+}
+
+export async function deletePurchaseOrderLine(
+  client: SupabaseClient<Database>,
+  purchaseOrderLineId: string
+) {
+  return client
+    .from("purchaseOrderLine")
+    .delete()
+    .eq("id", purchaseOrderLineId);
 }
 
 export async function deleteSupplierContact(
@@ -125,7 +136,7 @@ export async function getPurchaseOrders(
     query = query.eq("supplierId", args.supplierId);
   }
 
-  query = setGenericQueryFilters(query, args, "purchaseOrderId");
+  query = setGenericQueryFilters(query, args, "purchaseOrderId", false);
   return query;
 }
 
@@ -151,17 +162,6 @@ export async function getPurchaseOrderPayment(
     .single();
 }
 
-export function getPurchaseOrderApprovalStatuses(): Database["public"]["Enums"]["purchaseOrderApprovalStatus"][] {
-  return [
-    "Draft",
-    "In Review",
-    "In External Review",
-    "Approved",
-    "Rejected",
-    "Confirmed",
-  ];
-}
-
 export async function getPurchaseOrderLines(
   client: SupabaseClient<Database>,
   purchaseOrderId: string
@@ -183,18 +183,10 @@ export async function getPurchaseOrderLine(
     .single();
 }
 
-export function getPurchaseOrderLineTypes(): Database["public"]["Enums"]["purchaseOrderLineType"][] {
-  return ["Part", "G/L Account", "Fixed Asset", "Comment"];
-}
-
 export async function getPurchaseOrderSuppliers(
   client: SupabaseClient<Database>
 ) {
   return client.from("purchase_order_suppliers_view").select("id, name");
-}
-
-export function getPurchaseOrderTypes(): Database["public"]["Enums"]["purchaseOrderType"][] {
-  return ["Draft", "Purchase", "Return"];
 }
 
 export async function getSupplier(
@@ -324,9 +316,16 @@ export async function getSupplierTypes(
 
 export async function insertSupplier(
   client: SupabaseClient<Database>,
-  supplier: TypeOfValidator<typeof supplierValidator> & {}
+  supplier:
+    | (Omit<TypeOfValidator<typeof supplierValidator>, "id"> & {
+        createdBy: string;
+      })
+    | (Omit<TypeOfValidator<typeof supplierValidator>, "id"> & {
+        id: string;
+        updatedBy: string;
+      })
 ) {
-  return client.from("supplier").insert([supplier]).select("id");
+  return client.from("supplier").insert([supplier]).select("id").single();
 }
 
 export async function insertSupplierContact(
@@ -357,12 +356,13 @@ export async function insertSupplierContact(
   const insertContact = await getSupabaseServiceRole()
     .from("contact")
     .insert([supplierContact.contact])
-    .select("id");
+    .select("id")
+    .single();
   if (insertContact.error) {
     return insertContact;
   }
 
-  const contactId = insertContact.data[0].id;
+  const contactId = insertContact.data?.id;
   if (!contactId) {
     return { data: null, error: new Error("Contact ID not found") };
   }
@@ -375,7 +375,8 @@ export async function insertSupplierContact(
         contactId,
       },
     ])
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function insertSupplierLocation(
@@ -395,12 +396,13 @@ export async function insertSupplierLocation(
   const insertAddress = await client
     .from("address")
     .insert([supplierLocation.address])
-    .select("id");
+    .select("id")
+    .single();
   if (insertAddress.error) {
     return insertAddress;
   }
 
-  const addressId = insertAddress.data[0].id;
+  const addressId = insertAddress.data?.id;
   if (!addressId) {
     return { data: null, error: new Error("Address ID not found") };
   }
@@ -413,7 +415,8 @@ export async function insertSupplierLocation(
         addressId,
       },
     ])
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function updateSupplier(
@@ -427,7 +430,8 @@ export async function updateSupplier(
     .from("supplier")
     .update(sanitize(supplier))
     .eq("id", supplier.id)
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function updateSupplierContact(
@@ -458,7 +462,8 @@ export async function updateSupplierContact(
     .from("contact")
     .update(sanitize(supplierContact.contact))
     .eq("id", supplierContact.contactId)
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function updateSupplierLocation(
@@ -479,7 +484,8 @@ export async function updateSupplierLocation(
     .from("address")
     .update(sanitize(supplierLocation.address))
     .eq("id", supplierLocation.addressId)
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function upsertPurchaseOrder(
@@ -581,12 +587,14 @@ export async function upsertPurchaseOrderDelivery(
       .from("purchaseOrderDelivery")
       .update(sanitize(purchaseOrderDelivery))
       .eq("id", purchaseOrderDelivery.id)
-      .select("id");
+      .select("id")
+      .single();
   }
   return client
     .from("purchaseOrderDelivery")
     .insert([purchaseOrderDelivery])
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function upsertPurchaseOrderLine(
@@ -605,12 +613,14 @@ export async function upsertPurchaseOrderLine(
       .from("purchaseOrderLine")
       .update(sanitize(purchaseOrderLine))
       .eq("id", purchaseOrderLine.id)
-      .select("id");
+      .select("id")
+      .single();
   }
   return client
     .from("purchaseOrderLine")
     .insert([purchaseOrderLine])
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function upsertPurchaseOrderPayment(
@@ -629,17 +639,23 @@ export async function upsertPurchaseOrderPayment(
       .from("purchaseOrderPayment")
       .update(sanitize(purchaseOrderPayment))
       .eq("id", purchaseOrderPayment.id)
-      .select("id");
+      .select("id")
+      .single();
   }
   return client
     .from("purchaseOrderPayment")
     .insert([purchaseOrderPayment])
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function upsertSupplierType(
   client: SupabaseClient<Database>,
   supplierType: { id?: string; name: string; color: string | null }
 ) {
-  return client.from("supplierType").upsert([supplierType]).select("id");
+  return client
+    .from("supplierType")
+    .upsert([supplierType])
+    .select("id")
+    .single();
 }

@@ -99,9 +99,15 @@ export async function getPartGroupsList(
 
 export async function getPartInventory(
   client: SupabaseClient<Database>,
-  id: string
+  partId: string,
+  locationId: string
 ) {
-  return client.from("partInventory").select("*").eq("partId", id).single();
+  return client
+    .from("partInventory")
+    .select("*")
+    .eq("partId", partId)
+    .eq("locationId", locationId)
+    .maybeSingle();
 }
 
 export async function getPartManufacturing(
@@ -113,9 +119,15 @@ export async function getPartManufacturing(
 
 export async function getPartPlanning(
   client: SupabaseClient<Database>,
-  id: string
+  partId: string,
+  locationId: string
 ) {
-  return client.from("partPlanning").select("*").eq("partId", id).single();
+  return client
+    .from("partPlanning")
+    .select("*")
+    .eq("partId", partId)
+    .eq("locationId", locationId)
+    .maybeSingle();
 }
 
 export async function getPartPurchasing(
@@ -235,8 +247,15 @@ export function getPartCostingMethods(): Database["public"]["Enums"]["partCostin
   return ["Standard", "Average", "FIFO", "LIFO"];
 }
 
-export async function getShelvesList(client: SupabaseClient<Database>) {
-  return client.from("shelf").select("id").eq("active", true);
+export async function getShelvesList(
+  client: SupabaseClient<Database>,
+  locationId: string
+) {
+  return client
+    .from("shelf")
+    .select("id")
+    .eq("active", true)
+    .eq("locationId", locationId);
 }
 
 export async function getUnitOfMeasure(
@@ -273,13 +292,19 @@ export async function getUnitOfMeasuresList(client: SupabaseClient<Database>) {
 export async function insertShelf(
   client: SupabaseClient<Database>,
   shelfId: string,
+  locationId: string,
   userId: string
 ) {
-  const shelfLookup = await client.from("shelf").select("id").eq("id", shelfId);
+  const shelfLookup = await client
+    .from("shelf")
+    .select("id")
+    .eq("id", shelfId)
+    .eq("locationId", locationId)
+    .maybeSingle();
   if (shelfLookup.error) return shelfLookup;
 
   // the shelf is inactive, so we can just reactivate it
-  if (shelfLookup.data?.length) {
+  if (shelfLookup.data) {
     return client.from("shelf").update({ active: true }).eq("id", shelfId);
   }
 
@@ -289,10 +314,12 @@ export async function insertShelf(
     .insert([
       {
         id: shelfId,
+        locationId,
         createdBy: userId,
       },
     ])
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function upsertPart(
@@ -302,7 +329,7 @@ export async function upsertPart(
     | (TypeOfValidator<typeof partValidator> & { updatedBy: string })
 ) {
   if ("createdBy" in part) {
-    return client.from("part").insert(part).select("id");
+    return client.from("part").insert(part).select("id").single();
   }
   return client.from("part").update(sanitize(part)).eq("id", part.id);
 }
@@ -319,17 +346,25 @@ export async function upsertPartCost(
 
 export async function upsertPartInventory(
   client: SupabaseClient<Database>,
-  partInventory: Omit<
-    TypeOfValidator<typeof partInventoryValidator>,
-    "hasNewShelf"
-  > & {
-    updatedBy: string;
-  }
+  partInventory:
+    | {
+        partId: string;
+        locationId: string;
+        createdBy: string;
+      }
+    | (Omit<TypeOfValidator<typeof partInventoryValidator>, "hasNewShelf"> & {
+        updatedBy: string;
+      })
 ) {
+  if ("createdBy" in partInventory) {
+    return client.from("partInventory").insert(partInventory);
+  }
+
   return client
     .from("partInventory")
     .update(sanitize(partInventory))
-    .eq("partId", partInventory.partId);
+    .eq("partId", partInventory.partId)
+    .eq("locationId", partInventory.locationId);
 }
 
 export async function upsertPartManufacturing(
@@ -346,14 +381,24 @@ export async function upsertPartManufacturing(
 
 export async function upsertPartPlanning(
   client: SupabaseClient<Database>,
-  partPlanning: TypeOfValidator<typeof partPlanningValidator> & {
-    updatedBy: string;
-  }
+  partPlanning:
+    | {
+        partId: string;
+        locationId: string;
+        createdBy: string;
+      }
+    | (TypeOfValidator<typeof partPlanningValidator> & {
+        updatedBy: string;
+      })
 ) {
+  if ("createdBy" in partPlanning) {
+    return client.from("partPlanning").insert(partPlanning);
+  }
   return client
     .from("partPlanning")
     .update(sanitize(partPlanning))
-    .eq("partId", partPlanning.partId);
+    .eq("partId", partPlanning.partId)
+    .eq("locationId", partPlanning.locationId);
 }
 
 export async function upsertPartPurchasing(
@@ -390,7 +435,7 @@ export async function upsertPartGroup(
       }
 ) {
   if ("createdBy" in partGroup) {
-    return client.from("partGroup").insert([partGroup]).select("id");
+    return client.from("partGroup").insert([partGroup]).select("id").single();
   }
   return (
     client
@@ -399,6 +444,7 @@ export async function upsertPartGroup(
       // @ts-ignore
       .eq("id", partGroup.id)
       .select("id")
+      .single()
   );
 }
 
@@ -414,13 +460,18 @@ export async function upsertPartSupplier(
       })
 ) {
   if ("createdBy" in partSupplier) {
-    return client.from("partSupplier").insert([partSupplier]).select("id");
+    return client
+      .from("partSupplier")
+      .insert([partSupplier])
+      .select("id")
+      .single();
   }
   return client
     .from("partSupplier")
     .update(sanitize(partSupplier))
     .eq("id", partSupplier.id)
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function upsertPartUnitSalePrice(
@@ -446,8 +497,13 @@ export async function upsertUnitOfMeasure(
       .from("unitOfMeasure")
       .update(sanitize(unitOfMeasure))
       .eq("id", unitOfMeasure.id)
-      .select("id");
+      .select("id")
+      .single();
   }
 
-  return client.from("unitOfMeasure").insert([unitOfMeasure]).select("id");
+  return client
+    .from("unitOfMeasure")
+    .insert([unitOfMeasure])
+    .select("id")
+    .single();
 }

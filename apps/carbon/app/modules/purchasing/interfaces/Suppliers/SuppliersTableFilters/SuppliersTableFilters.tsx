@@ -47,13 +47,13 @@ const SuppliersTableFilters = ({
           param="name"
           size="sm"
           minW={180}
-          placeholder="Filter by name"
+          placeholder="Search"
         />
         {supplierTypeOptions.length > 0 && (
           <Select
             // @ts-ignore
             size="sm"
-            value={supplierTypeOptions.filter(
+            value={supplierTypeOptions.find(
               (type) => type.value === params.get("type")
             )}
             isClearable
@@ -71,7 +71,7 @@ const SuppliersTableFilters = ({
             // @ts-ignore
             size="sm"
             isClearable
-            value={supplierStatusOptions.filter(
+            value={supplierStatusOptions.find(
               (type) => type.value === params.get("status")
             )}
             options={supplierStatusOptions}

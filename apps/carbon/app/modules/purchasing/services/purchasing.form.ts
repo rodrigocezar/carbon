@@ -3,36 +3,40 @@ import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { address, contact } from "~/types/validators";
 
+export const purchaseOrderLineType = [
+  "Part",
+  "G/L Account",
+  "Fixed Asset",
+  "Comment",
+] as const;
+
+export const purchaseOrderTypeType = ["Draft", "Purchase", "Return"] as const;
+
+export const purchaseOrderStatusType = [
+  "Open",
+  "In Review",
+  "In External Review",
+  "Approved",
+  "Rejected",
+  "Released",
+  "Closed",
+] as const;
+
 export const purchaseOrderValidator = withZod(
   z.object({
     id: zfd.text(z.string().optional()),
     purchaseOrderId: zfd.text(z.string().optional()),
     orderDate: z.string().min(1, { message: "Order Date is required" }),
-    type: z.enum(["Draft", "Purchase", "Return"], {
+    type: z.enum(purchaseOrderTypeType, {
       errorMap: (issue, ctx) => ({
         message: "Type is required",
       }),
     }),
-    status: z.enum(
-      [
-        "Draft",
-        "In Review",
-        "In External Review",
-        "Approved",
-        "Rejected",
-        "Confirmed",
-      ],
-      {
-        errorMap: (issue, ctx) => ({
-          message: "Status is required",
-        }),
-      }
-    ),
+    status: z.enum(purchaseOrderStatusType).optional(),
     notes: zfd.text(z.string().optional()),
     supplierId: z.string().min(36, { message: "Supplier is required" }),
     supplierContactId: zfd.text(z.string().optional()),
     supplierReference: zfd.text(z.string().optional()),
-    closed: zfd.checkbox(),
   })
 );
 
@@ -83,14 +87,11 @@ export const purchaseOrderLineValidator = withZod(
     .object({
       id: zfd.text(z.string().optional()),
       purchaseOrderId: z.string().min(20, { message: "Order is required" }),
-      purchaseOrderLineType: z.enum(
-        ["Comment", "Part", "G/L Account", "Fixed Asset"],
-        {
-          errorMap: (issue, ctx) => ({
-            message: "Type is required",
-          }),
-        }
-      ),
+      purchaseOrderLineType: z.enum(purchaseOrderLineType, {
+        errorMap: (issue, ctx) => ({
+          message: "Type is required",
+        }),
+      }),
       partId: zfd.text(z.string().optional()),
       accountNumber: zfd.text(z.string().optional()),
       assetId: zfd.text(z.string().optional()),
@@ -99,6 +100,7 @@ export const purchaseOrderLineValidator = withZod(
       unitOfMeasureCode: zfd.text(z.string().optional()),
       unitPrice: zfd.numeric(z.number().optional()),
       setupPrice: zfd.numeric(z.number().optional()),
+      locationId: zfd.text(z.string().optional()),
       shelfId: zfd.text(z.string().optional()),
     })
     .refine(

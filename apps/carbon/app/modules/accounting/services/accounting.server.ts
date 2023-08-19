@@ -136,17 +136,14 @@ export async function getAccounts(
 
 export async function getAccountsList(
   client: SupabaseClient<Database>,
-  type: string | null
+  type = "Posting"
 ) {
-  let query = client.from("account").select("number, name").eq("active", true);
-
-  if (type) {
-    query = query.eq("type", type);
-  }
-
-  query = query.order("name", { ascending: true });
-
-  return query;
+  return client
+    .from("account")
+    .select("number, name")
+    .eq("active", true)
+    .eq("type", type)
+    .order("name", { ascending: true });
 }
 
 export async function getAccountCategories(
@@ -420,42 +417,50 @@ export async function insertAccountEntries(
   client: SupabaseClient<Database>,
   accountEntries: TypeOfValidator<typeof accountLedgerValidator>[]
 ) {
-  return client.from("accountLedger").insert(accountEntries).select("id");
+  return client
+    .from("accountLedger")
+    .insert(accountEntries)
+    .select("id")
+    .single();
 }
 
 export async function insertAccountLedger(
   client: SupabaseClient<Database>,
   accountEntry: TypeOfValidator<typeof accountLedgerValidator>
 ) {
-  return client.from("accountLedger").insert([accountEntry]).select("id");
+  return client
+    .from("accountLedger")
+    .insert([accountEntry])
+    .select("id")
+    .single();
 }
 
 export async function insertPartEntries(
   client: SupabaseClient<Database>,
   partEntries: TypeOfValidator<typeof partLedgerValidator>[]
 ) {
-  return client.from("partLedger").insert(partEntries).select("id");
+  return client.from("partLedger").insert(partEntries).select("id").single();
 }
 
 export async function insertPartLedger(
   client: SupabaseClient<Database>,
   partEntry: TypeOfValidator<typeof partLedgerValidator>
 ) {
-  return client.from("partLedger").insert([partEntry]).select("id");
+  return client.from("partLedger").insert([partEntry]).select("id").single();
 }
 
 export async function insertValueEntries(
   client: SupabaseClient<Database>,
   valueEntries: TypeOfValidator<typeof valueLedgerValidator>[]
 ) {
-  return client.from("valueLedger").insert(valueEntries).select("id");
+  return client.from("valueLedger").insert(valueEntries).select("id").single();
 }
 
 export async function insertValueLedger(
   client: SupabaseClient<Database>,
   valueEntry: TypeOfValidator<typeof valueLedgerValidator>
 ) {
-  return client.from("valueLedger").insert([valueEntry]).select("id");
+  return client.from("valueLedger").insert([valueEntry]).select("id").single();
 }
 
 export async function upsertAccount(
@@ -470,13 +475,14 @@ export async function upsertAccount(
       })
 ) {
   if ("createdBy" in account) {
-    return client.from("account").insert([account]).select("id");
+    return client.from("account").insert([account]).select("id").single();
   }
   return client
     .from("account")
     .update(sanitize(account))
     .eq("id", account.id)
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function upsertAccountCategory(
@@ -494,13 +500,15 @@ export async function upsertAccountCategory(
     return client
       .from("accountCategory")
       .insert([accountCategory])
-      .select("id");
+      .select("id")
+      .single();
   }
   return client
     .from("accountCategory")
     .update(sanitize(accountCategory))
     .eq("id", accountCategory.id)
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function upsertAccountSubcategory(
@@ -518,13 +526,15 @@ export async function upsertAccountSubcategory(
     return client
       .from("accountSubcategory")
       .insert([accountSubcategory])
-      .select("id");
+      .select("id")
+      .single();
   }
   return client
     .from("accountSubcategory")
     .update(sanitize(accountSubcategory))
     .eq("id", accountSubcategory.id)
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function upsertCurrency(
@@ -543,13 +553,14 @@ export async function upsertCurrency(
   }
 
   if ("createdBy" in currency) {
-    return client.from("currency").insert([currency]).select("id");
+    return client.from("currency").insert([currency]).select("id").single();
   }
   return client
     .from("currency")
     .update(sanitize(currency))
     .eq("id", currency.id)
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function upsertPaymentTerm(
@@ -564,11 +575,16 @@ export async function upsertPaymentTerm(
       })
 ) {
   if ("createdBy" in paymentTerm) {
-    return client.from("paymentTerm").insert([paymentTerm]).select("id");
+    return client
+      .from("paymentTerm")
+      .insert([paymentTerm])
+      .select("id")
+      .single();
   }
   return client
     .from("paymentTerm")
     .update(sanitize(paymentTerm))
     .eq("id", paymentTerm.id)
-    .select("id");
+    .select("id")
+    .single();
 }

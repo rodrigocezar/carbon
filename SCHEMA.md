@@ -2922,7 +2922,7 @@ CREATE VIEW "contractors_view" AS
       ON s.id = sc."supplierId"
     INNER JOIN "contact" c 
       ON c.id = sc."contactId"
-    INNER JOIN "contractorAbility" pa
+    LEFT JOIN "contractorAbility" pa
       ON pa."contractorId" = p.id
   WHERE p."active" = true
   GROUP BY p.id, p.active, p."hoursPerWeek", s.id, c.id, s.name, c."firstName", c."lastName", c."email"
@@ -3433,7 +3433,7 @@ CREATE TABLE "part" (
 
   CONSTRAINT "part_pkey" PRIMARY KEY ("id"),
   CONSTRAINT "part_unitOfMeasureCode_fkey" FOREIGN KEY ("unitOfMeasureCode") REFERENCES "unitOfMeasure"("code") ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT "part_partGroupId_fkey" FOREIGN KEY ("partGroupId") REFERENCES "partGroup"("id") ON DELETE SET NULL,
+  CONSTRAINT "part_partGroupId_fkey" FOREIGN KEY ("partGroupId") REFERENCES "partGroup"("id"),
   CONSTRAINT "part_approvedBy_fkey" FOREIGN KEY ("approvedBy") REFERENCES "user"("id"),
   CONSTRAINT "part_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id"),
   CONSTRAINT "part_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id")
@@ -3494,12 +3494,6 @@ BEGIN
   VALUES (new.id, 'Standard', new."createdBy");
 
   INSERT INTO public."partReplenishment"("partId", "createdBy")
-  VALUES (new.id, new."createdBy");
-
-  INSERT INTO public."partPlanning"("partId", "createdBy")
-  VALUES (new.id, new."createdBy");
-
-  INSERT INTO public."partInventory"("partId", "createdBy")
   VALUES (new.id, new."createdBy");
 
   INSERT INTO public."partUnitSalePrice"("partId", "currencyCode", "createdBy")
@@ -3875,7 +3869,7 @@ CREATE TABLE "warehouse" (
 
 CREATE TABLE "shelf" (
   "id" TEXT NOT NULL,
-  "locationId" TEXT,
+  "locationId" TEXT NOT NULL,
   "warehouseId" TEXT,
   "active" BOOLEAN NOT NULL DEFAULT true,
   "createdBy" TEXT NOT NULL,
@@ -3883,14 +3877,14 @@ CREATE TABLE "shelf" (
   "updatedBy" TEXT,
   "updatedAt" TIMESTAMP WITH TIME ZONE,
 
-  CONSTRAINT "shelf_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "shelf_pkey" PRIMARY KEY ("id", "locationId"),
   CONSTRAINT "shelf_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "location"("id") ON DELETE CASCADE,
   CONSTRAINT "shelf_warehouseId_fkey" FOREIGN KEY ("warehouseId") REFERENCES "warehouse"("id") ON DELETE CASCADE,
   CONSTRAINT "shelf_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id"),
   CONSTRAINT "shelf_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id")
 );
 
-CREATE INDEX "shelf_locationId_index" ON "shelf" ("locationId");
+CREATE INDEX "shelf_id_locationId_index" ON "shelf" ("id", "locationId");
 CREATE INDEX "shelf_warehouseId_index" ON "shelf" ("warehouseId");
 
 ALTER TABLE "shelf" ENABLE ROW LEVEL SECURITY;
@@ -3926,6 +3920,7 @@ CREATE POLICY "Employees with parts_delete can delete shelves" ON "shelf"
 
 CREATE TABLE "partPlanning" (
   "partId" TEXT NOT NULL,
+  "locationId" TEXT NOT NULL,
   "reorderingPolicy" "partReorderingPolicy" NOT NULL DEFAULT 'Demand-Based Reorder',
   "critical" BOOLEAN NOT NULL DEFAULT false,
   "safetyStockQuantity" INTEGER NOT NULL DEFAULT 0,
@@ -3936,8 +3931,6 @@ CREATE TABLE "partPlanning" (
   "reorderPoint" INTEGER NOT NULL DEFAULT 0,
   "reorderQuantity" INTEGER NOT NULL DEFAULT 0,
   "reorderMaximumInventory" INTEGER NOT NULL DEFAULT 0,
-  "reorderOverflowLevel" INTEGER NOT NULL DEFAULT 0,
-  "reorderTimeBucket" INTEGER NOT NULL DEFAULT 5,
   "minimumOrderQuantity" INTEGER NOT NULL DEFAULT 0,
   "maximumOrderQuantity" INTEGER NOT NULL DEFAULT 0,
   "orderMultiple" INTEGER NOT NULL DEFAULT 1,
@@ -3946,17 +3939,28 @@ CREATE TABLE "partPlanning" (
   "updatedBy" TEXT,
   "updatedAt" TIMESTAMP WITH TIME ZONE,
 
+
+  CONSTRAINT "partPlanning_partId_locationId_key" UNIQUE ("partId", "locationId"),
   CONSTRAINT "partPlanning_partId_fkey" FOREIGN KEY ("partId") REFERENCES "part"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "partPlanning_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "location"("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "partPlanning_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id"),
   CONSTRAINT "partPlanning_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id")
 );
 
-CREATE INDEX "partPlanning_partId_index" ON "partPlanning" ("partId");
+CREATE INDEX "partPlanning_partId_locationId_index" ON "partPlanning" ("partId", "locationId");
 ALTER TABLE "partPlanning" ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Employees with part_view can view part planning" ON "partPlanning"
   FOR SELECT
   USING (
+    coalesce(get_my_claim('parts_view')::boolean,false) 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+-- these are records are created lazily when a user attempts to view them
+CREATE POLICY "Employees with part_view can insert part planning" ON "partPlanning"
+  FOR INSERT
+  WITH CHECK (
     coalesce(get_my_claim('parts_view')::boolean,false) 
     AND (get_my_claim('role'::text)) = '"employee"'::jsonb
   );
@@ -3971,30 +3975,37 @@ CREATE POLICY "Employees with parts_update can update part planning" ON "partPla
 
 CREATE TABLE "partInventory" (
   "partId" TEXT NOT NULL,
-  "shelfId" TEXT,
-  "stockoutWarning" BOOLEAN NOT NULL DEFAULT true,
-  "unitVolume" NUMERIC(15,5) NOT NULL DEFAULT 0,
-  "unitWeight" NUMERIC(15,5) NOT NULL DEFAULT 0,
+  "locationId" TEXT NOT NULL,
+  "defaultShelfId" TEXT,
   "createdBy" TEXT NOT NULL,
   "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   "updatedBy" TEXT,
   "updatedAt" TIMESTAMP WITH TIME ZONE,
 
-  CONSTRAINT "partInventory_partId_shelfId_key" UNIQUE ("partId", "shelfId"),
+  CONSTRAINT "partInventory_partId_locationId_key" UNIQUE ("partId", "locationId"),
   CONSTRAINT "partInventory_partId_fkey" FOREIGN KEY ("partId") REFERENCES "part"("id") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "partInventory_shelfId_fkey" FOREIGN KEY ("shelfId") REFERENCES "shelf"("id") ON DELETE SET NULL,
+  CONSTRAINT "partInventory_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "location"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "partInventory_shelfId_fkey" FOREIGN KEY ("defaultShelfId", "locationId") REFERENCES "shelf"("id", "locationId") ON DELETE SET NULL,
   CONSTRAINT "partInventory_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id"),
   CONSTRAINT "partInventory_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id")
 );
 
-CREATE INDEX "partInventory_partId_index" ON "partInventory" ("partId");
-CREATE INDEX "partInventory_shelfId_index" ON "partInventory" ("shelfId");
+CREATE INDEX "partInventory_partId_locationId_index" ON "partInventory" ("partId", "locationId");
+CREATE INDEX "partInventory_shelfId_index" ON "partInventory" ("defaultShelfId");
 
 ALTER TABLE "partInventory" ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Employees with part_view can view part planning" ON "partInventory"
   FOR SELECT
   USING (
+    coalesce(get_my_claim('parts_view')::boolean,false) 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+-- these are records are created lazily when a user attempts to view them
+CREATE POLICY "Employees with part_view can insert part planning" ON "partInventory"
+  FOR INSERT
+  WITH CHECK (
     coalesce(get_my_claim('parts_view')::boolean,false) 
     AND (get_my_claim('role'::text)) = '"employee"'::jsonb
   );
@@ -4454,26 +4465,26 @@ CREATE TYPE "purchaseOrderType" AS ENUM (
   'Return'
 );
 
-CREATE TYPE "purchaseOrderApprovalStatus" AS ENUM (
-  'Draft',
+CREATE TYPE "purchaseOrderStatus" AS ENUM (
+  'Open',
   'In Review',
   'In External Review',
   'Approved',
   'Rejected',
-  'Confirmed'
+  'Released',
+  'Closed'
 );
 
 CREATE TABLE "purchaseOrder" (
   "id" TEXT NOT NULL DEFAULT xid(),
   "purchaseOrderId" TEXT NOT NULL,
   "type" "purchaseOrderType" NOT NULL,
-  "status" "purchaseOrderApprovalStatus" NOT NULL,
+  "status" "purchaseOrderStatus" NOT NULL DEFAULT 'Open',
   "orderDate" DATE NOT NULL DEFAULT CURRENT_DATE,
   "notes" TEXT,
   "supplierId" TEXT NOT NULL,
   "supplierContactId" TEXT,
   "supplierReference" TEXT,
-  "closed" BOOLEAN NOT NULL DEFAULT FALSE,
   "closedAt" DATE,
   "closedBy" TEXT,
   "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -4493,6 +4504,7 @@ CREATE TABLE "purchaseOrder" (
 CREATE INDEX "purchaseOrder_purchaseOrderId_idx" ON "purchaseOrder" ("purchaseOrderId");
 CREATE INDEX "purchaseOrder_supplierId_idx" ON "purchaseOrder" ("supplierId");
 CREATE INDEX "purchaseOrder_supplierContactId_idx" ON "purchaseOrder" ("supplierContactId");
+CREATE INDEX "purchaseOrder_status_idx" ON "purchaseOrder" ("status");
 
 CREATE TYPE "purchaseOrderLineType" AS ENUM (
   'Comment',
@@ -4510,8 +4522,13 @@ CREATE TABLE "purchaseOrderLine" (
   "assetId" TEXT,
   "description" TEXT,
   "purchaseQuantity" NUMERIC(9,2) DEFAULT 0,
+  "quantityToReceive" NUMERIC(9,2) DEFAULT 0,
+  "quantityReceived" NUMERIC(9,2) DEFAULT 0,
+  "quantityToInvoice" NUMERIC(9,2) DEFAULT 0,
+  "quantityInvoiced" NUMERIC(9,2) DEFAULT 0,
   "unitPrice" NUMERIC(9,2),
   "unitOfMeasureCode" TEXT,
+  "locationId" TEXT,
   "shelfId" TEXT,
   "setupPrice" NUMERIC(9,2),
   "receivedComplete" BOOLEAN NOT NULL DEFAULT FALSE,
@@ -4556,7 +4573,7 @@ CREATE TABLE "purchaseOrderLine" (
   CONSTRAINT "purchaseOrderLine_partId_fkey" FOREIGN KEY ("partId") REFERENCES "part" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "purchaseOrderLine_accountNumber_fkey" FOREIGN KEY ("accountNumber") REFERENCES "account" ("number") ON DELETE CASCADE ON UPDATE CASCADE,
   -- TODO: Add assetId foreign key
-  CONSTRAINT "purchaseOrderLine_shelfId_fkey" FOREIGN KEY ("shelfId") REFERENCES "shelf" ("id") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderLine_shelfId_fkey" FOREIGN KEY ("shelfId", "locationId") REFERENCES "shelf" ("id", "locationId") ON DELETE CASCADE,
   CONSTRAINT "purchaseOrderLine_unitOfMeasureCode_fkey" FOREIGN KEY ("unitOfMeasureCode") REFERENCES "unitOfMeasure" ("code") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "purchaseOrderLine_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE CASCADE,
   CONSTRAINT "purchaseOrderLine_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE CASCADE
@@ -4681,6 +4698,7 @@ CREATE VIEW "purchase_order_view" AS
     pd."receiptPromisedDate",
     pd."dropShipment",
     pol."lineCount",
+    l."id" AS "locationId",
     l."name" AS "locationName",
     s."name" AS "supplierName",
     u."avatarUrl" AS "createdByAvatar",
@@ -4690,7 +4708,6 @@ CREATE VIEW "purchase_order_view" AS
     u2."avatarUrl" AS "updatedByAvatar",
     u2."fullName" AS "updatedByFullName",
     p."updatedAt",
-    p."closed",
     p."closedAt",
     u3."avatarUrl" AS "closedByAvatar",
     u3."fullName" AS "closedByFullName",
@@ -4753,7 +4770,7 @@ CREATE TABLE "sequence" (
 );
 
 INSERT INTO "sequence" ("table", "name", "prefix", "suffix", "next", "size", "step")
-VALUES ('purchaseOrder', 'Purchase Order', 'PO', NULL, 0, 5, 1);
+VALUES ('purchaseOrder', 'Purchase Order', 'PO', NULL, 0, 6, 1);
 
 
 ```
@@ -5410,7 +5427,7 @@ CREATE TABLE "partLedger" (
   CONSTRAINT "partLedger_pkey" PRIMARY KEY ("id"),
   CONSTRAINT "partLedger_partId_fkey" FOREIGN KEY ("partId") REFERENCES "part"("id") ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT "partLedger_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "location"("id") ON UPDATE CASCADE ON DELETE SET NULL,
-  CONSTRAINT "partLedger_shelfId_fkey" FOREIGN KEY ("shelfId") REFERENCES "shelf"("id") ON UPDATE CASCADE ON DELETE SET NULL
+  CONSTRAINT "partLedger_shelfId_fkey" FOREIGN KEY ("shelfId", "locationId") REFERENCES "shelf"("id", "locationId") ON UPDATE CASCADE ON DELETE SET NULL
 );
 
 ALTER TABLE "partLedger" ENABLE ROW LEVEL SECURITY;
@@ -5454,5 +5471,106 @@ $$;
 
 
 
+```
+
+
+
+## `receipts`
+
+```sql
+CREATE TYPE "receiptSourceDocument" AS ENUM (
+  'Sales Order',
+  'Sales Return Order',
+  'Purchase Order',
+  'Purchase Return Order',
+  'Inbound Transfer',
+  'Outbound Transfer',
+  'Manufacturing Consumption',
+  'Manufacturing Output'
+);
+
+CREATE TABLE "receipt" (
+  "id" TEXT NOT NULL DEFAULT xid(),
+  "receiptId" TEXT NOT NULL,
+  "locationId" TEXT,
+  "sourceDocument" "receiptSourceDocument",
+  "sourceDocumentId" TEXT,
+  "sourceDocumentReadableId" TEXT,
+  "supplierId" TEXT,
+  "postingDate" DATE,
+  "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  "createdBy" TEXT NOT NULL,
+  "updatedAt" TIMESTAMP WITH TIME ZONE,
+  "updatedBy" TEXT,
+
+  CONSTRAINT "receipt_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "receipt_receiptId_key" UNIQUE ("receiptId"),
+  CONSTRAINT "receipt_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "location" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT "receipt_supplierId_fkey" FOREIGN KEY ("supplierId") REFERENCES "supplier" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "receipt_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "receipt_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE INDEX "receipt_receiptId_idx" ON "receipt" ("receiptId");
+CREATE INDEX "receipt_locationId_idx" ON "receipt" ("locationId");
+CREATE INDEX "receipt_sourceDocumentId_idx" ON "receipt" ("sourceDocumentId");
+CREATE INDEX "receipt_supplierId_idx" ON "receipt" ("supplierId");
+
+INSERT INTO "sequence" ("table", "name", "prefix", "suffix", "next", "size", "step")
+VALUES ('receipt', 'Receipt', 'RE', NULL, 0, 6, 1);
+
+CREATE TABLE "receiptLine" (
+  "id" TEXT NOT NULL DEFAULT xid(),
+  "receiptId" TEXT NOT NULL,
+  "lineId" TEXT,
+  "partId" TEXT NOT NULL,
+  "orderQuantity" NUMERIC(18, 4) NOT NULL,
+  "outstandingQuantity" NUMERIC(18, 4) NOT NULL DEFAULT 0,
+  "receivedQuantity" NUMERIC(18, 4) NOT NULL DEFAULT 0,
+  "locationId" TEXT,
+  "shelfId" TEXT,
+  "unitOfMeasure" TEXT NOT NULL,
+  "unitPrice" NUMERIC(18, 4) NOT NULL,
+  "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  "createdBy" TEXT NOT NULL,
+  "updatedAt" TIMESTAMP WITH TIME ZONE,
+  "updatedBy" TEXT,
+
+  CONSTRAINT "receiptLine_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "receiptLine_receiptId_fkey" FOREIGN KEY ("receiptId") REFERENCES "receipt" ("receiptId") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "receiptLine_partId_fkey" FOREIGN KEY ("partId") REFERENCES "part" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "receiptLine_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "location" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT "receiptLine_shelfId_fkey" FOREIGN KEY ("shelfId", "locationId") REFERENCES "shelf" ("id", "locationId") ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT "receiptLine_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "receiptLine_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE INDEX "receiptLine_receiptId_idx" ON "receiptLine" ("receiptId");
+CREATE INDEX "receiptLine_lineId_idx" ON "receiptLine" ("lineId");
+CREATE INDEX "receiptLine_receiptId_lineId_idx" ON "receiptLine" ("receiptId", "lineId");
+
+CREATE VIEW "receipt_quantity_received_by_line" AS 
+  SELECT
+    r."sourceDocumentId",
+    l."lineId",
+    SUM(l."receivedQuantity") AS "receivedQuantity"
+  FROM "receipt" r 
+  INNER JOIN "receiptLine" l
+    ON l."receiptId" = r."receiptId"
+  GROUP BY r."sourceDocumentId", l."lineId";
+
+```
+
+
+
+## `defaults`
+
+```sql
+CREATE VIEW "user_default_view" AS
+  SELECT
+    u.id as "userId",
+    ej."locationId"
+  FROM "user" u
+  LEFT JOIN "employeeJob" ej ON ej.id = u.id;
 ```
 

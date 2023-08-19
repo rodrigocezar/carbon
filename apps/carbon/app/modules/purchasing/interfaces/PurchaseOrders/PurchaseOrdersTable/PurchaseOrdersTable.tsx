@@ -1,8 +1,16 @@
-import { HStack, Icon, MenuItem, Text, useDisclosure } from "@chakra-ui/react";
+import {
+  HStack,
+  Icon,
+  Link,
+  MenuItem,
+  Text,
+  useDisclosure,
+} from "@chakra-ui/react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { BsPencilSquare, BsStar, BsStarFill } from "react-icons/bs";
 import { IoMdTrash } from "react-icons/io";
+import { MdCallReceived } from "react-icons/md";
 import { Avatar, Table } from "~/components";
 import { ConfirmDelete } from "~/components/Modals";
 import { usePermissions } from "~/hooks";
@@ -26,7 +34,7 @@ const PurchaseOrdersTable = memo(
       setRows(data);
     }, [data]);
 
-    const { edit, favorite } = usePurchaseOrder();
+    const { edit, favorite, receive } = usePurchaseOrder();
 
     const [selectedPurchaseOrder, setSelectedPurchaseOrder] =
       useState<PurchaseOrder | null>(null);
@@ -65,7 +73,10 @@ const PurchaseOrdersTable = memo(
                 as={row.original.favorite ? BsStarFill : BsStar}
                 onClick={() => onFavorite(row.original)}
               />
-              <span>{row.original.purchaseOrderId}</span>
+
+              <Link onClick={() => edit(row.original)}>
+                {row.original.purchaseOrderId}
+              </Link>
             </HStack>
           ),
         },
@@ -119,7 +130,7 @@ const PurchaseOrdersTable = memo(
           cell: (item) => item.getValue(),
         },
       ];
-    }, [onFavorite]);
+    }, [edit, onFavorite]);
 
     const actions = useMemo(() => {
       return [
@@ -147,7 +158,7 @@ const PurchaseOrdersTable = memo(
             isDisabled={!permissions.can("view", "purchasing")}
             onClick={() => edit(row)}
           >
-            View
+            Edit
           </MenuItem>
           <MenuItem
             icon={<BsStar />}
@@ -156,6 +167,17 @@ const PurchaseOrdersTable = memo(
             }}
           >
             Favorite
+          </MenuItem>
+          <MenuItem
+            icon={<MdCallReceived />}
+            isDisabled={
+              !row.released || !permissions.can("update", "inventory")
+            }
+            onClick={() => {
+              receive(row);
+            }}
+          >
+            Receive
           </MenuItem>
           <MenuItem
             icon={<IoMdTrash />}
@@ -169,7 +191,7 @@ const PurchaseOrdersTable = memo(
           </MenuItem>
         </>
       );
-    }, [closePurchaseOrderModal, edit, onFavorite, permissions]);
+    }, [closePurchaseOrderModal, edit, onFavorite, permissions, receive]);
 
     return (
       <>

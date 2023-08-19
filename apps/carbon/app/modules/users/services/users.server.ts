@@ -86,8 +86,13 @@ export async function createCustomerAccount(
     return error(updateContact.error, "Failed to update customer contact");
   }
 
+  const generatedId = Array.isArray(insertUser.data)
+    ? insertUser.data[0].id
+    : // @ts-ignore
+      insertUser.data?.id!;
+
   const createCustomerAccount = await insertCustomerAccount(client, {
-    id: insertUser.data[0].id,
+    id: generatedId,
     customerId,
   });
 
@@ -538,7 +543,7 @@ export async function getUserClaims(
         );
       }
       // convert rawClaims to permissions
-      claims = makePermissionsFromClaims(rawClaims.data);
+      claims = makePermissionsFromClaims(rawClaims.data as Json[]);
 
       // store claims in redis
       await redis.set(getPermissionCacheKey(userId), JSON.stringify(claims));
@@ -562,6 +567,17 @@ export async function getUserGroups(
   return client.rpc("groups_for_user", { uid: userId });
 }
 
+export async function getUserDefaults(
+  client: SupabaseClient<Database>,
+  userId: string
+) {
+  return client
+    .from("user_default_view")
+    .select("*")
+    .eq("userId", userId)
+    .single();
+}
+
 export async function getUsers(client: SupabaseClient<Database>) {
   return client
     .from("user")
@@ -577,28 +593,36 @@ async function insertCustomerAccount(
     customerId: string;
   }
 ) {
-  return client.from("customerAccount").insert(customerAccount).select("id");
+  return client
+    .from("customerAccount")
+    .insert(customerAccount)
+    .select("id")
+    .single();
 }
 
 export async function insertEmployee(
   client: SupabaseClient<Database>,
   employee: EmployeeRow
 ) {
-  return client.from("employee").insert([employee]);
+  return client.from("employee").insert([employee]).select("id").single();
 }
 
 export async function insertEmployeeType(
   client: SupabaseClient<Database>,
   employeeType: { id?: string; name: string; color?: string }
 ) {
-  return client.from("employeeType").insert([employeeType]).select("id");
+  return client
+    .from("employeeType")
+    .insert([employeeType])
+    .select("id")
+    .single();
 }
 
 export async function insertGroup(
   client: SupabaseClient<Database>,
   group: { name: string }
 ) {
-  return client.from("group").insert(group).select("id");
+  return client.from("group").insert(group).select("id").single();
 }
 
 async function insertSupplierAccount(
@@ -608,7 +632,11 @@ async function insertSupplierAccount(
     supplierId: string;
   }
 ) {
-  return client.from("supplierAccount").insert(supplierAccount).select("id");
+  return client
+    .from("supplierAccount")
+    .insert(supplierAccount)
+    .select("id")
+    .single();
 }
 
 async function insertUser(
@@ -868,8 +896,8 @@ export async function updatePermissions(
     });
 
     const claimsUpdate = await setUserClaims(id, {
-      ...currentClaims,
-      ...newClaims,
+      ...(currentClaims as Record<string, boolean>),
+      ...(newClaims as Record<string, boolean>),
     });
     if (claimsUpdate.error)
       return error(claimsUpdate.error, "Failed to update claims");
@@ -886,7 +914,11 @@ export async function upsertEmployeeType(
   client: SupabaseClient<Database>,
   employeeType: { id?: string; name: string; color?: string }
 ) {
-  return client.from("employeeType").upsert([employeeType]).select("id");
+  return client
+    .from("employeeType")
+    .upsert([employeeType])
+    .select("id")
+    .single();
 }
 
 export async function upsertEmployeeTypePermissions(

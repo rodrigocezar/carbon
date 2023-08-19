@@ -177,7 +177,7 @@ export async function insertCustomer(
     createdBy: string;
   }
 ) {
-  return client.from("customer").insert([customer]).select("id");
+  return client.from("customer").insert([customer]).select("id").single();
 }
 
 export async function insertCustomerContact(
@@ -209,12 +209,13 @@ export async function insertCustomerContact(
   const insertContact = await getSupabaseServiceRole()
     .from("contact")
     .insert([customerContact.contact])
-    .select("id");
+    .select("id")
+    .single();
   if (insertContact.error) {
     return insertContact;
   }
 
-  const contactId = insertContact.data[0].id;
+  const contactId = insertContact.data?.id;
   if (!contactId) {
     return { data: null, error: new Error("Contact ID not found") };
   }
@@ -227,7 +228,8 @@ export async function insertCustomerContact(
         contactId,
       },
     ])
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function insertCustomerLocation(
@@ -247,12 +249,13 @@ export async function insertCustomerLocation(
   const insertAddress = await client
     .from("address")
     .insert([customerLocation.address])
-    .select("id");
+    .select("id")
+    .single();
   if (insertAddress.error) {
     return insertAddress;
   }
 
-  const addressId = insertAddress.data[0].id;
+  const addressId = insertAddress.data?.id;
   if (!addressId) {
     return { data: null, error: new Error("Address ID not found") };
   }
@@ -265,7 +268,8 @@ export async function insertCustomerLocation(
         addressId,
       },
     ])
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function updateCustomer(
@@ -279,7 +283,8 @@ export async function updateCustomer(
     .from("customer")
     .update(sanitize(customer))
     .eq("id", customer.id)
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function updateCustomerContact(
@@ -310,7 +315,8 @@ export async function updateCustomerContact(
     .from("contact")
     .update(sanitize(customerContact.contact))
     .eq("id", customerContact.contactId)
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function updateCustomerLocation(
@@ -331,12 +337,17 @@ export async function updateCustomerLocation(
     .from("address")
     .update(sanitize(customerLocation.address))
     .eq("id", customerLocation.addressId)
-    .select("id");
+    .select("id")
+    .single();
 }
 
 export async function upsertCustomerType(
   client: SupabaseClient<Database>,
   customerType: { id?: string; name: string; color: string | null }
 ) {
-  return client.from("customerType").upsert([customerType]).select("id");
+  return client
+    .from("customerType")
+    .upsert([customerType])
+    .select("id")
+    .single();
 }

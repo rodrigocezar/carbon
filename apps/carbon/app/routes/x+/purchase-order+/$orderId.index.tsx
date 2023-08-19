@@ -3,11 +3,7 @@ import { redirect } from "@remix-run/node";
 import { useParams } from "@remix-run/react";
 import { validationError } from "remix-validated-form";
 import { useRouteData } from "~/hooks";
-import type {
-  PurchaseOrder,
-  PurchaseOrderApprovalStatus,
-  PurchaseOrderType,
-} from "~/modules/purchasing";
+import type { PurchaseOrder } from "~/modules/purchasing";
 import {
   PurchaseOrderForm,
   purchaseOrderValidator,
@@ -62,11 +58,6 @@ export async function action({ request, params }: ActionArgs) {
 }
 
 export default function PurchaseOrderBasicRoute() {
-  const sharedPurchaseOrdersData = useRouteData<{
-    purchaseOrderApprovalStatuses: PurchaseOrderApprovalStatus[];
-    purchaseOrderTypes: PurchaseOrderType[];
-  }>("/x/purchase-order");
-
   const { orderId } = useParams();
   const orderData = useRouteData<{ purchaseOrder: PurchaseOrder }>(
     `/x/purchase-order/${orderId}`
@@ -81,20 +72,11 @@ export default function PurchaseOrderBasicRoute() {
     supplierReference: orderData?.purchaseOrder?.supplierReference ?? "",
     orderDate: orderData?.purchaseOrder?.orderDate ?? "",
     type: orderData?.purchaseOrder?.type ?? "Draft",
-    status: orderData?.purchaseOrder?.status ?? "Draft",
+    status: orderData?.purchaseOrder?.status ?? "Open",
     receiptRequestedDate: orderData?.purchaseOrder?.receiptRequestedDate ?? "",
     receiptPromisedDate: orderData?.purchaseOrder?.receiptPromisedDate ?? "",
     notes: orderData?.purchaseOrder?.notes ?? "",
-    closed: orderData?.purchaseOrder?.closed ?? false,
   };
 
-  return (
-    <PurchaseOrderForm
-      initialValues={initialValues}
-      purchaseOrderApprovalStatuses={
-        sharedPurchaseOrdersData?.purchaseOrderApprovalStatuses ?? []
-      }
-      purchaseOrderTypes={sharedPurchaseOrdersData?.purchaseOrderTypes ?? []}
-    />
-  );
+  return <PurchaseOrderForm initialValues={initialValues} />;
 }

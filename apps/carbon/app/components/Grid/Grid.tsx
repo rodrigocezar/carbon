@@ -7,10 +7,10 @@ import {
   Icon,
   Table,
   Tbody,
-  Text,
-  Thead,
   Td,
+  Text,
   Th,
+  Thead,
   Tr,
   VStack,
 } from "@chakra-ui/react";
@@ -22,16 +22,17 @@ import {
 } from "@tanstack/react-table";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BsPlus } from "react-icons/bs";
-import { Row } from "./components";
 import type {
   EditableTableCellComponent,
   Position,
 } from "~/components/Editable";
+import { Row } from "./components";
 import { getAccessorKey, updateNestedProperty } from "./utils";
 
 interface GridProps<T extends object> {
   canEdit?: boolean;
   columns: ColumnDef<T>[];
+  contained?: boolean;
   data: T[];
   defaultColumnOrder?: string[];
   defaultColumnVisibility?: Record<string, boolean>;
@@ -46,6 +47,7 @@ interface GridProps<T extends object> {
 const Grid = <T extends object>({
   canEdit = true,
   columns,
+  contained = true,
   data,
   editableComponents,
   defaultColumnOrder,
@@ -351,8 +353,10 @@ const Grid = <T extends object>({
         w="full"
         h="full"
         bg={useColor("white")}
-        overflow="scroll"
-        style={{ contain: "strict" }}
+        overflowX="auto"
+        style={{
+          contain: contained ? "strict" : undefined,
+        }}
         ref={tableContainerRef}
         onKeyDown={onKeyDown}
       >
@@ -439,6 +443,20 @@ const Grid = <T extends object>({
                 />
               );
             })}
+            {rows.length === 0 && !onNewRow && (
+              <Tr
+                h={10}
+                _hover={{
+                  backgroundColor: "gray.100",
+                }}
+              >
+                <Td colSpan={24}>
+                  <Text color="gray.500" w="full" textAlign="center">
+                    No Data
+                  </Text>
+                </Td>
+              </Tr>
+            )}
             {onNewRow && (
               <Tr
                 onClick={onNewRow}

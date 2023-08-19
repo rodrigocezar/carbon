@@ -4,7 +4,17 @@ import type { TypeOfValidator } from "~/types/validators";
 import type { GenericQueryFilters } from "~/utils/query";
 import { setGenericQueryFilters } from "~/utils/query";
 import { sanitize } from "~/utils/supabase";
-import type { shippingMethodValidator } from "./inventory.form";
+import type {
+  receiptValidator,
+  shippingMethodValidator,
+} from "./inventory.form";
+
+export async function deleteReceipt(
+  client: SupabaseClient<Database>,
+  receiptId: string
+) {
+  return client.from("receipt").delete().eq("id", receiptId);
+}
 
 export async function deleteShippingMethod(
   client: SupabaseClient<Database>,
@@ -14,6 +24,53 @@ export async function deleteShippingMethod(
     .from("shippingMethod")
     .update({ active: false })
     .eq("id", shippingMethodId);
+}
+
+export async function getReceipts(
+  client: SupabaseClient<Database>,
+  args: GenericQueryFilters & {
+    search: string | null;
+    document: string | null;
+    location: string | null;
+  }
+) {
+  let query = client
+    .from("receipt")
+    .select("*, location(name), supplier(name)", {
+      count: "exact",
+    })
+    .neq("sourceDocumentId", "");
+
+  if (args.search) {
+    query = query.or(
+      `receiptId.ilike.%${args.search}%,sourceDocumentReadableId.ilike.%${args.search}%`
+    );
+  }
+
+  if (args.document) {
+    query = query.eq("sourceDocument", args.document);
+  }
+
+  if (args.location) {
+    query = query.eq("locationId", args.location);
+  }
+
+  query = setGenericQueryFilters(query, args, "receiptId", false);
+  return query;
+}
+
+export async function getReceipt(
+  client: SupabaseClient<Database>,
+  receiptId: string
+) {
+  return client.from("receipt").select("*").eq("id", receiptId).single();
+}
+
+export async function getReceiptLines(
+  client: SupabaseClient<Database>,
+  receiptId: string
+) {
+  return client.from("receiptLine").select("*").eq("receiptId", receiptId);
 }
 
 export async function getShippingMethod(
@@ -64,6 +121,30 @@ export async function getShippingTermsList(client: SupabaseClient<Database>) {
     .order("name", { ascending: true });
 }
 
+export async function upsertReceipt(
+  client: SupabaseClient<Database>,
+  receipt:
+    | (Omit<TypeOfValidator<typeof receiptValidator>, "id" | "receiptId"> & {
+        receiptId: string;
+        createdBy: string;
+      })
+    | (Omit<TypeOfValidator<typeof receiptValidator>, "id" | "receiptId"> & {
+        id: string;
+        receiptId: string;
+        updatedBy: string;
+      })
+) {
+  if ("createdBy" in receipt) {
+    return client.from("receipt").insert([receipt]).select("id").single();
+  }
+  return client
+    .from("receipt")
+    .update(sanitize(receipt))
+    .eq("id", receipt.id)
+    .select("id")
+    .single();
+}
+
 export async function upsertShippingMethod(
   client: SupabaseClient<Database>,
   shippingMethod:
@@ -76,11 +157,16 @@ export async function upsertShippingMethod(
       })
 ) {
   if ("createdBy" in shippingMethod) {
-    return client.from("shippingMethod").insert([shippingMethod]).select("id");
+    return client
+      .from("shippingMethod")
+      .insert([shippingMethod])
+      .select("id")
+      .single();
   }
   return client
     .from("shippingMethod")
     .update(sanitize(shippingMethod))
     .eq("id", shippingMethod.id)
-    .select("id");
+    .select("id")
+    .single();
 }

@@ -18,8 +18,8 @@ import {
   NumberInputStepper,
   VStack,
 } from "@chakra-ui/react";
-import { useNavigate, useParams } from "@remix-run/react";
-import { useState } from "react";
+import { useFetcher, useNavigate, useParams } from "@remix-run/react";
+import { useEffect, useMemo, useState } from "react";
 import { ValidatedForm } from "remix-validated-form";
 import {
   Account,
@@ -27,47 +27,93 @@ import {
   Number,
   Part,
   Select,
+  SelectControlled,
   Submit,
 } from "~/components/Form";
-import { usePermissions } from "~/hooks";
+import { usePermissions, useRouteData, useUser } from "~/hooks";
 import { useSupabase } from "~/lib/supabase";
-import type { PurchaseOrderLineType } from "~/modules/purchasing";
-import { purchaseOrderLineValidator } from "~/modules/purchasing";
+import type { getShelvesList } from "~/modules/parts";
+import type {
+  PurchaseOrder,
+  PurchaseOrderLineType,
+} from "~/modules/purchasing";
+import {
+  purchaseOrderLineType,
+  purchaseOrderLineValidator,
+} from "~/modules/purchasing";
+import type { ListItem } from "~/types";
 import type { TypeOfValidator } from "~/types/validators";
 
 type PurchaseOrderLineFormProps = {
   initialValues: TypeOfValidator<typeof purchaseOrderLineValidator>;
-  purchaseOrderLineTypes: PurchaseOrderLineType[];
 };
 
 const PurchaseOrderLineForm = ({
   initialValues,
-  purchaseOrderLineTypes,
 }: PurchaseOrderLineFormProps) => {
   const permissions = usePermissions();
   const { supabase } = useSupabase();
   const navigate = useNavigate();
+  const { defaults } = useUser();
   const { orderId } = useParams();
 
+  const routeData = useRouteData<{
+    locations: ListItem[];
+    purchaseOrder: PurchaseOrder;
+  }>(`/x/purchase-order/${orderId}`);
+
+  const locations = routeData?.locations ?? [];
+  const locationOptions = locations.map((location) => ({
+    label: location.name,
+    value: location.id,
+  }));
+
+  const isEditable = ["Open", "In Review", "In External Review"].includes(
+    routeData?.purchaseOrder?.status ?? ""
+  );
+
   const [type, setType] = useState(initialValues.purchaseOrderLineType);
+  const [locationId, setLocationId] = useState(defaults.locationId ?? "");
   const [partData, setPartData] = useState<{
+    partId: string;
     description: string;
     unitPrice: string;
     uom: string;
     shelfId: string;
   }>({
+    partId: initialValues.partId ?? "",
     description: initialValues.description ?? "",
     unitPrice: initialValues.unitPrice?.toString() ?? "0",
     uom: initialValues.unitOfMeasureCode ?? "",
     shelfId: initialValues.shelfId ?? "",
   });
 
+  const shelfFetcher = useFetcher<Awaited<ReturnType<typeof getShelvesList>>>();
+
+  useEffect(() => {
+    if (locationId) {
+      shelfFetcher.load(`/api/parts/shelf?locationId=${locationId}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locationId]);
+
+  const shelfOptions = useMemo(
+    () =>
+      shelfFetcher.data?.data?.map((shelf) => ({
+        label: shelf.id,
+        value: shelf.id,
+      })) ?? [],
+    [shelfFetcher.data]
+  );
+
   const isEditing = initialValues.id !== undefined;
-  const isDisabled = isEditing
+  const isDisabled = !isEditable
+    ? true
+    : isEditing
     ? !permissions.can("update", "purchasing")
     : !permissions.can("create", "purchasing");
 
-  const purchaseOrderLineTypeOptions = purchaseOrderLineTypes.map((type) => ({
+  const purchaseOrderLineTypeOptions = purchaseOrderLineType.map((type) => ({
     label: type,
     value: type,
   }));
@@ -77,6 +123,7 @@ const PurchaseOrderLineForm = ({
   const onTypeChange = (type: PurchaseOrderLineType) => {
     setType(type);
     setPartData({
+      partId: "",
       description: "",
       unitPrice: "0",
       uom: "EA",
@@ -94,9 +141,10 @@ const PurchaseOrderLineForm = ({
         .single(),
       supabase
         .from("partInventory")
-        .select("shelfId")
+        .select("defaultShelfId")
         .eq("partId", partId)
-        .single(),
+        .eq("locationId", locationId)
+        .maybeSingle(),
       supabase
         .from("partCost")
         .select("unitCost")
@@ -105,11 +153,34 @@ const PurchaseOrderLineForm = ({
     ]);
 
     setPartData({
+      partId,
       description: part.data?.name ?? "",
       unitPrice: cost.data?.unitCost?.toString() ?? "0",
       uom: part.data?.unitOfMeasureCode ?? "EA",
-      shelfId: shelf.data?.shelfId ?? "",
+      shelfId: shelf.data?.defaultShelfId ?? "",
     });
+  };
+
+  const onLocationChange = async (
+    newLocationId: string | number | undefined
+  ) => {
+    if (!supabase) throw new Error("supabase is not defined");
+    if (typeof newLocationId !== "string")
+      throw new Error("locationId is not a string");
+
+    setLocationId(newLocationId);
+    if (!partData.partId) return;
+    const shelf = await supabase
+      .from("partInventory")
+      .select("defaultShelfId")
+      .eq("partId", partData.partId)
+      .eq("locationId", newLocationId)
+      .maybeSingle();
+
+    setPartData((d) => ({
+      ...d,
+      shelfId: shelf?.data?.defaultShelfId ?? "",
+    }));
   };
 
   return (
@@ -160,6 +231,7 @@ const PurchaseOrderLineForm = ({
                   label="Account"
                   onChange={({ label }) => {
                     setPartData({
+                      partId: "",
                       description: label,
                       unitPrice: "0",
                       uom: "EA",
@@ -204,15 +276,28 @@ const PurchaseOrderLineForm = ({
                   </NumberInputStepper>
                 </NumberInput>
               </FormControl>
-              {/* 
-              // TODO: 
-              <Shelf name="shelfId" label="Shelf" value={shelf}/> */}
+              <SelectControlled
+                name="locationId"
+                label="Location"
+                options={locationOptions}
+                value={locationId}
+                onChange={onLocationChange}
+              />
+              <SelectControlled
+                name="shelfId"
+                label="Shelf"
+                options={shelfOptions}
+                value={partData.shelfId}
+                onChange={(newValue) =>
+                  setPartData((d) => ({ ...d, shelfId: newValue as string }))
+                }
+              />
             </VStack>
           </DrawerBody>
           <DrawerFooter>
             <HStack>
               <Submit isDisabled={isDisabled}>Save</Submit>
-              <Button variant="ghost" onClick={onClose}>
+              <Button size="md" variant="ghost" onClick={onClose}>
                 Cancel
               </Button>
             </HStack>
