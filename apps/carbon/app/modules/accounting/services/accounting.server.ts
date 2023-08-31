@@ -1,6 +1,8 @@
 import type { Database } from "@carbon/database";
 import { getDateNYearsAgo } from "@carbon/utils";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { getSupabaseServiceRole } from "~/lib/supabase";
+import type { ReceiptLine } from "~/modules/inventory";
 import type { TypeOfValidator } from "~/types/validators";
 import type { GenericQueryFilters } from "~/utils/query";
 import { setGenericQueryFilters } from "~/utils/query";
@@ -12,6 +14,7 @@ import type {
   accountSubcategoryValidator,
   accountValidator,
   currencyValidator,
+  defaultAcountValidator,
   partLedgerValidator,
   paymentTermValidator,
   valueLedgerValidator,
@@ -136,14 +139,23 @@ export async function getAccounts(
 
 export async function getAccountsList(
   client: SupabaseClient<Database>,
-  type = "Posting"
+  args?: {
+    type?: string | null;
+    incomeBalance?: string | null;
+  }
 ) {
-  return client
-    .from("account")
-    .select("number, name")
-    .eq("active", true)
-    .eq("type", type)
-    .order("name", { ascending: true });
+  let query = client.from("account").select("number, name").eq("active", true);
+
+  if (args?.type) {
+    query = query.eq("type", args.type);
+  }
+
+  if (args?.incomeBalance) {
+    query = query.eq("incomeBalance", args.incomeBalance);
+  }
+
+  query = query.order("number", { ascending: true });
+  return query;
 }
 
 export async function getAccountCategories(
@@ -373,6 +385,33 @@ export async function getCurrenciesList(client: SupabaseClient<Database>) {
     .order("name", { ascending: true });
 }
 
+export async function getDefaultAccounts(client: SupabaseClient<Database>) {
+  return client.from("accountDefault").select("*").eq("id", true).single();
+}
+
+export async function getInventoryPostingGroups(
+  client: SupabaseClient<Database>,
+  args: GenericQueryFilters & {
+    partGroup: string | null;
+    location: string | null;
+  }
+) {
+  let query = client.from("postingGroupInventory").select("*", {
+    count: "exact",
+  });
+
+  if (args.partGroup) {
+    query = query.eq("partGroupId", args.partGroup);
+  }
+
+  if (args.location) {
+    query = query.eq("locationId", args.location);
+  }
+
+  query = setGenericQueryFilters(query, args, "partGroupId", false);
+  return query;
+}
+
 export async function getPaymentTerm(
   client: SupabaseClient<Database>,
   paymentTermId: string
@@ -411,6 +450,52 @@ export async function getPaymentTermsList(client: SupabaseClient<Database>) {
     .select("id, name")
     .eq("active", true)
     .order("name", { ascending: true });
+}
+
+export async function getPurchasingPostingGroups(
+  client: SupabaseClient<Database>,
+  args: GenericQueryFilters & {
+    partGroup: string | null;
+    supplierType: string | null;
+  }
+) {
+  let query = client.from("postingGroupPurchasing").select("*", {
+    count: "exact",
+  });
+
+  if (args.partGroup) {
+    query = query.eq("partGroupId", args.partGroup);
+  }
+
+  if (args.supplierType) {
+    query = query.eq("supplierTypeId", args.supplierType);
+  }
+
+  query = setGenericQueryFilters(query, args, "partGroupId", false);
+  return query;
+}
+
+export async function getSalesPostingGroups(
+  client: SupabaseClient<Database>,
+  args: GenericQueryFilters & {
+    partGroup: string | null;
+    customerType: string | null;
+  }
+) {
+  let query = client.from("postingGroupSales").select("*", {
+    count: "exact",
+  });
+
+  if (args.partGroup) {
+    query = query.eq("partGroupId", args.partGroup);
+  }
+
+  if (args.customerType) {
+    query = query.eq("customerTypeId", args.customerType);
+  }
+
+  query = setGenericQueryFilters(query, args, "partGroupId", false);
+  return query;
 }
 
 export async function insertAccountEntries(
@@ -461,6 +546,90 @@ export async function insertValueLedger(
   valueEntry: TypeOfValidator<typeof valueLedgerValidator>
 ) {
   return client.from("valueLedger").insert([valueEntry]).select("id").single();
+}
+
+export async function updateDefaultAccounts(
+  client: SupabaseClient<Database>,
+  defaultAccounts: TypeOfValidator<typeof defaultAcountValidator> & {
+    updatedBy: string;
+  }
+) {
+  return client.from("accountDefault").update(defaultAccounts).eq("id", true);
+}
+
+export async function postReceiptWithExpectedCost(receiptId: string) {
+  const client = getSupabaseServiceRole();
+  const [receipt, receiptLines] = await Promise.all([
+    client.from("receipt").select("*").eq("id", receiptId).single(),
+    client.from("receiptLine").select("*").eq("receiptId", receiptId),
+  ]);
+
+  if (receipt.error) return receipt;
+  if (receiptLines.error) return receiptLines;
+
+  switch (receipt.data?.sourceDocument) {
+    case "Purchase Order":
+      // TODO: this should all be done as a transaction
+      const purchaseOrderLines = await client
+        .from("purchaseOrderLine")
+        .select("*")
+        .eq("purchaseOrderId", receipt.data.sourceDocumentId);
+      if (purchaseOrderLines.error) return purchaseOrderLines;
+
+      const receiptLinesByLineId = receiptLines.data.reduce<
+        Record<string, ReceiptLine>
+      >((acc, receiptLine) => {
+        if (receiptLine.lineId) {
+          acc[receiptLine.lineId] = receiptLine;
+        }
+        return acc;
+      }, {});
+
+      // First, update the quantity received on the purchase order lines
+      purchaseOrderLines.data.forEach(async (purchaseOrderLine) => {
+        const receiptLine = receiptLinesByLineId[purchaseOrderLine.id];
+        if (!receiptLine) return;
+
+        if (!purchaseOrderLine.purchaseQuantity) return;
+
+        const newQuantityReceived =
+          (purchaseOrderLine.quantityReceived ?? 0) +
+          receiptLine.receivedQuantity;
+
+        const newQuantityToReceive =
+          (purchaseOrderLine.quantityToReceive ??
+            purchaseOrderLine.purchaseQuantity) - receiptLine.receivedQuantity;
+
+        const receivedComplete =
+          receiptLine.receivedQuantity >=
+          (purchaseOrderLine.quantityToReceive ??
+            purchaseOrderLine.purchaseQuantity);
+
+        let purchaseOrderLineUpdate = await client
+          .from("purchaseOrderLine")
+          .update({
+            quantityReceived: newQuantityReceived,
+            quantityToReceive: newQuantityToReceive,
+            receivedComplete,
+          })
+          .eq("id", purchaseOrderLine.id);
+
+        if (purchaseOrderLineUpdate.error) return purchaseOrderLineUpdate;
+      });
+
+      // Next, make the following entries for each line on the receipt:
+      // - a value ledger entry for the value of the receipt
+      // - a part ledger entry for the quantity received
+      // - a G/L entry to debit interim inventory accrual
+      // - a G/L entry to credit inventory received not invoiced
+      receiptLines.data.forEach(async (receiptLine) => {
+        // TODO:
+      });
+
+      break;
+    default:
+      break;
+  }
 }
 
 export async function upsertAccount(

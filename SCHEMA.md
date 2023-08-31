@@ -285,9 +285,6 @@ CREATE TABLE "user" (
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );
 
-INSERT INTO "user" ("id", "email", "firstName", "lastName")
-VALUES ('system', 'system@carbon.us.org', 'System', 'Operation');
-
 CREATE UNIQUE INDEX "index_user_email_key" ON "user"("email");
 CREATE INDEX "index_user_fullName" ON "user"("fullName");
 
@@ -515,16 +512,6 @@ CREATE TABLE "attributeDataType" (
     )
 );
 
-INSERT INTO "attributeDataType" ("label", "isBoolean", "isDate", "isList", "isNumeric", "isText", "isUser")
-VALUES 
-  ('Yes/No', true, false, false, false, false, false),
-  ('Date', false, true, false, false, false, false),
-  ('List', false, false, true, false, false, false),
-  ('Numeric', false, false, false, true, false, false),
-  ('Text', false, false, false, false, true, false),
-  ('User', false, false, false, false, false, true);
-  
-
 -- ALTER TABLE "attributeDataType" ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE "userAttribute" (
@@ -716,10 +703,9 @@ CREATE TABLE "supplierStatus" (
     "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     "updatedAt" TIMESTAMP WITH TIME ZONE,
 
-    CONSTRAINT "supplierStatus_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "supplierStatus_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "supplierStatus_name_unique" UNIQUE ("name")
 );
-
-INSERT INTO "supplierStatus" ("name") VALUES ('Active'), ('Inactive'), ('Pending'), ('Rejected');
 
 CREATE TABLE "supplierType" (
     "id" TEXT NOT NULL DEFAULT uuid_generate_v4(),
@@ -727,10 +713,15 @@ CREATE TABLE "supplierType" (
     "color" TEXT DEFAULT '#000000',
     "protected" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    "createdBy" TEXT NOT NULL,
+    "updatedBy" TEXT,
     "updatedAt" TIMESTAMP WITH TIME ZONE,
 
     CONSTRAINT "supplierType_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "supplierType_colorCheck" CHECK ("color" is null or "color" ~* '^#[a-f0-9]{6}$')
+    CONSTRAINT "supplierType_name_unique" UNIQUE ("name"),
+    CONSTRAINT "supplierType_colorCheck" CHECK ("color" is null or "color" ~* '^#[a-f0-9]{6}$'),
+    CONSTRAINT "supplierType_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id") ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT "supplierType_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id") ON UPDATE CASCADE ON DELETE SET NULL
 );
 
 CREATE TABLE "supplier" (
@@ -798,10 +789,9 @@ CREATE TABLE "customerStatus" (
     "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     "updatedAt" TIMESTAMP WITH TIME ZONE,
 
-    CONSTRAINT "customerStatus_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "customerStatus_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "customerStatus_name_unique" UNIQUE ("name")
 );
-
-INSERT INTO "customerStatus" ("name") VALUES ('Active'), ('Inactive'), ('Prospect'), ('Lead'), ('On Hold'), ('Cancelled'), ('Archived');
 
 CREATE TABLE "customerType" (
     "id" TEXT NOT NULL DEFAULT uuid_generate_v4(),
@@ -809,10 +799,15 @@ CREATE TABLE "customerType" (
     "color" TEXT DEFAULT '#000000',
     "protected" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    "createdBy" TEXT NOT NULL,
+    "updatedBy" TEXT,
     "updatedAt" TIMESTAMP WITH TIME ZONE,
 
     CONSTRAINT "customerType_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "customerType_colorCheck" CHECK ("color" is null or "color" ~* '^#[a-f0-9]{6}$')
+    CONSTRAINT "customerType_name_unique" UNIQUE ("name"),
+    CONSTRAINT "customerType_colorCheck" CHECK ("color" is null or "color" ~* '^#[a-f0-9]{6}$'),
+    CONSTRAINT "customerType_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id") ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT "customerType_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id") ON UPDATE CASCADE ON DELETE SET NULL
 );
 
 CREATE TABLE "customer" (
@@ -2954,9 +2949,6 @@ CREATE TABLE "currency" (
   CONSTRAINT "currency_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id")
 );
 
-INSERT INTO "currency" ("name", "code", "symbol", "exchangeRate", "isBaseCurrency", "createdBy")
-VALUES ('US Dollar', 'USD', '$', 1.0000, true, 'system');
-
 CREATE INDEX "currency_code_index" ON "currency" ("code");
 
 ALTER TABLE "currency" ENABLE ROW LEVEL SECURITY;
@@ -3043,27 +3035,6 @@ CREATE TABLE "accountCategory" (
   CONSTRAINT "accountCategory_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id"),
   CONSTRAINT "accountCategory_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id")
 );
-
-INSERT INTO "accountCategory" ("category", "incomeBalance", "normalBalance", "createdBy")
-VALUES 
-  ('Bank', 'Balance Sheet', 'Credit', 'system'),
-  ('Accounts Receivable', 'Balance Sheet', 'Credit', 'system'),
-  ('Inventory', 'Balance Sheet', 'Debit', 'system'),
-  ('Other Current Asset', 'Balance Sheet', 'Debit', 'system'),
-  ('Fixed Asset', 'Balance Sheet', 'Debit', 'system'),
-  ('Accumulated Depreciation', 'Balance Sheet', 'Credit', 'system'),
-  ('Other Asset', 'Balance Sheet', 'Debit', 'system'),
-  ('Accounts Payable', 'Balance Sheet', 'Debit', 'system'),
-  ('Other Current Liability', 'Balance Sheet', 'Debit', 'system'),
-  ('Long Term Liability', 'Balance Sheet', 'Debit', 'system'),
-  ('Equity - No Close', 'Balance Sheet', 'Credit', 'system'),
-  ('Equity - Close', 'Balance Sheet', 'Credit', 'system'),
-  ('Retained Earnings', 'Balance Sheet', 'Credit', 'system'),
-  ('Income', 'Income Statement', 'Credit', 'system'),
-  ('Cost of Goods Sold', 'Income Statement', 'Debit', 'system'),
-  ('Expense', 'Income Statement', 'Debit', 'system'),
-  ('Other Income', 'Income Statement', 'Credit', 'system'),
-  ('Other Expense', 'Income Statement', 'Debit', 'system');
 
 ALTER TABLE "accountCategory" ENABLE ROW LEVEL SECURITY;
 
@@ -3267,13 +3238,6 @@ CREATE TABLE "partGroup" (
   "id" TEXT NOT NULL DEFAULT xid(),
   "name" TEXT NOT NULL,
   "description" TEXT,
-  "salesAccountId" TEXT,
-  "discountAccountId" TEXT,
-  "inventoryAccountId" TEXT,
-  "costOfGoodsSoldLaborAccountId" TEXT,
-  "costOfGoodsSoldMaterialAccountId" TEXT,
-  "costOfGoodsSoldOverheadAccountId" TEXT,
-  "costOfGoodsSoldSubcontractorAccountId" TEXT,
   "active" BOOLEAN NOT NULL DEFAULT true,
   "createdBy" TEXT NOT NULL,
   "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -3282,13 +3246,6 @@ CREATE TABLE "partGroup" (
 
   CONSTRAINT "partGroup_pkey" PRIMARY KEY ("id"),
   CONSTRAINT "partGroup_name_key" UNIQUE ("name"),
-  CONSTRAINT "partGroup_salesAccountId_fkey" FOREIGN KEY ("salesAccountId") REFERENCES "account"("number") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "partGroup_discountAccountId_fkey" FOREIGN KEY ("discountAccountId") REFERENCES "account"("number") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "partGroup_inventoryAccountId_fkey" FOREIGN KEY ("inventoryAccountId") REFERENCES "account"("number") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "partGroup_costOfGoodsSoldLaborAccountId_fkey" FOREIGN KEY ("costOfGoodsSoldLaborAccountId") REFERENCES "account"("number") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "partGroup_costOfGoodsSoldMaterialAccountId_fkey" FOREIGN KEY ("costOfGoodsSoldMaterialAccountId") REFERENCES "account"("number") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "partGroup_costOfGoodsSoldOverheadAccountId_fkey" FOREIGN KEY ("costOfGoodsSoldOverheadAccountId") REFERENCES "account"("number") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "partGroup_costOfGoodsSoldSubcontractorAccountId_fkey" FOREIGN KEY ("costOfGoodsSoldSubcontractorAccountId") REFERENCES "account"("number") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "partGroup_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id"),
   CONSTRAINT "partGroup_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id")
 );
@@ -3374,11 +3331,6 @@ CREATE TABLE "unitOfMeasure" (
 );
 
 CREATE INDEX "unitOfMeasure_code_index" ON "unitOfMeasure"("code");
-
-INSERT INTO "unitOfMeasure" ("code", "name", "createdBy")
-VALUES 
-( 'EA', 'Each', 'system'),
-( 'PCS', 'Pieces', 'system');
 
 ALTER TABLE "unitOfMeasure" ENABLE ROW LEVEL SECURITY;
 
@@ -3529,9 +3481,6 @@ CREATE TABLE "partCost" (
   "costingMethod" "partCostingMethod" NOT NULL,
   "standardCost" NUMERIC(15,5) NOT NULL DEFAULT 0,
   "unitCost" NUMERIC(15,5) NOT NULL DEFAULT 0,
-  "salesAccountId" TEXT,
-  "discountAccountId" TEXT,
-  "inventoryAccountId" TEXT,
   "costIsAdjusted" BOOLEAN NOT NULL DEFAULT false,
   "createdBy" TEXT NOT NULL,
   "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -3539,9 +3488,6 @@ CREATE TABLE "partCost" (
   "updatedAt" TIMESTAMP WITH TIME ZONE,
 
   CONSTRAINT "partCost_partId_fkey" FOREIGN KEY ("partId") REFERENCES "part"("id") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "partGroup_salesAccountId_fkey" FOREIGN KEY ("salesAccountId") REFERENCES "account"("number") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "partGroup_discountAccountId_fkey" FOREIGN KEY ("discountAccountId") REFERENCES "account"("number") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "partGroup_inventoryAccountId_fkey" FOREIGN KEY ("inventoryAccountId") REFERENCES "account"("number") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "partGroup_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id"),
   CONSTRAINT "partGroup_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id")
 );
@@ -3950,7 +3896,7 @@ CREATE TABLE "partPlanning" (
 CREATE INDEX "partPlanning_partId_locationId_index" ON "partPlanning" ("partId", "locationId");
 ALTER TABLE "partPlanning" ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Employees with part_view can view part planning" ON "partPlanning"
+CREATE POLICY "Employees with parts_view can view part planning" ON "partPlanning"
   FOR SELECT
   USING (
     coalesce(get_my_claim('parts_view')::boolean,false) 
@@ -3958,7 +3904,7 @@ CREATE POLICY "Employees with part_view can view part planning" ON "partPlanning
   );
 
 -- these are records are created lazily when a user attempts to view them
-CREATE POLICY "Employees with part_view can insert part planning" ON "partPlanning"
+CREATE POLICY "Employees with parts_view can insert part planning" ON "partPlanning"
   FOR INSERT
   WITH CHECK (
     coalesce(get_my_claim('parts_view')::boolean,false) 
@@ -4327,18 +4273,6 @@ CREATE TABLE "paymentTerm" (
   CONSTRAINT "paymentTerm_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE CASCADE,
   CONSTRAINT "paymentTerm_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE CASCADE
 );
-
-INSERT INTO "paymentTerm" ("name", "daysDue", "calculationMethod", "daysDiscount", "discountPercentage", "createdBy") 
-VALUES 
-  ('Net 15', 15, 'Net', 0, 0, 'system'),
-  ('Net 30', 30, 'Net', 0, 0, 'system'),
-  ('Net 50', 50, 'Net', 0, 0, 'system'),
-  ('Net 60', 60, 'Net', 0, 0, 'system'),
-  ('Net 90', 90, 'Net', 0, 0, 'system'),
-  ('1% 10 Net 30', 30, 'Net', 10, 1, 'system'),
-  ('2% 10 Net 30', 30, 'Net', 10, 2, 'system'),
-  ('Due on Receipt', 0, 'Net', 0, 0, 'system'),
-  ('Net EOM 10', 10, 'End of Month', 0, 0, 'system');
 
 ALTER TABLE "paymentTerm" ENABLE ROW LEVEL SECURITY;
 
@@ -4768,9 +4702,6 @@ CREATE TABLE "sequence" (
   CONSTRAINT "sequence_step_check" CHECK ("step" >= 1),
   CONSTRAINT "sequence_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
-
-INSERT INTO "sequence" ("table", "name", "prefix", "suffix", "next", "size", "step")
-VALUES ('purchaseOrder', 'Purchase Order', 'PO', NULL, 0, 6, 1);
 
 
 ```
@@ -5516,8 +5447,36 @@ CREATE INDEX "receipt_locationId_idx" ON "receipt" ("locationId");
 CREATE INDEX "receipt_sourceDocumentId_idx" ON "receipt" ("sourceDocumentId");
 CREATE INDEX "receipt_supplierId_idx" ON "receipt" ("supplierId");
 
-INSERT INTO "sequence" ("table", "name", "prefix", "suffix", "next", "size", "step")
-VALUES ('receipt', 'Receipt', 'RE', NULL, 0, 6, 1);
+ALTER TABLE "receipt" ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Employees with inventory_view can view receipts" ON "receipt"
+  FOR SELECT
+  USING (
+    coalesce(get_my_claim('inventory_view')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+  
+
+CREATE POLICY "Employees with inventory_create can insert receipts" ON "receipt"
+  FOR INSERT
+  WITH CHECK (   
+    coalesce(get_my_claim('inventory_create')::boolean,false) 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+);
+
+CREATE POLICY "Employees with inventory_update can update receipts" ON "receipt"
+  FOR UPDATE
+  USING (
+    coalesce(get_my_claim('inventory_update')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+CREATE POLICY "Employees with inventory_delete can delete receipts" ON "receipt"
+  FOR DELETE
+  USING (
+    coalesce(get_my_claim('inventory_delete')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
 
 CREATE TABLE "receiptLine" (
   "id" TEXT NOT NULL DEFAULT xid(),
@@ -5549,6 +5508,37 @@ CREATE INDEX "receiptLine_receiptId_idx" ON "receiptLine" ("receiptId");
 CREATE INDEX "receiptLine_lineId_idx" ON "receiptLine" ("lineId");
 CREATE INDEX "receiptLine_receiptId_lineId_idx" ON "receiptLine" ("receiptId", "lineId");
 
+ALTER TABLE "receiptLine" ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Employees with inventory_view can view receipt lines" ON "receiptLine"
+  FOR SELECT
+  USING (
+    coalesce(get_my_claim('inventory_view')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+  
+
+CREATE POLICY "Employees with inventory_create can insert receipt lines" ON "receiptLine"
+  FOR INSERT
+  WITH CHECK (   
+    coalesce(get_my_claim('inventory_create')::boolean,false) 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+);
+
+CREATE POLICY "Employees with inventory_update can update receipt lines" ON "receiptLine"
+  FOR UPDATE
+  USING (
+    coalesce(get_my_claim('inventory_update')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+CREATE POLICY "Employees with inventory_delete can delete receipt lines" ON "receiptLine"
+  FOR DELETE
+  USING (
+    coalesce(get_my_claim('inventory_delete')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
 CREATE VIEW "receipt_quantity_received_by_line" AS 
   SELECT
     r."sourceDocumentId",
@@ -5572,5 +5562,673 @@ CREATE VIEW "user_default_view" AS
     ej."locationId"
   FROM "user" u
   LEFT JOIN "employeeJob" ej ON ej.id = u.id;
+```
+
+
+
+## `posting-groups`
+
+```sql
+CREATE TABLE "accountDefault" (
+  "id" BOOLEAN NOT NULL DEFAULT TRUE,
+  -- income statement
+    -- revenue
+    "salesAccount" TEXT NOT NULL,
+    "salesDiscountAccount" TEXT NOT NULL,
+
+    -- part cost
+    "costOfGoodsSoldAccount" TEXT NOT NULL,
+    "purchaseAccount" TEXT NOT NULL,
+    "directCostAppliedAccount" TEXT NOT NULL,
+    "overheadCostAppliedAccount" TEXT NOT NULL,
+    "purchaseVarianceAccount" TEXT NOT NULL,
+    "inventoryAdjustmentVarianceAccount" TEXT NOT NULL,
+
+    -- direct costs
+    "materialVarianceAccount" TEXT NOT NULL,
+    "capacityVarianceAccount" TEXT NOT NULL,
+    "overheadAccount" TEXT NOT NULL,
+    "maintenanceAccount" TEXT NOT NULL,
+
+    -- depreciaition of fixed assets
+    "assetDepreciationExpenseAccount" TEXT NOT NULL,
+    "assetGainsAndLossesAccount" TEXT NOT NULL,
+    "serviceChargeAccount" TEXT NOT NULL,
+
+    -- interest
+    "interestAccount" TEXT NOT NULL,
+    "supplierPaymentDiscountAccount" TEXT NOT NULL,
+    "customerPaymentDiscountAccount" TEXT NOT NULL,
+    "roundingAccount" TEXT NOT NULL,
+
+  -- balance sheet
+    -- assets
+    "assetAquisitionCostAccount" TEXT NOT NULL,
+    "assetAquisitionCostOnDisposalAccount" TEXT NOT NULL,
+    "accumulatedDepreciationAccount" TEXT NOT NULL,
+    "accumulatedDepreciationOnDisposalAccount" TEXT NOT NULL,
+
+    -- current assets
+    "inventoryAccount" TEXT NOT NULL,
+    "inventoryInterimAccrualAccount" TEXT NOT NULL,
+    "workInProgressAccount" TEXT NOT NULL,
+    "receivablesAccount" TEXT NOT NULL,
+    "inventoryShippedNotInvoicedAccount" TEXT NOT NULL,
+    "bankCashAccount" TEXT NOT NULL,
+    "bankLocalCurrencyAccount" TEXT NOT NULL,
+    "bankForeignCurrencyAccount" TEXT NOT NULL,
+
+    -- liabilities
+    "prepaymentAccount" TEXT NOT NULL,
+    "payablesAccount" TEXT NOT NULL,
+    "inventoryReceivedNotInvoicedAccount" TEXT NOT NULL,
+    "salesTaxPayableAccount" TEXT NOT NULL,
+    "purchaseTaxPayableAccount" TEXT NOT NULL,
+    "reverseChargeSalesTaxPayableAccount" TEXT NOT NULL,
+
+    -- retained earnings
+    "retainedEarningsAccount" TEXT NOT NULL,
+
+    "updatedBy" TEXT,
+
+
+
+  CONSTRAINT "accountDefault_pkey" PRIMARY KEY ("id"),
+  -- this is a hack to make sure that this table only ever has one row
+  CONSTRAINT "accountDefault_id_check" CHECK ("id" = TRUE),
+  CONSTRAINT "accountDefault_id_unique" UNIQUE ("id"),
+  CONSTRAINT "accountDefault_salesAccount_fkey" FOREIGN KEY ("salesAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_salesDiscountAccount_fkey" FOREIGN KEY ("salesDiscountAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_costOfGoodsSoldAccount_fkey" FOREIGN KEY ("costOfGoodsSoldAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_purchaseAccount_fkey" FOREIGN KEY ("purchaseAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_directCostAppliedAccount_fkey" FOREIGN KEY ("directCostAppliedAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_overheadCostAppliedAccount_fkey" FOREIGN KEY ("overheadCostAppliedAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_purchaseVarianceAccount_fkey" FOREIGN KEY ("purchaseVarianceAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_inventoryAdjustmentVarianceAccount_fkey" FOREIGN KEY ("inventoryAdjustmentVarianceAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_materialVarianceAccount_fkey" FOREIGN KEY ("materialVarianceAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_capacityVarianceAccount_fkey" FOREIGN KEY ("capacityVarianceAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_overheadAccount_fkey" FOREIGN KEY ("overheadAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_maintenanceAccount_fkey" FOREIGN KEY ("maintenanceAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_assetDepreciationExpenseAccount_fkey" FOREIGN KEY ("assetDepreciationExpenseAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_assetGainsAndLossesAccount_fkey" FOREIGN KEY ("assetGainsAndLossesAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_serviceChargeAccount_fkey" FOREIGN KEY ("serviceChargeAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_interestAccount_fkey" FOREIGN KEY ("interestAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_supplierPaymentDiscountAccount_fkey" FOREIGN KEY ("supplierPaymentDiscountAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_customerPaymentDiscountAccount_fkey" FOREIGN KEY ("customerPaymentDiscountAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_roundingAccount_fkey" FOREIGN KEY ("roundingAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_aquisitionCostAccount_fkey" FOREIGN KEY ("assetAquisitionCostAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_aquisitionCostOnDisposalAccount_fkey" FOREIGN KEY ("assetAquisitionCostOnDisposalAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_accumulatedDepreciationAccount_fkey" FOREIGN KEY ("accumulatedDepreciationAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_accumulatedDepreciationOnDisposalAccount_fkey" FOREIGN KEY ("accumulatedDepreciationOnDisposalAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_inventoryAccount_fkey" FOREIGN KEY ("inventoryAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_inventoryInterimAccrualAccount_fkey" FOREIGN KEY ("inventoryInterimAccrualAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_workInProgressAccount_fkey" FOREIGN KEY ("workInProgressAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_receivablesAccount_fkey" FOREIGN KEY ("receivablesAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_inventoryShippedNotInvoicedAccount_fkey" FOREIGN KEY ("inventoryShippedNotInvoicedAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_bankCashAccount_fkey" FOREIGN KEY ("bankCashAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_bankLocalCurrencyAccount_fkey" FOREIGN KEY ("bankLocalCurrencyAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_bankForeignCurrencyAccount_fkey" FOREIGN KEY ("bankForeignCurrencyAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_prepaymentAccount_fkey" FOREIGN KEY ("prepaymentAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_payablesAccount_fkey" FOREIGN KEY ("payablesAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_inventoryReceivedNotInvoicedAccount_fkey" FOREIGN KEY ("inventoryReceivedNotInvoicedAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_salesTaxPayableAccount_fkey" FOREIGN KEY ("salesTaxPayableAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_reverseChargeSalesTaxPayableAccount_fkey" FOREIGN KEY ("reverseChargeSalesTaxPayableAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_purchaseTaxPayableAccount_fkey" FOREIGN KEY ("purchaseTaxPayableAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_retainedEarningsAccount_fkey" FOREIGN KEY ("retainedEarningsAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "accountDefault_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+ALTER TABLE "accountDefault" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "Employees with accounting_view can view account defaults" ON "accountDefault"
+  FOR SELECT
+  USING (
+    coalesce(get_my_claim('accounting_view')::boolean,false) 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+CREATE POLICY "Employees with accounting_update can update account defaults" ON "accountDefault"
+  FOR UPDATE
+  USING (
+    coalesce(get_my_claim('accounting_update')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+
+
+CREATE TABLE "postingGroupInventory" (
+  "id" TEXT NOT NULL DEFAULT xid(),
+  "partGroupId" TEXT,
+  "locationId" TEXT,
+  "costOfGoodsSoldAccount" TEXT NOT NULL,
+  "inventoryAccount" TEXT NOT NULL,
+  "inventoryInterimAccrualAccount" TEXT NOT NULL,
+  "inventoryReceivedNotInvoicedAccount" TEXT NOT NULL,
+  "inventoryShippedNotInvoicedAccount" TEXT NOT NULL,
+  "workInProgressAccount" TEXT NOT NULL,
+  "directCostAppliedAccount" TEXT NOT NULL,
+  "overheadCostAppliedAccount" TEXT NOT NULL,
+  "purchaseVarianceAccount" TEXT NOT NULL,
+  "inventoryAdjustmentVarianceAccount" TEXT NOT NULL,
+  "materialVarianceAccount" TEXT NOT NULL,
+  "capacityVarianceAccount" TEXT NOT NULL,
+  "overheadAccount" TEXT NOT NULL,
+  "updatedBy" TEXT,
+
+  CONSTRAINT "postingGroupInventory_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "postingGroupInventory_id_partGroupId_locationId_key" UNIQUE ("partGroupId", "locationId"),
+  CONSTRAINT "postingGroupInventory_partGroupId_fkey" FOREIGN KEY ("partGroupId") REFERENCES "partGroup" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupInventory_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "location" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupInventory_costOfGoodsSoldAccount_fkey" FOREIGN KEY ("costOfGoodsSoldAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupInventory_inventoryAccount_fkey" FOREIGN KEY ("inventoryAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupInventory_inventoryInterimAccrualAccount_fkey" FOREIGN KEY ("inventoryInterimAccrualAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupInventory_inventoryReceivedNotInvoicedAccount_fkey" FOREIGN KEY ("inventoryReceivedNotInvoicedAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupInventory_inventoryShippedNotInvoicedAccount_fkey" FOREIGN KEY ("inventoryShippedNotInvoicedAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupInventory_workInProgressAccount_fkey" FOREIGN KEY ("workInProgressAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupInventory_directCostAppliedAccount_fkey" FOREIGN KEY ("directCostAppliedAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupInventory_overheadCostAppliedAccount_fkey" FOREIGN KEY ("overheadCostAppliedAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupInventory_purchaseVarianceAccount_fkey" FOREIGN KEY ("purchaseVarianceAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupInventory_inventoryAdjustmentVarianceAccount_fkey" FOREIGN KEY ("inventoryAdjustmentVarianceAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupInventory_materialVarianceAccount_fkey" FOREIGN KEY ("materialVarianceAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupInventory_capacityVarianceAccount_fkey" FOREIGN KEY ("capacityVarianceAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupInventory_overheadAccount_fkey" FOREIGN KEY ("overheadAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupInventory_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+CREATE INDEX "postingGroupInventory_partGroupId_locationId_idx" ON "postingGroupInventory" ("partGroupId", "locationId");
+
+ALTER TABLE "postingGroupInventory" ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Employees with accounting_view can view inventory posting groups" ON "postingGroupInventory"
+  FOR SELECT
+  USING (
+    coalesce(get_my_claim('accounting_view')::boolean,false) 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+CREATE POLICY "Employees with accounting_update can update inventory posting groups" ON "postingGroupInventory"
+  FOR UPDATE
+  USING (
+    coalesce(get_my_claim('accounting_update')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+
+CREATE TABLE "postingGroupPurchasing" (
+  "id" TEXT NOT NULL DEFAULT xid(),
+  "supplierTypeId" TEXT,
+  "partGroupId" TEXT,
+  "purchaseAccount" TEXT NOT NULL,
+  "purchaseDiscountAccount" TEXT NOT NULL,
+  "purchaseCreditAccount" TEXT NOT NULL,
+  "purchasePrepaymentAccount" TEXT NOT NULL,
+  "purchaseTaxPayableAccount" TEXT NOT NULL,
+  "updatedBy" TEXT,
+
+  CONSTRAINT "postingGroupPurchasing_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "postingGroupPurchasing_id_supplierTypeId_partGroupId_key" UNIQUE ("supplierTypeId", "partGroupId"),
+  CONSTRAINT "postingGroupPurchasing_partGroupId_fkey" FOREIGN KEY ("partGroupId") REFERENCES "partGroup" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupPurchasing_supplierTypeId_fkey" FOREIGN KEY ("supplierTypeId") REFERENCES "supplierType" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupPurchasing_purchaseAccount_fkey" FOREIGN KEY ("purchaseAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupPurchasing_purchaseDiscountAccount_fkey" FOREIGN KEY ("purchaseDiscountAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupPurchasing_purchaseCreditAccount_fkey" FOREIGN KEY ("purchaseCreditAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupPurchasing_purchasePrepaymentAccount_fkey" FOREIGN KEY ("purchasePrepaymentAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupPurchasing_purchaseTaxPayableAccount_fkey" FOREIGN KEY ("purchaseTaxPayableAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupPurchasing_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+CREATE INDEX "postingGroupPurchasing_partGroupId_supplierTypeId_idx" ON "postingGroupPurchasing" ("partGroupId", "supplierTypeId");
+
+ALTER TABLE "postingGroupPurchasing" ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Employees with accounting_view can view purchasing posting groups" ON "postingGroupPurchasing"
+  FOR SELECT
+  USING (
+    coalesce(get_my_claim('accounting_view')::boolean,false) 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+CREATE POLICY "Employees with accounting_update can update purchasing posting groups" ON "postingGroupPurchasing"
+  FOR UPDATE
+  USING (
+    coalesce(get_my_claim('accounting_update')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+CREATE TABLE "postingGroupSales" (
+  "id" TEXT NOT NULL DEFAULT xid(),
+  "customerTypeId" TEXT,
+  "partGroupId" TEXT,
+  "salesAccount" TEXT NOT NULL,
+  "salesDiscountAccount" TEXT NOT NULL,
+  "salesCreditAccount" TEXT NOT NULL,
+  "salesPrepaymentAccount" TEXT NOT NULL,
+  "salesTaxPayableAccount" TEXT NOT NULL,
+  "updatedBy" TEXT,
+
+  CONSTRAINT "postingGroupSales_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "postingGroupSales_id_customerTypeId_partGroupId_key" UNIQUE ("customerTypeId", "partGroupId"),
+  CONSTRAINT "postingGroupSales_partGroupId_fkey" FOREIGN KEY ("partGroupId") REFERENCES "partGroup" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupSales_customerTypeId_fkey" FOREIGN KEY ("customerTypeId") REFERENCES "customerType" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupSales_salesAccount_fkey" FOREIGN KEY ("salesAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupSales_salesDiscountAccount_fkey" FOREIGN KEY ("salesDiscountAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupSales_salesCreditAccount_fkey" FOREIGN KEY ("salesCreditAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupSales_salesPrepaymentAccount_fkey" FOREIGN KEY ("salesPrepaymentAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupSales_salesTaxPayableAccount_fkey" FOREIGN KEY ("salesTaxPayableAccount") REFERENCES "account" ("number") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "postingGroupSales_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+CREATE INDEX "postingGroupSales_partGroupId_customerTypeId_idx" ON "postingGroupSales" ("partGroupId", "customerTypeId");
+
+CREATE POLICY "Employees with accounting_view can view sales posting groups" ON "postingGroupSales"
+  FOR SELECT
+  USING (
+    coalesce(get_my_claim('accounting_view')::boolean,false) 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+CREATE POLICY "Employees with accounting_update can update sales posting groups" ON "postingGroupSales"
+  FOR UPDATE
+  USING (
+    coalesce(get_my_claim('accounting_update')::boolean, false) = true 
+    AND (get_my_claim('role'::text)) = '"employee"'::jsonb
+  );
+
+CREATE FUNCTION public.create_posting_groups_for_location()
+RETURNS TRIGGER AS $$
+DECLARE
+  part_group RECORD;
+  account_defaults RECORD;
+BEGIN
+  SELECT * INTO account_defaults FROM "accountDefault" WHERE "id" = TRUE;
+
+  FOR part_group IN SELECT "id" FROM "partGroup"
+  LOOP
+    INSERT INTO "postingGroupInventory" (
+      "partGroupId",
+      "locationId",
+      "costOfGoodsSoldAccount",
+      "inventoryAccount",
+      "inventoryInterimAccrualAccount",
+      "inventoryReceivedNotInvoicedAccount",
+      "inventoryShippedNotInvoicedAccount",
+      "workInProgressAccount",
+      "directCostAppliedAccount",
+      "overheadCostAppliedAccount",
+      "purchaseVarianceAccount",
+      "inventoryAdjustmentVarianceAccount",
+      "materialVarianceAccount",
+      "capacityVarianceAccount",
+      "overheadAccount",
+      "updatedBy"
+    ) VALUES (
+      part_group."id",
+      new."id",
+      account_defaults."costOfGoodsSoldAccount",
+      account_defaults."inventoryAccount",
+      account_defaults."inventoryInterimAccrualAccount",
+      account_defaults."inventoryReceivedNotInvoicedAccount",
+      account_defaults."inventoryShippedNotInvoicedAccount",
+      account_defaults."workInProgressAccount",
+      account_defaults."directCostAppliedAccount",
+      account_defaults."overheadCostAppliedAccount",
+      account_defaults."purchaseVarianceAccount",
+      account_defaults."inventoryAdjustmentVarianceAccount",
+      account_defaults."materialVarianceAccount",
+      account_defaults."capacityVarianceAccount",
+      account_defaults."overheadAccount",
+      new."createdBy"
+    );
+  END LOOP;
+
+  -- insert the null part group
+  INSERT INTO "postingGroupInventory" (
+    "partGroupId",
+    "locationId",
+    "costOfGoodsSoldAccount",
+    "inventoryAccount",
+    "inventoryInterimAccrualAccount",
+    "inventoryReceivedNotInvoicedAccount",
+    "inventoryShippedNotInvoicedAccount",
+    "workInProgressAccount",
+    "directCostAppliedAccount",
+    "overheadCostAppliedAccount",
+    "purchaseVarianceAccount",
+    "inventoryAdjustmentVarianceAccount",
+    "materialVarianceAccount",
+    "capacityVarianceAccount",
+    "overheadAccount",
+    "updatedBy"
+  ) VALUES (
+    NULL,
+    new."id",
+    account_defaults."costOfGoodsSoldAccount",
+    account_defaults."inventoryAccount",
+    account_defaults."inventoryInterimAccrualAccount",
+    account_defaults."inventoryReceivedNotInvoicedAccount",
+    account_defaults."inventoryShippedNotInvoicedAccount",
+    account_defaults."workInProgressAccount",
+    account_defaults."directCostAppliedAccount",
+    account_defaults."overheadCostAppliedAccount",
+    account_defaults."purchaseVarianceAccount",
+    account_defaults."inventoryAdjustmentVarianceAccount",
+    account_defaults."materialVarianceAccount",
+    account_defaults."capacityVarianceAccount",
+    account_defaults."overheadAccount",
+    new."createdBy"
+  );
+
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER create_location
+  AFTER INSERT on public."location"
+  FOR EACH ROW EXECUTE PROCEDURE public.create_posting_groups_for_location();
+
+
+CREATE FUNCTION public.create_posting_groups_for_part_group()
+RETURNS TRIGGER AS $$
+DECLARE
+  rec RECORD;
+  account_defaults RECORD;
+BEGIN
+  SELECT * INTO account_defaults FROM "accountDefault" WHERE "id" = TRUE;
+
+  FOR rec IN SELECT "id" FROM "customerType"
+  LOOP
+    INSERT INTO "postingGroupSales" (
+      "partGroupId",
+      "customerTypeId",
+      "salesAccount",
+      "salesDiscountAccount",
+      "salesCreditAccount",
+      "salesPrepaymentAccount",
+      "salesTaxPayableAccount",
+      "updatedBy"
+    ) VALUES (
+      new."id",
+      rec."id",
+      account_defaults."salesAccount",
+      account_defaults."salesDiscountAccount",
+      account_defaults."receivablesAccount",
+      account_defaults."prepaymentAccount",
+      account_defaults."salesTaxPayableAccount",
+      new."createdBy"
+    );
+  END LOOP;
+
+  -- insert the null customer type
+  INSERT INTO "postingGroupSales" (
+    "partGroupId",
+    "customerTypeId",
+    "salesAccount",
+    "salesDiscountAccount",
+    "salesCreditAccount",
+    "salesPrepaymentAccount",
+    "salesTaxPayableAccount",
+    "updatedBy"
+  ) VALUES (
+    new."id",
+    NULL,
+    account_defaults."salesAccount",
+    account_defaults."salesDiscountAccount",
+    account_defaults."receivablesAccount",
+    account_defaults."prepaymentAccount",
+    account_defaults."salesTaxPayableAccount",
+    new."createdBy"
+  );
+
+  FOR rec IN SELECT "id" FROM "supplierType"
+  LOOP
+    INSERT INTO "postingGroupPurchasing" (
+      "partGroupId",
+      "supplierTypeId",
+      "purchaseAccount",
+      "purchaseDiscountAccount",
+      "purchaseCreditAccount",
+      "purchasePrepaymentAccount",
+      "purchaseTaxPayableAccount",
+      "updatedBy"
+    ) VALUES (
+      new."id",
+      rec."id",
+      account_defaults."purchaseAccount",
+      account_defaults."purchaseAccount",
+      account_defaults."payablesAccount",
+      account_defaults."prepaymentAccount",
+      account_defaults."purchaseTaxPayableAccount",
+      new."createdBy"
+    );
+  END LOOP;
+
+  -- insert the null supplier type
+  INSERT INTO "postingGroupPurchasing" (
+    "partGroupId",
+    "supplierTypeId",
+    "purchaseAccount",
+    "purchaseDiscountAccount",
+    "purchaseCreditAccount",
+    "purchasePrepaymentAccount",
+    "purchaseTaxPayableAccount",
+    "updatedBy"
+  ) VALUES (
+    new."id",
+    NULL,
+    account_defaults."purchaseAccount",
+    account_defaults."purchaseAccount",
+    account_defaults."payablesAccount",
+    account_defaults."prepaymentAccount",
+    account_defaults."purchaseTaxPayableAccount",
+    new."createdBy"
+  );
+
+  FOR rec IN SELECT "id" FROM "location"
+  LOOP
+    INSERT INTO "postingGroupInventory" (
+      "partGroupId",
+      "locationId",
+      "costOfGoodsSoldAccount",
+      "inventoryAccount",
+      "inventoryInterimAccrualAccount",
+      "inventoryReceivedNotInvoicedAccount",
+      "inventoryShippedNotInvoicedAccount",
+      "workInProgressAccount",
+      "directCostAppliedAccount",
+      "overheadCostAppliedAccount",
+      "purchaseVarianceAccount",
+      "inventoryAdjustmentVarianceAccount",
+      "materialVarianceAccount",
+      "capacityVarianceAccount",
+      "overheadAccount",
+      "updatedBy"
+    ) VALUES (
+      new."id",
+      rec."id",
+      account_defaults."costOfGoodsSoldAccount",
+      account_defaults."inventoryAccount",
+      account_defaults."inventoryInterimAccrualAccount",
+      account_defaults."inventoryReceivedNotInvoicedAccount",
+      account_defaults."inventoryShippedNotInvoicedAccount",
+      account_defaults."workInProgressAccount",
+      account_defaults."directCostAppliedAccount",
+      account_defaults."overheadCostAppliedAccount",
+      account_defaults."purchaseVarianceAccount",
+      account_defaults."inventoryAdjustmentVarianceAccount",
+      account_defaults."materialVarianceAccount",
+      account_defaults."capacityVarianceAccount",
+      account_defaults."overheadAccount",
+      new."createdBy"
+    );
+  END LOOP;
+
+  -- insert the null location
+  INSERT INTO "postingGroupInventory" (
+    "partGroupId",
+    "locationId",
+    "costOfGoodsSoldAccount",
+    "inventoryAccount",
+    "inventoryInterimAccrualAccount",
+    "inventoryReceivedNotInvoicedAccount",
+    "inventoryShippedNotInvoicedAccount",
+    "workInProgressAccount",
+    "directCostAppliedAccount",
+    "overheadCostAppliedAccount",
+    "purchaseVarianceAccount",
+    "inventoryAdjustmentVarianceAccount",
+    "materialVarianceAccount",
+    "capacityVarianceAccount",
+    "overheadAccount",
+    "updatedBy"
+  ) VALUES (
+    new."id",
+    NULL,
+    account_defaults."costOfGoodsSoldAccount",
+    account_defaults."inventoryAccount",
+    account_defaults."inventoryInterimAccrualAccount",
+    account_defaults."inventoryReceivedNotInvoicedAccount",
+    account_defaults."inventoryShippedNotInvoicedAccount",
+    account_defaults."workInProgressAccount",
+    account_defaults."directCostAppliedAccount",
+    account_defaults."overheadCostAppliedAccount",
+    account_defaults."purchaseVarianceAccount",
+    account_defaults."inventoryAdjustmentVarianceAccount",
+    account_defaults."materialVarianceAccount",
+    account_defaults."capacityVarianceAccount",
+    account_defaults."overheadAccount",
+    new."createdBy"
+  );
+
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+
+CREATE TRIGGER create_part_group
+  AFTER INSERT on public."partGroup"
+  FOR EACH ROW EXECUTE PROCEDURE public.create_posting_groups_for_part_group();
+
+CREATE FUNCTION public.create_posting_groups_for_customer_type()
+RETURNS TRIGGER AS $$
+DECLARE
+  rec RECORD;
+  account_defaults RECORD;
+BEGIN
+  SELECT * INTO account_defaults FROM "accountDefault" WHERE "id" = TRUE;
+
+  FOR rec IN SELECT "id" FROM "partGroup"
+  LOOP
+    INSERT INTO "postingGroupSales" (
+      "customerTypeId",
+      "partGroupId",
+      "salesAccount",
+      "salesDiscountAccount",
+      "salesCreditAccount",
+      "salesPrepaymentAccount",
+      "salesTaxPayableAccount",
+      "updatedBy"
+    ) VALUES (
+      new."id",
+      rec."id",
+      account_defaults."salesAccount",
+      account_defaults."salesDiscountAccount",
+      account_defaults."salesAccount",
+      account_defaults."prepaymentAccount",
+      account_defaults."salesTaxPayableAccount",
+      new."createdBy"
+    );
+  END LOOP;
+
+  -- insert the null part group
+  INSERT INTO "postingGroupSales" (
+    "customerTypeId",
+    "partGroupId",
+    "salesAccount",
+    "salesDiscountAccount",
+    "salesCreditAccount",
+    "salesPrepaymentAccount",
+    "salesTaxPayableAccount",
+    "updatedBy"
+  ) VALUES (
+    new."id",
+    NULL,
+    account_defaults."salesAccount",
+    account_defaults."salesDiscountAccount",
+    account_defaults."salesAccount",
+    account_defaults."prepaymentAccount",
+    account_defaults."salesTaxPayableAccount",
+    new."createdBy"
+  );
+
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER create_posting_groups_for_customer_type
+  AFTER INSERT on public."customerType"
+  FOR EACH ROW EXECUTE PROCEDURE public.create_posting_groups_for_customer_type();
+
+
+CREATE FUNCTION public.create_posting_groups_for_supplier_type()
+RETURNS TRIGGER AS $$
+DECLARE
+  rec RECORD;
+  account_defaults RECORD;
+BEGIN
+  SELECT * INTO account_defaults FROM "accountDefault" WHERE "id" = TRUE;
+
+  FOR rec IN SELECT "id" FROM "partGroup"
+  LOOP
+    INSERT INTO "postingGroupPurchasing" (
+      "supplierTypeId",
+      "partGroupId",
+      "purchaseAccount",
+      "purchaseDiscountAccount",
+      "purchaseCreditAccount",
+      "purchasePrepaymentAccount",
+      "purchaseTaxPayableAccount",
+      "updatedBy"
+    ) VALUES (
+      new."id",
+      rec."id",
+      account_defaults."purchaseAccount",
+      account_defaults."purchaseAccount",
+      account_defaults."purchaseAccount",
+      account_defaults."prepaymentAccount",
+      account_defaults."purchaseTaxPayableAccount",
+      new."createdBy"
+    );
+  END LOOP;
+
+  -- insert the null part group
+  INSERT INTO "postingGroupPurchasing" (
+    "supplierTypeId",
+    "partGroupId",
+    "purchaseAccount",
+    "purchaseDiscountAccount",
+    "purchaseCreditAccount",
+    "purchasePrepaymentAccount",
+    "purchaseTaxPayableAccount",
+    "updatedBy"
+  ) VALUES (
+    new."id",
+    NULL,
+    account_defaults."purchaseAccount",
+    account_defaults."purchaseAccount",
+    account_defaults."purchaseAccount",
+    account_defaults."prepaymentAccount",
+    account_defaults."purchaseTaxPayableAccount",
+    new."createdBy"
+  );
+
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER create_posting_groups_for_supplier_type
+  AFTER INSERT on public."supplierType"
+  FOR EACH ROW EXECUTE PROCEDURE public.create_posting_groups_for_supplier_type();
+
 ```
 

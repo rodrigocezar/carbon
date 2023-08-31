@@ -5,7 +5,7 @@ import type { TypeOfValidator } from "~/types/validators";
 import type { GenericQueryFilters } from "~/utils/query";
 import { setGenericQueryFilters } from "~/utils/query";
 import { sanitize } from "~/utils/supabase";
-import type { customerValidator } from "./sales.form";
+import type { customerTypeValidator, customerValidator } from "./sales.form";
 
 export async function deleteCustomerContact(
   client: SupabaseClient<Database>,
@@ -169,6 +169,10 @@ export async function getCustomerTypes(
   }
 
   return query;
+}
+
+export async function getCustomerTypesList(client: SupabaseClient<Database>) {
+  return client.from("customerType").select("id, name");
 }
 
 export async function insertCustomer(
@@ -343,11 +347,21 @@ export async function updateCustomerLocation(
 
 export async function upsertCustomerType(
   client: SupabaseClient<Database>,
-  customerType: { id?: string; name: string; color: string | null }
+  customerType:
+    | (Omit<TypeOfValidator<typeof customerTypeValidator>, "id"> & {
+        createdBy: string;
+      })
+    | (Omit<TypeOfValidator<typeof customerTypeValidator>, "id"> & {
+        id: string;
+        updatedBy: string;
+      })
 ) {
-  return client
-    .from("customerType")
-    .upsert([customerType])
-    .select("id")
-    .single();
+  if ("createdBy" in customerType) {
+    return client.from("customerType").insert([customerType]);
+  } else {
+    return client
+      .from("customerType")
+      .update(sanitize(customerType))
+      .eq("id", customerType.id);
+  }
 }

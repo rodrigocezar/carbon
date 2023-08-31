@@ -11,6 +11,7 @@ import type {
   purchaseOrderLineValidator,
   purchaseOrderPaymentValidator,
   purchaseOrderValidator,
+  supplierTypeValidator,
   supplierValidator,
 } from "./purchasing.form";
 
@@ -314,6 +315,10 @@ export async function getSupplierTypes(
   return query;
 }
 
+export async function getSupplierTypesList(client: SupabaseClient<Database>) {
+  return client.from("supplierType").select("id, name");
+}
+
 export async function insertSupplier(
   client: SupabaseClient<Database>,
   supplier:
@@ -611,14 +616,26 @@ export async function upsertPurchaseOrderLine(
   if ("id" in purchaseOrderLine) {
     return client
       .from("purchaseOrderLine")
-      .update(sanitize(purchaseOrderLine))
+      .update(
+        sanitize({
+          ...purchaseOrderLine,
+          quantityToReceive: purchaseOrderLine.purchaseQuantity,
+          quantityToInvoice: purchaseOrderLine.purchaseQuantity,
+        })
+      )
       .eq("id", purchaseOrderLine.id)
       .select("id")
       .single();
   }
   return client
     .from("purchaseOrderLine")
-    .insert([purchaseOrderLine])
+    .insert([
+      {
+        ...purchaseOrderLine,
+        quantityToReceive: purchaseOrderLine.purchaseQuantity,
+        quantityToInvoice: purchaseOrderLine.purchaseQuantity,
+      },
+    ])
     .select("id")
     .single();
 }
@@ -651,11 +668,21 @@ export async function upsertPurchaseOrderPayment(
 
 export async function upsertSupplierType(
   client: SupabaseClient<Database>,
-  supplierType: { id?: string; name: string; color: string | null }
+  supplierType:
+    | (Omit<TypeOfValidator<typeof supplierTypeValidator>, "id"> & {
+        createdBy: string;
+      })
+    | (Omit<TypeOfValidator<typeof supplierTypeValidator>, "id"> & {
+        id: string;
+        updatedBy: string;
+      })
 ) {
-  return client
-    .from("supplierType")
-    .upsert([supplierType])
-    .select("id")
-    .single();
+  if ("createdBy" in supplierType) {
+    return client.from("supplierType").insert([supplierType]);
+  } else {
+    return client
+      .from("supplierType")
+      .update(sanitize(supplierType))
+      .eq("id", supplierType.id);
+  }
 }

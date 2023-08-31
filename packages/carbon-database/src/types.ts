@@ -250,6 +250,604 @@ export interface Database {
           }
         ];
       };
+      accountDefault: {
+        Row: {
+          accumulatedDepreciationAccount: string;
+          accumulatedDepreciationOnDisposalAccount: string;
+          assetAquisitionCostAccount: string;
+          assetAquisitionCostOnDisposalAccount: string;
+          assetDepreciationExpenseAccount: string;
+          assetGainsAndLossesAccount: string;
+          bankCashAccount: string;
+          bankForeignCurrencyAccount: string;
+          bankLocalCurrencyAccount: string;
+          capacityVarianceAccount: string;
+          costOfGoodsSoldAccount: string;
+          customerPaymentDiscountAccount: string;
+          directCostAppliedAccount: string;
+          id: boolean;
+          interestAccount: string;
+          inventoryAccount: string;
+          inventoryAdjustmentVarianceAccount: string;
+          inventoryInterimAccrualAccount: string;
+          inventoryReceivedNotInvoicedAccount: string;
+          inventoryShippedNotInvoicedAccount: string;
+          maintenanceAccount: string;
+          materialVarianceAccount: string;
+          overheadAccount: string;
+          overheadCostAppliedAccount: string;
+          payablesAccount: string;
+          prepaymentAccount: string;
+          purchaseAccount: string;
+          purchaseTaxPayableAccount: string;
+          purchaseVarianceAccount: string;
+          receivablesAccount: string;
+          retainedEarningsAccount: string;
+          reverseChargeSalesTaxPayableAccount: string;
+          roundingAccount: string;
+          salesAccount: string;
+          salesDiscountAccount: string;
+          salesTaxPayableAccount: string;
+          serviceChargeAccount: string;
+          supplierPaymentDiscountAccount: string;
+          updatedBy: string | null;
+          workInProgressAccount: string;
+        };
+        Insert: {
+          accumulatedDepreciationAccount: string;
+          accumulatedDepreciationOnDisposalAccount: string;
+          assetAquisitionCostAccount: string;
+          assetAquisitionCostOnDisposalAccount: string;
+          assetDepreciationExpenseAccount: string;
+          assetGainsAndLossesAccount: string;
+          bankCashAccount: string;
+          bankForeignCurrencyAccount: string;
+          bankLocalCurrencyAccount: string;
+          capacityVarianceAccount: string;
+          costOfGoodsSoldAccount: string;
+          customerPaymentDiscountAccount: string;
+          directCostAppliedAccount: string;
+          id?: boolean;
+          interestAccount: string;
+          inventoryAccount: string;
+          inventoryAdjustmentVarianceAccount: string;
+          inventoryInterimAccrualAccount: string;
+          inventoryReceivedNotInvoicedAccount: string;
+          inventoryShippedNotInvoicedAccount: string;
+          maintenanceAccount: string;
+          materialVarianceAccount: string;
+          overheadAccount: string;
+          overheadCostAppliedAccount: string;
+          payablesAccount: string;
+          prepaymentAccount: string;
+          purchaseAccount: string;
+          purchaseTaxPayableAccount: string;
+          purchaseVarianceAccount: string;
+          receivablesAccount: string;
+          retainedEarningsAccount: string;
+          reverseChargeSalesTaxPayableAccount: string;
+          roundingAccount: string;
+          salesAccount: string;
+          salesDiscountAccount: string;
+          salesTaxPayableAccount: string;
+          serviceChargeAccount: string;
+          supplierPaymentDiscountAccount: string;
+          updatedBy?: string | null;
+          workInProgressAccount: string;
+        };
+        Update: {
+          accumulatedDepreciationAccount?: string;
+          accumulatedDepreciationOnDisposalAccount?: string;
+          assetAquisitionCostAccount?: string;
+          assetAquisitionCostOnDisposalAccount?: string;
+          assetDepreciationExpenseAccount?: string;
+          assetGainsAndLossesAccount?: string;
+          bankCashAccount?: string;
+          bankForeignCurrencyAccount?: string;
+          bankLocalCurrencyAccount?: string;
+          capacityVarianceAccount?: string;
+          costOfGoodsSoldAccount?: string;
+          customerPaymentDiscountAccount?: string;
+          directCostAppliedAccount?: string;
+          id?: boolean;
+          interestAccount?: string;
+          inventoryAccount?: string;
+          inventoryAdjustmentVarianceAccount?: string;
+          inventoryInterimAccrualAccount?: string;
+          inventoryReceivedNotInvoicedAccount?: string;
+          inventoryShippedNotInvoicedAccount?: string;
+          maintenanceAccount?: string;
+          materialVarianceAccount?: string;
+          overheadAccount?: string;
+          overheadCostAppliedAccount?: string;
+          payablesAccount?: string;
+          prepaymentAccount?: string;
+          purchaseAccount?: string;
+          purchaseTaxPayableAccount?: string;
+          purchaseVarianceAccount?: string;
+          receivablesAccount?: string;
+          retainedEarningsAccount?: string;
+          reverseChargeSalesTaxPayableAccount?: string;
+          roundingAccount?: string;
+          salesAccount?: string;
+          salesDiscountAccount?: string;
+          salesTaxPayableAccount?: string;
+          serviceChargeAccount?: string;
+          supplierPaymentDiscountAccount?: string;
+          updatedBy?: string | null;
+          workInProgressAccount?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "accountDefault_accumulatedDepreciationAccount_fkey";
+            columns: ["accumulatedDepreciationAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_accumulatedDepreciationAccount_fkey";
+            columns: ["accumulatedDepreciationAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_accumulatedDepreciationOnDisposalAccount_fkey";
+            columns: ["accumulatedDepreciationOnDisposalAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_accumulatedDepreciationOnDisposalAccount_fkey";
+            columns: ["accumulatedDepreciationOnDisposalAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_aquisitionCostAccount_fkey";
+            columns: ["assetAquisitionCostAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_aquisitionCostAccount_fkey";
+            columns: ["assetAquisitionCostAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_aquisitionCostOnDisposalAccount_fkey";
+            columns: ["assetAquisitionCostOnDisposalAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_aquisitionCostOnDisposalAccount_fkey";
+            columns: ["assetAquisitionCostOnDisposalAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_assetDepreciationExpenseAccount_fkey";
+            columns: ["assetDepreciationExpenseAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_assetDepreciationExpenseAccount_fkey";
+            columns: ["assetDepreciationExpenseAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_assetGainsAndLossesAccount_fkey";
+            columns: ["assetGainsAndLossesAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_assetGainsAndLossesAccount_fkey";
+            columns: ["assetGainsAndLossesAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_bankCashAccount_fkey";
+            columns: ["bankCashAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_bankCashAccount_fkey";
+            columns: ["bankCashAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_bankForeignCurrencyAccount_fkey";
+            columns: ["bankForeignCurrencyAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_bankForeignCurrencyAccount_fkey";
+            columns: ["bankForeignCurrencyAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_bankLocalCurrencyAccount_fkey";
+            columns: ["bankLocalCurrencyAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_bankLocalCurrencyAccount_fkey";
+            columns: ["bankLocalCurrencyAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_capacityVarianceAccount_fkey";
+            columns: ["capacityVarianceAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_capacityVarianceAccount_fkey";
+            columns: ["capacityVarianceAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_costOfGoodsSoldAccount_fkey";
+            columns: ["costOfGoodsSoldAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_costOfGoodsSoldAccount_fkey";
+            columns: ["costOfGoodsSoldAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_customerPaymentDiscountAccount_fkey";
+            columns: ["customerPaymentDiscountAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_customerPaymentDiscountAccount_fkey";
+            columns: ["customerPaymentDiscountAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_directCostAppliedAccount_fkey";
+            columns: ["directCostAppliedAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_directCostAppliedAccount_fkey";
+            columns: ["directCostAppliedAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_interestAccount_fkey";
+            columns: ["interestAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_interestAccount_fkey";
+            columns: ["interestAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_inventoryAccount_fkey";
+            columns: ["inventoryAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_inventoryAccount_fkey";
+            columns: ["inventoryAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_inventoryAdjustmentVarianceAccount_fkey";
+            columns: ["inventoryAdjustmentVarianceAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_inventoryAdjustmentVarianceAccount_fkey";
+            columns: ["inventoryAdjustmentVarianceAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_inventoryInterimAccrualAccount_fkey";
+            columns: ["inventoryInterimAccrualAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_inventoryInterimAccrualAccount_fkey";
+            columns: ["inventoryInterimAccrualAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_inventoryReceivedNotInvoicedAccount_fkey";
+            columns: ["inventoryReceivedNotInvoicedAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_inventoryReceivedNotInvoicedAccount_fkey";
+            columns: ["inventoryReceivedNotInvoicedAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_inventoryShippedNotInvoicedAccount_fkey";
+            columns: ["inventoryShippedNotInvoicedAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_inventoryShippedNotInvoicedAccount_fkey";
+            columns: ["inventoryShippedNotInvoicedAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_maintenanceAccount_fkey";
+            columns: ["maintenanceAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_maintenanceAccount_fkey";
+            columns: ["maintenanceAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_materialVarianceAccount_fkey";
+            columns: ["materialVarianceAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_materialVarianceAccount_fkey";
+            columns: ["materialVarianceAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_overheadAccount_fkey";
+            columns: ["overheadAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_overheadAccount_fkey";
+            columns: ["overheadAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_overheadCostAppliedAccount_fkey";
+            columns: ["overheadCostAppliedAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_overheadCostAppliedAccount_fkey";
+            columns: ["overheadCostAppliedAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_payablesAccount_fkey";
+            columns: ["payablesAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_payablesAccount_fkey";
+            columns: ["payablesAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_prepaymentAccount_fkey";
+            columns: ["prepaymentAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_prepaymentAccount_fkey";
+            columns: ["prepaymentAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_purchaseAccount_fkey";
+            columns: ["purchaseAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_purchaseAccount_fkey";
+            columns: ["purchaseAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_purchaseTaxPayableAccount_fkey";
+            columns: ["purchaseTaxPayableAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_purchaseTaxPayableAccount_fkey";
+            columns: ["purchaseTaxPayableAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_purchaseVarianceAccount_fkey";
+            columns: ["purchaseVarianceAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_purchaseVarianceAccount_fkey";
+            columns: ["purchaseVarianceAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_receivablesAccount_fkey";
+            columns: ["receivablesAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_receivablesAccount_fkey";
+            columns: ["receivablesAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_retainedEarningsAccount_fkey";
+            columns: ["retainedEarningsAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_retainedEarningsAccount_fkey";
+            columns: ["retainedEarningsAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_reverseChargeSalesTaxPayableAccount_fkey";
+            columns: ["reverseChargeSalesTaxPayableAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_reverseChargeSalesTaxPayableAccount_fkey";
+            columns: ["reverseChargeSalesTaxPayableAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_roundingAccount_fkey";
+            columns: ["roundingAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_roundingAccount_fkey";
+            columns: ["roundingAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_salesAccount_fkey";
+            columns: ["salesAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_salesAccount_fkey";
+            columns: ["salesAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_salesDiscountAccount_fkey";
+            columns: ["salesDiscountAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_salesDiscountAccount_fkey";
+            columns: ["salesDiscountAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_salesTaxPayableAccount_fkey";
+            columns: ["salesTaxPayableAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_salesTaxPayableAccount_fkey";
+            columns: ["salesTaxPayableAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_serviceChargeAccount_fkey";
+            columns: ["serviceChargeAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_serviceChargeAccount_fkey";
+            columns: ["serviceChargeAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_supplierPaymentDiscountAccount_fkey";
+            columns: ["supplierPaymentDiscountAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_supplierPaymentDiscountAccount_fkey";
+            columns: ["supplierPaymentDiscountAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "accountDefault_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
+            foreignKeyName: "accountDefault_workInProgressAccount_fkey";
+            columns: ["workInProgressAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "accountDefault_workInProgressAccount_fkey";
+            columns: ["workInProgressAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          }
+        ];
+      };
       accountSubcategory: {
         Row: {
           accountCategoryId: string;
@@ -983,28 +1581,59 @@ export interface Database {
         Row: {
           color: string | null;
           createdAt: string;
+          createdBy: string;
           id: string;
           name: string;
           protected: boolean;
           updatedAt: string | null;
+          updatedBy: string | null;
         };
         Insert: {
           color?: string | null;
           createdAt?: string;
+          createdBy: string;
           id?: string;
           name: string;
           protected?: boolean;
           updatedAt?: string | null;
+          updatedBy?: string | null;
         };
         Update: {
           color?: string | null;
           createdAt?: string;
+          createdBy?: string;
           id?: string;
           name?: string;
           protected?: boolean;
           updatedAt?: string | null;
+          updatedBy?: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "customerType_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "customerType_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
+            foreignKeyName: "customerType_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "customerType_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          }
+        ];
       };
       department: {
         Row: {
@@ -2096,10 +2725,7 @@ export interface Database {
           costIsAdjusted: boolean;
           createdAt: string;
           createdBy: string;
-          discountAccountId: string | null;
-          inventoryAccountId: string | null;
           partId: string;
-          salesAccountId: string | null;
           standardCost: number;
           unitCost: number;
           updatedAt: string | null;
@@ -2110,10 +2736,7 @@ export interface Database {
           costIsAdjusted?: boolean;
           createdAt?: string;
           createdBy: string;
-          discountAccountId?: string | null;
-          inventoryAccountId?: string | null;
           partId: string;
-          salesAccountId?: string | null;
           standardCost?: number;
           unitCost?: number;
           updatedAt?: string | null;
@@ -2124,10 +2747,7 @@ export interface Database {
           costIsAdjusted?: boolean;
           createdAt?: string;
           createdBy?: string;
-          discountAccountId?: string | null;
-          inventoryAccountId?: string | null;
           partId?: string;
-          salesAccountId?: string | null;
           standardCost?: number;
           unitCost?: number;
           updatedAt?: string | null;
@@ -2159,42 +2779,6 @@ export interface Database {
             referencedColumns: ["userId"];
           },
           {
-            foreignKeyName: "partGroup_discountAccountId_fkey";
-            columns: ["discountAccountId"];
-            referencedRelation: "account";
-            referencedColumns: ["number"];
-          },
-          {
-            foreignKeyName: "partGroup_discountAccountId_fkey";
-            columns: ["discountAccountId"];
-            referencedRelation: "accounts_view";
-            referencedColumns: ["number"];
-          },
-          {
-            foreignKeyName: "partGroup_inventoryAccountId_fkey";
-            columns: ["inventoryAccountId"];
-            referencedRelation: "account";
-            referencedColumns: ["number"];
-          },
-          {
-            foreignKeyName: "partGroup_inventoryAccountId_fkey";
-            columns: ["inventoryAccountId"];
-            referencedRelation: "accounts_view";
-            referencedColumns: ["number"];
-          },
-          {
-            foreignKeyName: "partGroup_salesAccountId_fkey";
-            columns: ["salesAccountId"];
-            referencedRelation: "account";
-            referencedColumns: ["number"];
-          },
-          {
-            foreignKeyName: "partGroup_salesAccountId_fkey";
-            columns: ["salesAccountId"];
-            referencedRelation: "accounts_view";
-            referencedColumns: ["number"];
-          },
-          {
             foreignKeyName: "partGroup_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user";
@@ -2211,104 +2795,35 @@ export interface Database {
       partGroup: {
         Row: {
           active: boolean;
-          costOfGoodsSoldLaborAccountId: string | null;
-          costOfGoodsSoldMaterialAccountId: string | null;
-          costOfGoodsSoldOverheadAccountId: string | null;
-          costOfGoodsSoldSubcontractorAccountId: string | null;
           createdAt: string;
           createdBy: string;
           description: string | null;
-          discountAccountId: string | null;
           id: string;
-          inventoryAccountId: string | null;
           name: string;
-          salesAccountId: string | null;
           updatedAt: string | null;
           updatedBy: string | null;
         };
         Insert: {
           active?: boolean;
-          costOfGoodsSoldLaborAccountId?: string | null;
-          costOfGoodsSoldMaterialAccountId?: string | null;
-          costOfGoodsSoldOverheadAccountId?: string | null;
-          costOfGoodsSoldSubcontractorAccountId?: string | null;
           createdAt?: string;
           createdBy: string;
           description?: string | null;
-          discountAccountId?: string | null;
           id?: string;
-          inventoryAccountId?: string | null;
           name: string;
-          salesAccountId?: string | null;
           updatedAt?: string | null;
           updatedBy?: string | null;
         };
         Update: {
           active?: boolean;
-          costOfGoodsSoldLaborAccountId?: string | null;
-          costOfGoodsSoldMaterialAccountId?: string | null;
-          costOfGoodsSoldOverheadAccountId?: string | null;
-          costOfGoodsSoldSubcontractorAccountId?: string | null;
           createdAt?: string;
           createdBy?: string;
           description?: string | null;
-          discountAccountId?: string | null;
           id?: string;
-          inventoryAccountId?: string | null;
           name?: string;
-          salesAccountId?: string | null;
           updatedAt?: string | null;
           updatedBy?: string | null;
         };
         Relationships: [
-          {
-            foreignKeyName: "partGroup_costOfGoodsSoldLaborAccountId_fkey";
-            columns: ["costOfGoodsSoldLaborAccountId"];
-            referencedRelation: "account";
-            referencedColumns: ["number"];
-          },
-          {
-            foreignKeyName: "partGroup_costOfGoodsSoldLaborAccountId_fkey";
-            columns: ["costOfGoodsSoldLaborAccountId"];
-            referencedRelation: "accounts_view";
-            referencedColumns: ["number"];
-          },
-          {
-            foreignKeyName: "partGroup_costOfGoodsSoldMaterialAccountId_fkey";
-            columns: ["costOfGoodsSoldMaterialAccountId"];
-            referencedRelation: "account";
-            referencedColumns: ["number"];
-          },
-          {
-            foreignKeyName: "partGroup_costOfGoodsSoldMaterialAccountId_fkey";
-            columns: ["costOfGoodsSoldMaterialAccountId"];
-            referencedRelation: "accounts_view";
-            referencedColumns: ["number"];
-          },
-          {
-            foreignKeyName: "partGroup_costOfGoodsSoldOverheadAccountId_fkey";
-            columns: ["costOfGoodsSoldOverheadAccountId"];
-            referencedRelation: "account";
-            referencedColumns: ["number"];
-          },
-          {
-            foreignKeyName: "partGroup_costOfGoodsSoldOverheadAccountId_fkey";
-            columns: ["costOfGoodsSoldOverheadAccountId"];
-            referencedRelation: "accounts_view";
-            referencedColumns: ["number"];
-          },
-          {
-            foreignKeyName: "partGroup_costOfGoodsSoldSubcontractorAccountId_fkey";
-            columns: ["costOfGoodsSoldSubcontractorAccountId"];
-            referencedRelation: "account";
-            referencedColumns: ["number"];
-          },
-          {
-            foreignKeyName: "partGroup_costOfGoodsSoldSubcontractorAccountId_fkey";
-            columns: ["costOfGoodsSoldSubcontractorAccountId"];
-            referencedRelation: "accounts_view";
-            referencedColumns: ["number"];
-          },
           {
             foreignKeyName: "partGroup_createdBy_fkey";
             columns: ["createdBy"];
@@ -2320,42 +2835,6 @@ export interface Database {
             columns: ["createdBy"];
             referencedRelation: "user_default_view";
             referencedColumns: ["userId"];
-          },
-          {
-            foreignKeyName: "partGroup_discountAccountId_fkey";
-            columns: ["discountAccountId"];
-            referencedRelation: "account";
-            referencedColumns: ["number"];
-          },
-          {
-            foreignKeyName: "partGroup_discountAccountId_fkey";
-            columns: ["discountAccountId"];
-            referencedRelation: "accounts_view";
-            referencedColumns: ["number"];
-          },
-          {
-            foreignKeyName: "partGroup_inventoryAccountId_fkey";
-            columns: ["inventoryAccountId"];
-            referencedRelation: "account";
-            referencedColumns: ["number"];
-          },
-          {
-            foreignKeyName: "partGroup_inventoryAccountId_fkey";
-            columns: ["inventoryAccountId"];
-            referencedRelation: "accounts_view";
-            referencedColumns: ["number"];
-          },
-          {
-            foreignKeyName: "partGroup_salesAccountId_fkey";
-            columns: ["salesAccountId"];
-            referencedRelation: "account";
-            referencedColumns: ["number"];
-          },
-          {
-            foreignKeyName: "partGroup_salesAccountId_fkey";
-            columns: ["salesAccountId"];
-            referencedRelation: "accounts_view";
-            referencedColumns: ["number"];
           },
           {
             foreignKeyName: "partGroup_updatedBy_fkey";
@@ -3172,6 +3651,495 @@ export interface Database {
           },
           {
             foreignKeyName: "paymentTerm_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          }
+        ];
+      };
+      postingGroupInventory: {
+        Row: {
+          capacityVarianceAccount: string;
+          costOfGoodsSoldAccount: string;
+          directCostAppliedAccount: string;
+          id: string;
+          inventoryAccount: string;
+          inventoryAdjustmentVarianceAccount: string;
+          inventoryInterimAccrualAccount: string;
+          inventoryReceivedNotInvoicedAccount: string;
+          inventoryShippedNotInvoicedAccount: string;
+          locationId: string | null;
+          materialVarianceAccount: string;
+          overheadAccount: string;
+          overheadCostAppliedAccount: string;
+          partGroupId: string | null;
+          purchaseVarianceAccount: string;
+          updatedBy: string | null;
+          workInProgressAccount: string;
+        };
+        Insert: {
+          capacityVarianceAccount: string;
+          costOfGoodsSoldAccount: string;
+          directCostAppliedAccount: string;
+          id?: string;
+          inventoryAccount: string;
+          inventoryAdjustmentVarianceAccount: string;
+          inventoryInterimAccrualAccount: string;
+          inventoryReceivedNotInvoicedAccount: string;
+          inventoryShippedNotInvoicedAccount: string;
+          locationId?: string | null;
+          materialVarianceAccount: string;
+          overheadAccount: string;
+          overheadCostAppliedAccount: string;
+          partGroupId?: string | null;
+          purchaseVarianceAccount: string;
+          updatedBy?: string | null;
+          workInProgressAccount: string;
+        };
+        Update: {
+          capacityVarianceAccount?: string;
+          costOfGoodsSoldAccount?: string;
+          directCostAppliedAccount?: string;
+          id?: string;
+          inventoryAccount?: string;
+          inventoryAdjustmentVarianceAccount?: string;
+          inventoryInterimAccrualAccount?: string;
+          inventoryReceivedNotInvoicedAccount?: string;
+          inventoryShippedNotInvoicedAccount?: string;
+          locationId?: string | null;
+          materialVarianceAccount?: string;
+          overheadAccount?: string;
+          overheadCostAppliedAccount?: string;
+          partGroupId?: string | null;
+          purchaseVarianceAccount?: string;
+          updatedBy?: string | null;
+          workInProgressAccount?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "postingGroupInventory_capacityVarianceAccount_fkey";
+            columns: ["capacityVarianceAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_capacityVarianceAccount_fkey";
+            columns: ["capacityVarianceAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_costOfGoodsSoldAccount_fkey";
+            columns: ["costOfGoodsSoldAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_costOfGoodsSoldAccount_fkey";
+            columns: ["costOfGoodsSoldAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_directCostAppliedAccount_fkey";
+            columns: ["directCostAppliedAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_directCostAppliedAccount_fkey";
+            columns: ["directCostAppliedAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_inventoryAccount_fkey";
+            columns: ["inventoryAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_inventoryAccount_fkey";
+            columns: ["inventoryAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_inventoryAdjustmentVarianceAccount_fkey";
+            columns: ["inventoryAdjustmentVarianceAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_inventoryAdjustmentVarianceAccount_fkey";
+            columns: ["inventoryAdjustmentVarianceAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_inventoryInterimAccrualAccount_fkey";
+            columns: ["inventoryInterimAccrualAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_inventoryInterimAccrualAccount_fkey";
+            columns: ["inventoryInterimAccrualAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_inventoryReceivedNotInvoicedAccount_fkey";
+            columns: ["inventoryReceivedNotInvoicedAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_inventoryReceivedNotInvoicedAccount_fkey";
+            columns: ["inventoryReceivedNotInvoicedAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_inventoryShippedNotInvoicedAccount_fkey";
+            columns: ["inventoryShippedNotInvoicedAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_inventoryShippedNotInvoicedAccount_fkey";
+            columns: ["inventoryShippedNotInvoicedAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "location";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_locationId_fkey";
+            columns: ["locationId"];
+            referencedRelation: "purchase_order_view";
+            referencedColumns: ["locationId"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_materialVarianceAccount_fkey";
+            columns: ["materialVarianceAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_materialVarianceAccount_fkey";
+            columns: ["materialVarianceAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_overheadAccount_fkey";
+            columns: ["overheadAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_overheadAccount_fkey";
+            columns: ["overheadAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_overheadCostAppliedAccount_fkey";
+            columns: ["overheadCostAppliedAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_overheadCostAppliedAccount_fkey";
+            columns: ["overheadCostAppliedAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_partGroupId_fkey";
+            columns: ["partGroupId"];
+            referencedRelation: "partGroup";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_purchaseVarianceAccount_fkey";
+            columns: ["purchaseVarianceAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_purchaseVarianceAccount_fkey";
+            columns: ["purchaseVarianceAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_workInProgressAccount_fkey";
+            columns: ["workInProgressAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupInventory_workInProgressAccount_fkey";
+            columns: ["workInProgressAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          }
+        ];
+      };
+      postingGroupPurchasing: {
+        Row: {
+          id: string;
+          partGroupId: string | null;
+          purchaseAccount: string;
+          purchaseCreditAccount: string;
+          purchaseDiscountAccount: string;
+          purchasePrepaymentAccount: string;
+          purchaseTaxPayableAccount: string;
+          supplierTypeId: string | null;
+          updatedBy: string | null;
+        };
+        Insert: {
+          id?: string;
+          partGroupId?: string | null;
+          purchaseAccount: string;
+          purchaseCreditAccount: string;
+          purchaseDiscountAccount: string;
+          purchasePrepaymentAccount: string;
+          purchaseTaxPayableAccount: string;
+          supplierTypeId?: string | null;
+          updatedBy?: string | null;
+        };
+        Update: {
+          id?: string;
+          partGroupId?: string | null;
+          purchaseAccount?: string;
+          purchaseCreditAccount?: string;
+          purchaseDiscountAccount?: string;
+          purchasePrepaymentAccount?: string;
+          purchaseTaxPayableAccount?: string;
+          supplierTypeId?: string | null;
+          updatedBy?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "postingGroupPurchasing_partGroupId_fkey";
+            columns: ["partGroupId"];
+            referencedRelation: "partGroup";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "postingGroupPurchasing_purchaseAccount_fkey";
+            columns: ["purchaseAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupPurchasing_purchaseAccount_fkey";
+            columns: ["purchaseAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupPurchasing_purchaseCreditAccount_fkey";
+            columns: ["purchaseCreditAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupPurchasing_purchaseCreditAccount_fkey";
+            columns: ["purchaseCreditAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupPurchasing_purchaseDiscountAccount_fkey";
+            columns: ["purchaseDiscountAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupPurchasing_purchaseDiscountAccount_fkey";
+            columns: ["purchaseDiscountAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupPurchasing_purchasePrepaymentAccount_fkey";
+            columns: ["purchasePrepaymentAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupPurchasing_purchasePrepaymentAccount_fkey";
+            columns: ["purchasePrepaymentAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupPurchasing_purchaseTaxPayableAccount_fkey";
+            columns: ["purchaseTaxPayableAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupPurchasing_purchaseTaxPayableAccount_fkey";
+            columns: ["purchaseTaxPayableAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupPurchasing_supplierTypeId_fkey";
+            columns: ["supplierTypeId"];
+            referencedRelation: "supplierType";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "postingGroupPurchasing_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "postingGroupPurchasing_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          }
+        ];
+      };
+      postingGroupSales: {
+        Row: {
+          customerTypeId: string | null;
+          id: string;
+          partGroupId: string | null;
+          salesAccount: string;
+          salesCreditAccount: string;
+          salesDiscountAccount: string;
+          salesPrepaymentAccount: string;
+          salesTaxPayableAccount: string;
+          updatedBy: string | null;
+        };
+        Insert: {
+          customerTypeId?: string | null;
+          id?: string;
+          partGroupId?: string | null;
+          salesAccount: string;
+          salesCreditAccount: string;
+          salesDiscountAccount: string;
+          salesPrepaymentAccount: string;
+          salesTaxPayableAccount: string;
+          updatedBy?: string | null;
+        };
+        Update: {
+          customerTypeId?: string | null;
+          id?: string;
+          partGroupId?: string | null;
+          salesAccount?: string;
+          salesCreditAccount?: string;
+          salesDiscountAccount?: string;
+          salesPrepaymentAccount?: string;
+          salesTaxPayableAccount?: string;
+          updatedBy?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "postingGroupSales_customerTypeId_fkey";
+            columns: ["customerTypeId"];
+            referencedRelation: "customerType";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "postingGroupSales_partGroupId_fkey";
+            columns: ["partGroupId"];
+            referencedRelation: "partGroup";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "postingGroupSales_salesAccount_fkey";
+            columns: ["salesAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupSales_salesAccount_fkey";
+            columns: ["salesAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupSales_salesCreditAccount_fkey";
+            columns: ["salesCreditAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupSales_salesCreditAccount_fkey";
+            columns: ["salesCreditAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupSales_salesDiscountAccount_fkey";
+            columns: ["salesDiscountAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupSales_salesDiscountAccount_fkey";
+            columns: ["salesDiscountAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupSales_salesPrepaymentAccount_fkey";
+            columns: ["salesPrepaymentAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupSales_salesPrepaymentAccount_fkey";
+            columns: ["salesPrepaymentAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupSales_salesTaxPayableAccount_fkey";
+            columns: ["salesTaxPayableAccount"];
+            referencedRelation: "account";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupSales_salesTaxPayableAccount_fkey";
+            columns: ["salesTaxPayableAccount"];
+            referencedRelation: "accounts_view";
+            referencedColumns: ["number"];
+          },
+          {
+            foreignKeyName: "postingGroupSales_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "postingGroupSales_updatedBy_fkey";
             columns: ["updatedBy"];
             referencedRelation: "user_default_view";
             referencedColumns: ["userId"];
@@ -4681,28 +5649,59 @@ export interface Database {
         Row: {
           color: string | null;
           createdAt: string;
+          createdBy: string;
           id: string;
           name: string;
           protected: boolean;
           updatedAt: string | null;
+          updatedBy: string | null;
         };
         Insert: {
           color?: string | null;
           createdAt?: string;
+          createdBy: string;
           id?: string;
           name: string;
           protected?: boolean;
           updatedAt?: string | null;
+          updatedBy?: string | null;
         };
         Update: {
           color?: string | null;
           createdAt?: string;
+          createdBy?: string;
           id?: string;
           name?: string;
           protected?: boolean;
           updatedAt?: string | null;
+          updatedBy?: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "supplierType_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "supplierType_createdBy_fkey";
+            columns: ["createdBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          },
+          {
+            foreignKeyName: "supplierType_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "supplierType_updatedBy_fkey";
+            columns: ["updatedBy"];
+            referencedRelation: "user_default_view";
+            referencedColumns: ["userId"];
+          }
+        ];
       };
       unitOfMeasure: {
         Row: {
