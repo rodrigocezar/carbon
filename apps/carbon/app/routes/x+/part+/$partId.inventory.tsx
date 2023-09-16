@@ -4,10 +4,11 @@ import { useLoaderData } from "@remix-run/react";
 import { validationError } from "remix-validated-form";
 import { useRouteData } from "~/hooks";
 import {
-  PartInventoryForm,
   getPartInventory,
+  getPartQuantities,
   getShelvesList,
   insertShelf,
+  PartInventoryForm,
   partInventoryValidator,
   upsertPartInventory,
 } from "~/modules/parts";
@@ -101,8 +102,17 @@ export async function loader({ request, params }: LoaderArgs) {
     );
   }
 
+  const quantities = await getPartQuantities(client, partId, locationId);
+  if (quantities.error || !quantities.data) {
+    return redirect(
+      "/x/parts",
+      await flash(request, error(quantities, "Failed to load part quantities"))
+    );
+  }
+
   return json({
     partInventory: partInventory.data,
+    quantities: quantities.data,
     shelves: shelves.data.map((s) => s.id),
   });
 }
@@ -168,7 +178,7 @@ export async function action({ request, params }: ActionArgs) {
 
 export default function PartInventoryRoute() {
   const sharedPartsData = useRouteData<{ locations: ListItem[] }>("/x/part");
-  const { partInventory, shelves } = useLoaderData<typeof loader>();
+  const { partInventory, quantities, shelves } = useLoaderData<typeof loader>();
 
   const initialValues = {
     ...partInventory,
@@ -177,6 +187,7 @@ export default function PartInventoryRoute() {
   return (
     <PartInventoryForm
       initialValues={initialValues}
+      quantities={quantities}
       locations={sharedPartsData?.locations ?? []}
       shelves={shelves}
     />

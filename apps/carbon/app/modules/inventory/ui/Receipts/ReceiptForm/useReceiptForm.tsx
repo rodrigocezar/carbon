@@ -10,6 +10,7 @@ import type {
   ReceiptLineItem,
   ReceiptSourceDocument,
 } from "~/modules/inventory/types";
+import type { PurchaseOrderLine } from "~/modules/purchasing";
 import type { ListItem } from "~/types";
 import type { TypeOfValidator } from "~/types/validators";
 
@@ -56,11 +57,23 @@ export default function useReceiptForm({
     receipt.sourceDocumentId ?? null
   );
 
-  const onClose = () => {
-    if (!sourceDocumentId && receipt.id) {
-      deleteReceipt(receipt.id);
+  const onClose = async () => {
+    if (
+      !isEditing &&
+      (!sourceDocumentId || !locationId || receiptLines.length === 0)
+    ) {
+      await deleteReceipt();
     }
-    navigate(-1);
+
+    if (isEditing) {
+      navigate(`/x/inventory/receipts`);
+    } else {
+      navigate(-1);
+    }
+  };
+
+  const onPost = () => {
+    navigate(`/x/inventory/receipts/${receipt.id}/post`);
   };
 
   const sourceDocumentIdFromParams = params.get("sourceDocumentId");
@@ -78,24 +91,28 @@ export default function useReceiptForm({
     sourceDocumentIdFromParams,
   ]);
 
-  // TODO: this should call an API method that uses the service role to delete the receipt after
-  //      checking that it is not posted or received
-  const deleteReceipt = useCallback(
-    (id: string) => {
-      if (!supabase) return;
+  //  TODO: verify that it is not posted or received
+  const deleteReceipt = useCallback(async () => {
+    if (!supabase) return;
 
-      return supabase
+    try {
+      await fetch(
+        `/api/settings/sequence/rollback?table=receipt&currentSequence=${receipt.receiptId}`,
+        {
+          method: "DELETE",
+        }
+      )
+        .then(console.log)
+        .catch(console.error);
+
+      await supabase
         .from("receipt")
         .delete()
-        .eq("id", id)
-        .then((response) => {
-          if (response.error) {
-            setError(response.error.message);
-          }
-        });
-    },
-    [supabase]
-  );
+        .eq("receiptId", receipt.receiptId);
+    } catch {
+      setError("Failed to delete receipt");
+    }
+  }, [receipt.receiptId, supabase]);
 
   const deleteReceiptItems = useCallback(async () => {
     if (!supabase) throw new Error("supabase client is not defined");
@@ -140,21 +157,16 @@ export default function useReceiptForm({
       case "Purchase Order":
         const [
           purchaseOrder,
-          purchaseOrderLines,
           receiptLines,
           previouslyReceivedLines,
+          purchaseOrderLines,
         ] = await Promise.all([
           supabase
             .from("purchase_order_view")
             .select("*")
             .eq("id", sourceDocumentId)
             .single(),
-          supabase
-            .from("purchaseOrderLine")
-            .select("*")
-            .eq("purchaseOrderId", sourceDocumentId)
-            .eq("purchaseOrderLineType", "Part")
-            .eq("locationId", locationId),
+
           supabase
             .from("receiptLine")
             .select("*")
@@ -163,6 +175,14 @@ export default function useReceiptForm({
             .from("receipt_quantity_received_by_line")
             .select("*")
             .eq("sourceDocumentId", sourceDocumentId),
+          locationId
+            ? supabase
+                .from("purchaseOrderLine")
+                .select("*")
+                .eq("purchaseOrderId", sourceDocumentId)
+                .eq("purchaseOrderLineType", "Part")
+                .eq("locationId", locationId)
+            : Promise.resolve({ data: [] as PurchaseOrderLine[], error: null }),
         ]);
 
         if (purchaseOrder.error) {
@@ -218,15 +238,17 @@ export default function useReceiptForm({
             return acc;
           }
 
+          const outstandingQuantity =
+            d.purchaseQuantity -
+            (previouslyReceivedQuantitiesByLine[d.id] ?? 0);
+
           acc.push({
             receiptId: receipt.receiptId,
             lineId: d.id,
             partId: d.partId,
             orderQuantity: d.purchaseQuantity,
-            outstandingQuantity:
-              d.purchaseQuantity -
-              (previouslyReceivedQuantitiesByLine[d.id] ?? 0),
-            receivedQuantity: 0,
+            outstandingQuantity,
+            receivedQuantity: outstandingQuantity,
             unitPrice: d.unitPrice,
             unitOfMeasure: d.unitOfMeasureCode ?? "EA",
             locationId: d.locationId,
@@ -368,6 +390,7 @@ export default function useReceiptForm({
     supplierId,
     sourceDocuments,
     onClose,
+    onPost,
     setLocationId,
     setSourceDocument,
     setSourceDocumentId,

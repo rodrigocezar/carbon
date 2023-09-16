@@ -4,6 +4,7 @@ import {
   Card,
   CardBody,
   CardHeader,
+  Checkbox,
   Heading,
   HStack,
   IconButton,
@@ -55,7 +56,7 @@ const PurchaseOrderLines = ({
     handleCellEdit,
   } = usePurchaseOrderLines();
 
-  const isEditable = ["Open", "In Review", "In External Review"].includes(
+  const isEditable = ["Draft", "In Review", "In External Review"].includes(
     routeData?.purchaseOrder?.status ?? ""
   );
 
@@ -197,6 +198,42 @@ const PurchaseOrderLines = ({
               return (
                 row.original.unitPrice * row.original.purchaseQuantity
               ).toFixed(2);
+          }
+        },
+      },
+      {
+        id: "quantityReceived",
+        header: "Quantity Received",
+        cell: ({ row }) => {
+          switch (row.original.purchaseOrderLineType) {
+            case "Comment":
+              return null;
+            default:
+              return <span>{row.original.quantityReceived}</span>;
+          }
+        },
+      },
+      {
+        id: "quantityInvoiced",
+        header: "Quantity Invoiced",
+        cell: ({ row }) => {
+          switch (row.original.purchaseOrderLineType) {
+            case "Comment":
+              return null;
+            default:
+              return <span>{row.original.quantityInvoiced}</span>;
+          }
+        },
+      },
+      {
+        id: "receivedComplete",
+        header: "Received Complete",
+        cell: ({ row }) => {
+          switch (row.original.purchaseOrderLineType) {
+            case "Comment":
+              return null;
+            default:
+              return <Checkbox isChecked={row.original.receivedComplete} />;
           }
         },
       },

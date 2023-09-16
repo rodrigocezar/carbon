@@ -15,6 +15,11 @@ import { flash } from "~/services/session";
 import { assertIsPost } from "~/utils/http";
 import { error, success } from "~/utils/result";
 
+// shouldRevalidate function
+export function shouldRevalidate() {
+  return false;
+}
+
 export async function loader({ request }: LoaderArgs) {
   const { client, userId } = await requirePermissions(request, {
     create: "inventory",
@@ -86,7 +91,7 @@ export async function action({ request }: ActionArgs) {
   }
 
   return redirect(
-    "/x/inventory/receipts",
+    `/x/inventory/receipts/${id}`,
     await flash(request, success("Receipt created"))
   );
 }

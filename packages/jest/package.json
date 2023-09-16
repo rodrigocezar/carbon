@@ -1,0 +1,15 @@
+{
+  "name": "@carbon/jest",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "clean": "rimraf node_modules"
+  },
+  "dependencies": {
+    "ts-jest": "^26.5.0"
+  },
+  "devDependencies": {
+    "eslint-config-carbon": "*"
+  }
+}

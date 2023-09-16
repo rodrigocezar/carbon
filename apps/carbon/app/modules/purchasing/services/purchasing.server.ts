@@ -1,4 +1,5 @@
 import type { Database } from "@carbon/database";
+import { getLocalTimeZone, today } from "@internationalized/date";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseServiceRole } from "~/lib/supabase";
 import { getEmployeeJob } from "~/modules/resources";
@@ -24,7 +25,7 @@ export async function closePurchaseOrder(
     .from("purchaseOrder")
     .update({
       closed: true,
-      closedAt: new Date().toISOString(),
+      closedAt: today(getLocalTimeZone()).toString(),
       closedBy: userId,
     })
     .eq("id", purchaseOrderId)
@@ -333,6 +334,26 @@ export async function insertSupplier(
   return client.from("supplier").insert([supplier]).select("id").single();
 }
 
+export async function getUninvoicedReceipts(
+  client: SupabaseClient<Database>,
+  args?: GenericQueryFilters & {
+    supplier: string | null;
+  }
+) {
+  let query = client.from("receipts_posted_not_invoiced").select("*");
+
+  if (args?.supplier) {
+    query = query.eq("supplierId", args.supplier);
+  }
+
+  if (args)
+    if (args) {
+      query = setGenericQueryFilters(query, args, "name");
+    }
+
+  return query;
+}
+
 export async function insertSupplierContact(
   client: SupabaseClient<Database>,
   supplierContact: {
@@ -616,26 +637,14 @@ export async function upsertPurchaseOrderLine(
   if ("id" in purchaseOrderLine) {
     return client
       .from("purchaseOrderLine")
-      .update(
-        sanitize({
-          ...purchaseOrderLine,
-          quantityToReceive: purchaseOrderLine.purchaseQuantity,
-          quantityToInvoice: purchaseOrderLine.purchaseQuantity,
-        })
-      )
+      .update(sanitize(purchaseOrderLine))
       .eq("id", purchaseOrderLine.id)
       .select("id")
       .single();
   }
   return client
     .from("purchaseOrderLine")
-    .insert([
-      {
-        ...purchaseOrderLine,
-        quantityToReceive: purchaseOrderLine.purchaseQuantity,
-        quantityToInvoice: purchaseOrderLine.purchaseQuantity,
-      },
-    ])
+    .insert([purchaseOrderLine])
     .select("id")
     .single();
 }

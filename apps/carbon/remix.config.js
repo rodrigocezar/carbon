@@ -6,10 +6,10 @@ const { flatRoutes } = require("remix-flat-routes");
 module.exports = {
   future: {
     v2_dev: false,
-    v2_errorBoundary: false,
+    v2_errorBoundary: true,
     v2_headers: false,
-    v2_meta: false,
-    v2_normalizeFormMethod: false,
+    v2_meta: true,
+    v2_normalizeFormMethod: true,
     v2_routeConvention: true,
   },
   ignoredRouteFiles: ["**/.*"],
@@ -33,10 +33,10 @@ module.exports = {
   ],
   watchPaths: async () => {
     return [
-      "../../packages/carbon-react/src/**/*",
-      "../../packages/carbon-database/src/**/*",
-      "../../packages/carbon-logger/src/**/*",
-      "../../packages/carbon-utils/src/**/*",
+      "../../packages/react/src/**/*",
+      "../../packages/database/src/**/*",
+      "../../packages/logger/src/**/*",
+      "../../packages/utils/src/**/*",
     ];
   },
 };

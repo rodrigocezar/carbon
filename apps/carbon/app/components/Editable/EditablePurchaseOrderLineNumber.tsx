@@ -96,7 +96,7 @@ const EditablePurchaseOrderLineNumber =
           .from("partInventory")
           .select("defaultShelfId")
           .eq("partId", partId)
-          .eq("locationId", options.defaultLocationId)
+          .eq("locationId", options.defaultLocationId!)
           .single(),
         client
           .from("partCost")
@@ -109,12 +109,6 @@ const EditablePurchaseOrderLineNumber =
         onError();
         return;
       }
-
-      console.log({
-        partId,
-        locationId: options.defaultLocationId,
-        shelfId: shelf.data?.defaultShelfId,
-      });
 
       onUpdate("partId", partId);
       onUpdate("description", part.data?.name);

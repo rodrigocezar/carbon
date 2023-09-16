@@ -160,13 +160,30 @@ export async function getPartsList(
   client: SupabaseClient<Database>,
   replenishmentSystem: PartReplenishmentSystem | null
 ) {
-  let query = client.from("part").select("id, name");
+  let query = client
+    .from("part")
+    .select("id, name")
+    .eq("blocked", false)
+    .eq("active", true);
   if (replenishmentSystem) {
     query = query.or(
       `replenishmentSystem.eq.${replenishmentSystem},replenishmentSystem.eq.Buy and Make`
     );
   }
   return query;
+}
+
+export async function getPartQuantities(
+  client: SupabaseClient<Database>,
+  partId: string,
+  locationId: string
+) {
+  return client
+    .from("part_quantities_view")
+    .select("*")
+    .eq("partId", partId)
+    .eq("locationId", locationId)
+    .maybeSingle();
 }
 
 export async function getPartSummary(
