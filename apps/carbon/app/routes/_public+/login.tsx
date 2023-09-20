@@ -9,9 +9,9 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import type {
-  ActionArgs,
-  LoaderArgs,
-  V2_MetaFunction as MetaFunction,
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
 } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Link, useActionData, useSearchParams } from "@remix-run/react";
@@ -32,7 +32,7 @@ export const meta: MetaFunction = () => {
   return [{ title: "Carbon | Login" }];
 };
 
-export async function loader({ request }: LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const authSession = await getAuthSession(request);
   if (authSession && (await verifyAuthSession(authSession))) {
     if (authSession) return redirect("/x");
@@ -41,7 +41,7 @@ export async function loader({ request }: LoaderArgs) {
   return null;
 }
 
-export async function action({ request }: ActionArgs): FormActionData {
+export async function action({ request }: ActionFunctionArgs): FormActionData {
   assertIsPost(request);
   const validation = await loginValidator.validate(await request.formData());
 

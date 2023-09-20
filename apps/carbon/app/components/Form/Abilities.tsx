@@ -1,4 +1,5 @@
-import { Select } from "@carbon/react";
+import type { MultiValue } from "@carbon/react";
+import { Select, useMount } from "@carbon/react";
 import {
   FormControl,
   FormErrorMessage,
@@ -6,7 +7,7 @@ import {
   FormLabel,
 } from "@chakra-ui/react";
 import { useFetcher } from "@remix-run/react";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { useControlField, useField } from "remix-validated-form";
 import type { getAbilitiesList } from "~/modules/resources";
 import type { SelectProps } from "./Select";
@@ -14,10 +15,10 @@ import type { SelectProps } from "./Select";
 type AbilitiesSelectProps = Omit<SelectProps, "options" | "onChange"> & {
   ability?: string;
   onChange?: (
-    selections: {
+    selections: MultiValue<{
       value: string;
       label: string;
-    }[]
+    }>
   ) => void;
 };
 
@@ -38,10 +39,9 @@ const Abilities = ({
   const abilityFetcher =
     useFetcher<Awaited<ReturnType<typeof getAbilitiesList>>>();
 
-  useEffect(() => {
+  useMount(() => {
     abilityFetcher.load(`/api/resources/abilities`);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
   const options = useMemo(
     () =>
@@ -55,10 +55,7 @@ const Abilities = ({
   );
 
   const handleChange = (
-    selections: {
-      value: string;
-      label: string;
-    }[]
+    selections: MultiValue<{ value: string; label: string }>
   ) => {
     const newValue = selections.map((s) => s.value as string) || [];
     setValue(newValue);
@@ -68,7 +65,6 @@ const Abilities = ({
   };
 
   const controlledValue = useMemo(
-    // @ts-ignore
     () => options?.filter((option) => value?.includes(option.value)) ?? [],
     [value, options]
   );
@@ -91,7 +87,6 @@ const Abilities = ({
         isLoading={isLoading}
         options={options}
         placeholder={placeholder}
-        // @ts-ignore
         onChange={handleChange}
       />
       {error ? (

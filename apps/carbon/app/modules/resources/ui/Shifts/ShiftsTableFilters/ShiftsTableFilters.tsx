@@ -5,7 +5,6 @@ import { IoMdAdd } from "react-icons/io";
 import { DebouncedInput } from "~/components/Search";
 import { usePermissions, useUrlParams } from "~/hooks";
 import type { ShiftLocation } from "~/modules/resources";
-import { mapRowsToOptions } from "~/utils/form";
 
 type ShiftsTableFiltersProps = {
   locations: Partial<ShiftLocation>[];
@@ -15,11 +14,13 @@ const ShiftsTableFilters = ({ locations }: ShiftsTableFiltersProps) => {
   const [params, setParams] = useUrlParams();
   const permissions = usePermissions();
   const borderColor = useColor("gray.200");
-  const locationOptions = mapRowsToOptions({
-    data: locations,
-    value: "id",
-    label: "name",
-  });
+
+  const locationOptions =
+    locations?.map((location) => ({
+      value: location.id,
+      label: location.name,
+    })) ?? [];
+
   return (
     <HStack
       borderBottomColor={borderColor}
@@ -38,7 +39,6 @@ const ShiftsTableFilters = ({ locations }: ShiftsTableFiltersProps) => {
           placeholder="Search"
         />
         <Select
-          // @ts-ignore
           size="sm"
           value={locationOptions.find(
             (type) => type.value === params.get("location")
@@ -49,7 +49,6 @@ const ShiftsTableFilters = ({ locations }: ShiftsTableFiltersProps) => {
             setParams({ location: selected?.value });
           }}
           aria-label="Location"
-          minW={180}
           placeholder="Location"
         />
       </HStack>

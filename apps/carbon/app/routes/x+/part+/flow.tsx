@@ -1,7 +1,4 @@
-import type {
-  LoaderArgs,
-  V2_MetaFunction as MetaFunction,
-} from "@remix-run/node";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { useCallback } from "react";
@@ -25,7 +22,7 @@ export function links() {
   return [{ rel: "stylesheet", href: reactFlowStyles }];
 }
 
-export async function loader({ request }: LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   await requirePermissions(request, {
     view: "parts",
   });

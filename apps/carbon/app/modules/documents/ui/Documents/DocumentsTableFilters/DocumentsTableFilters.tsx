@@ -3,7 +3,6 @@ import { HStack } from "@chakra-ui/react";
 import { DebouncedInput } from "~/components/Search";
 import { usePermissions, useUrlParams } from "~/hooks";
 import type { DocumentLabel } from "~/modules/documents/types";
-import { mapRowsToOptions } from "~/utils/form";
 import { capitalize } from "~/utils/string";
 import DocumentCreateForm from "../DocumentCreateForm";
 
@@ -30,11 +29,10 @@ const DocumentsTableFilters = ({ labels }: DocumentTableFiltersProps) => {
 
   const borderColor = useColor("gray.200");
 
-  const labelOptions = mapRowsToOptions({
-    data: labels,
-    value: "label",
-    label: "label",
-  });
+  const labelOptions = labels.map((l) => ({
+    value: l.label,
+    label: l.label,
+  }));
 
   return (
     <HStack
@@ -54,7 +52,6 @@ const DocumentsTableFilters = ({ labels }: DocumentTableFiltersProps) => {
           placeholder="Search"
         />
         <Select
-          // @ts-ignore
           size="sm"
           value={documentTypeOptions.find(
             (type) => type.value === params.get("type")
@@ -65,12 +62,10 @@ const DocumentsTableFilters = ({ labels }: DocumentTableFiltersProps) => {
             setParams({ type: selected?.value });
           }}
           aria-label="Document Type"
-          minW={180}
           placeholder="Document Type"
         />
         {labels.length > 0 && (
           <Select
-            // @ts-ignore
             size="sm"
             value={labelOptions.find(
               (label) =>
@@ -83,7 +78,6 @@ const DocumentsTableFilters = ({ labels }: DocumentTableFiltersProps) => {
               setParams({ label: selected?.label });
             }}
             aria-label="Label"
-            minW={180}
             placeholder="Label"
           />
         )}

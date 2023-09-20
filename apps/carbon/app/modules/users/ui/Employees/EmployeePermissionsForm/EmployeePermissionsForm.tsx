@@ -1,3 +1,4 @@
+import { useMount } from "@carbon/react";
 import {
   Box,
   Button,
@@ -14,14 +15,13 @@ import {
 } from "@chakra-ui/react";
 import { useFetcher, useNavigate } from "@remix-run/react";
 import type { PostgrestResponse } from "@supabase/supabase-js";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ValidatedForm } from "remix-validated-form";
 import { Hidden, Select, Submit } from "~/components/Form";
 import type { EmployeeType, Permission } from "~/modules/users";
 import { employeeValidator } from "~/modules/users";
 import PermissionCheckboxes from "~/modules/users/ui/components/Permission";
 import type { TypeOfValidator } from "~/types/validators";
-import { mapRowsToOptions } from "~/utils/form";
 
 type EmployeePermissionsFormProps = {
   name: string;
@@ -39,17 +39,15 @@ const EmployeePermissionsForm = ({
 
   const employeeTypeFetcher = useFetcher<PostgrestResponse<EmployeeType>>();
 
-  useEffect(() => {
-    if (employeeTypeFetcher.type === "init") {
-      employeeTypeFetcher.load("/api/users/employee-types");
-    }
-  }, [employeeTypeFetcher]);
-
-  const employeeTypeOptions = mapRowsToOptions({
-    data: employeeTypeFetcher.data?.data,
-    value: "id",
-    label: "name",
+  useMount(() => {
+    employeeTypeFetcher.load("/api/users/employee-types");
   });
+
+  const employeeTypeOptions =
+    employeeTypeFetcher.data?.data?.map((et) => ({
+      value: et.id,
+      label: et.name,
+    })) ?? [];
 
   const [permissions, setPermissions] = useState(initialValues.permissions);
   const updatePermissions = (module: string, permission: Permission) => {

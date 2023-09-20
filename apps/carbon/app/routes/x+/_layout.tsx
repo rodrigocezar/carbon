@@ -1,7 +1,7 @@
 import { useColor, useNotification } from "@carbon/react";
 import { Flex, Grid, GridItem, VStack } from "@chakra-ui/react";
 import { SkipNavContent } from "@chakra-ui/skip-nav";
-import type { LoaderArgs } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Outlet, useLoaderData, useNavigation } from "@remix-run/react";
 import NProgress from "nprogress";
@@ -19,8 +19,9 @@ import {
   getSessionFlash,
   requireAuthSession,
 } from "~/services/session";
+import { RealtimeDataProvider } from "~/stores/data";
 
-export async function loader({ request }: LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const { accessToken, expiresAt, expiresIn, userId } =
     await requireAuthSession(request, { verify: true });
 
@@ -86,20 +87,22 @@ export default function AuthenticatedRoute() {
 
   return (
     <SupabaseProvider session={session}>
-      <Grid h="100vh" w="100vw" templateColumns="auto 1fr">
-        <IconSidebar />
-        <GridItem w="full" h="full">
-          <Grid templateRows="auto 1fr" h="full" w="full">
-            <Topbar />
-            <Flex w="full" h="full">
-              <SkipNavContent />
-              <VStack spacing={0} w="full" bg={useColor("gray.50")}>
-                <Outlet />
-              </VStack>
-            </Flex>
-          </Grid>
-        </GridItem>
-      </Grid>
+      <RealtimeDataProvider>
+        <Grid h="100vh" w="100vw" templateColumns="auto 1fr">
+          <IconSidebar />
+          <GridItem w="full" h="full">
+            <Grid templateRows="auto 1fr" h="full" w="full">
+              <Topbar />
+              <Flex w="full" h="full">
+                <SkipNavContent />
+                <VStack spacing={0} w="full" bg={useColor("gray.50")}>
+                  <Outlet />
+                </VStack>
+              </Flex>
+            </Grid>
+          </GridItem>
+        </Grid>
+      </RealtimeDataProvider>
     </SupabaseProvider>
   );
 }

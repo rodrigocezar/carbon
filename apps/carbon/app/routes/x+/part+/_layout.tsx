@@ -1,8 +1,5 @@
 import { VStack } from "@chakra-ui/react";
-import type {
-  LoaderArgs,
-  V2_MetaFunction as MetaFunction,
-} from "@remix-run/node";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { Outlet } from "@remix-run/react";
 import {
   getPartCostingMethods,
@@ -20,7 +17,7 @@ export const meta: MetaFunction = () => {
   return [{ title: "Carbon | Login" }];
 };
 
-export async function loader({ request }: LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const { client } = await requirePermissions(request, {
     view: "parts",
   });

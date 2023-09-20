@@ -5,7 +5,6 @@ import { IoMdAdd } from "react-icons/io";
 import { DebouncedInput } from "~/components/Search";
 import { usePermissions, useUrlParams } from "~/hooks";
 import type { SupplierType } from "~/modules/purchasing";
-import { mapRowsToOptions } from "~/utils/form";
 
 type SupplierAccountsTableFiltersProps = {
   supplierTypes: Partial<SupplierType>[];
@@ -16,11 +15,12 @@ const SupplierAccountsTableFilters = ({
 }: SupplierAccountsTableFiltersProps) => {
   const [params, setParams] = useUrlParams();
   const permissions = usePermissions();
-  const supplierTypeOptions = mapRowsToOptions({
-    data: supplierTypes,
-    value: "id",
-    label: "name",
-  });
+
+  const supplierTypeOptions =
+    supplierTypes?.map((type) => ({
+      value: type.id,
+      label: type.name,
+    })) ?? [];
 
   const borderColor = useColor("gray.200");
 
@@ -42,7 +42,6 @@ const SupplierAccountsTableFilters = ({
           placeholder="Search"
         />
         <Select
-          // @ts-ignore
           size="sm"
           value={supplierTypeOptions.find(
             (type) => type.value === params.get("type")
@@ -53,11 +52,9 @@ const SupplierAccountsTableFilters = ({
             setParams({ type: selected?.value });
           }}
           aria-label="Supplier Type"
-          minW={180}
           placeholder="Supplier Type"
         />
         <Select
-          // @ts-ignore
           size="sm"
           value={
             params.get("active") === "false"
@@ -78,7 +75,6 @@ const SupplierAccountsTableFilters = ({
             setParams({ active: selected?.value });
           }}
           aria-label="Active"
-          minW={180}
         />
       </HStack>
       <HStack spacing={2}>

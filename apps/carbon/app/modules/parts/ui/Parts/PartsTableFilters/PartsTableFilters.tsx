@@ -5,7 +5,6 @@ import { IoMdAdd } from "react-icons/io";
 import { DebouncedInput } from "~/components/Search";
 import { usePermissions, useUrlParams } from "~/hooks";
 import type { PartType } from "~/modules/parts";
-import { mapRowsToOptions } from "~/utils/form";
 
 type PartsTableFiltersProps = {
   partTypes: PartType[];
@@ -23,11 +22,10 @@ const PartsTableFilters = ({
     label: type,
   }));
 
-  const partGroupsOptions = mapRowsToOptions({
-    data: partGroups,
-    value: "id",
-    label: "name",
-  });
+  const partGroupsOptions = partGroups.map((group) => ({
+    value: group.id,
+    label: group.name,
+  }));
 
   const borderColor = useColor("gray.200");
 
@@ -48,9 +46,8 @@ const PartsTableFilters = ({
           minW={180}
           placeholder="Search Parts"
         />
-        {partGroupsOptions && (
+        {partGroupsOptions.length > 0 && (
           <Select
-            // @ts-ignore
             size="sm"
             isClearable
             value={partGroupsOptions.find(
@@ -62,12 +59,10 @@ const PartsTableFilters = ({
             }}
             aria-label="Groups"
             placeholder="Part Groups"
-            minW={180}
           />
         )}
         {partTypeOptions.length > 0 && (
           <Select
-            // @ts-ignore
             size="sm"
             value={partTypeOptions.find(
               (type) => type.value === params.get("type")
@@ -79,7 +74,6 @@ const PartsTableFilters = ({
             }}
             aria-label="Part Type"
             placeholder="Part Type"
-            minW={180}
           />
         )}
       </HStack>

@@ -5,11 +5,9 @@ import {
   FormHelperText,
   FormLabel,
 } from "@chakra-ui/react";
-import { useFetcher } from "@remix-run/react";
 import { useEffect, useMemo } from "react";
 import { useControlField, useField } from "remix-validated-form";
-import type { getCustomersList } from "~/modules/sales";
-import { mapRowsToOptions } from "~/utils/form";
+import { useCustomers } from "~/stores/data";
 import type { SelectProps } from "./Select";
 
 type CustomerSelectProps = Omit<SelectProps, "options">;
@@ -27,23 +25,15 @@ const Customer = ({
   const { getInputProps, error, defaultValue } = useField(name);
   const [value, setValue] = useControlField<string | undefined>(name);
 
-  const customerFetcher =
-    useFetcher<Awaited<ReturnType<typeof getCustomersList>>>();
-
-  useEffect(() => {
-    if (customerFetcher.type === "init") {
-      customerFetcher.load("/api/sales/customers");
-    }
-  }, [customerFetcher]);
+  const [customers] = useCustomers();
 
   const options = useMemo(
     () =>
-      mapRowsToOptions({
-        data: customerFetcher.data?.data,
-        value: "id",
-        label: "name",
-      }),
-    [customerFetcher.data]
+      customers.map((c) => ({
+        value: c.id,
+        label: c.name,
+      })) ?? [],
+    [customers]
   );
 
   const handleChange = (selection: {

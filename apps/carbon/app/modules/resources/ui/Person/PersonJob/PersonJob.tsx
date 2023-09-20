@@ -1,4 +1,4 @@
-import { Select } from "@carbon/react";
+import { Select, useMount } from "@carbon/react";
 import {
   Box,
   FormControl,
@@ -20,7 +20,6 @@ import {
 import { SectionTitle } from "~/components/Layout";
 import type { EmployeeJob, getShiftsList } from "~/modules/resources";
 import { employeeJobValidator } from "~/modules/resources";
-import { mapRowsToOptions } from "~/utils/form";
 
 type PersonJobProps = {
   job: EmployeeJob;
@@ -29,23 +28,22 @@ type PersonJobProps = {
 const PersonJob = ({ job }: PersonJobProps) => {
   const shiftFetcher = useFetcher<Awaited<ReturnType<typeof getShiftsList>>>();
 
-  const onLocationChange = ({ value }: { value: string | number }) => {
-    if (value) shiftFetcher.load(`/api/resources/shifts?location=${value}`);
+  const onLocationChange = (selected: { value: string | number } | null) => {
+    if (selected?.value)
+      shiftFetcher.load(`/api/resources/shifts?location=${selected.value}`);
   };
 
-  useEffect(() => {
+  useMount(() => {
     if (job.locationId)
       shiftFetcher.load(`/api/resources/shifts?location=${job.locationId}`);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
   const shifts = useMemo(
     () =>
-      mapRowsToOptions({
-        data: shiftFetcher.data?.data ?? [],
-        value: "id",
-        label: "name",
-      }),
+      shiftFetcher.data?.data?.map((shift) => ({
+        value: shift.id,
+        label: shift.name,
+      })) ?? [],
     [shiftFetcher.data]
   );
 

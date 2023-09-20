@@ -1,3 +1,4 @@
+import { useMount } from "@carbon/react";
 import {
   Grid,
   HStack,
@@ -11,13 +12,12 @@ import {
 } from "@chakra-ui/react";
 import { useFetcher, useNavigate } from "@remix-run/react";
 import type { PostgrestResponse } from "@supabase/supabase-js";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { ValidatedForm } from "remix-validated-form";
 import { Input, Select, Submit } from "~/components/Form";
 import type { EmployeeType } from "~/modules/users";
 import { createEmployeeValidator } from "~/modules/users";
 import type { Result } from "~/types";
-import { mapRowsToOptions } from "~/utils/form";
 
 const CreateEmployeeModal = () => {
   const initialFocusRef = useRef<HTMLInputElement>(null);
@@ -25,17 +25,15 @@ const CreateEmployeeModal = () => {
   const formFetcher = useFetcher<Result>();
   const employeeTypeFetcher = useFetcher<PostgrestResponse<EmployeeType>>();
 
-  useEffect(() => {
-    if (employeeTypeFetcher.type === "init") {
-      employeeTypeFetcher.load("/api/users/employee-types");
-    }
-  }, [employeeTypeFetcher]);
-
-  const employeeTypeOptions = mapRowsToOptions({
-    data: employeeTypeFetcher.data?.data,
-    value: "id",
-    label: "name",
+  useMount(() => {
+    employeeTypeFetcher.load("/api/users/employee-types");
   });
+
+  const employeeTypeOptions =
+    employeeTypeFetcher.data?.data?.map((et) => ({
+      value: et.id,
+      label: et.name,
+    })) ?? [];
 
   return (
     <Modal

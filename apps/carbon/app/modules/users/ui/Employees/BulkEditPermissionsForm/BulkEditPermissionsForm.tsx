@@ -1,4 +1,4 @@
-import { useColor } from "@carbon/react";
+import { useColor, useMount } from "@carbon/react";
 import {
   Box,
   Button,
@@ -52,11 +52,9 @@ const BulkEditPermissions = ({
     >;
   }>();
 
-  useEffect(() => {
-    if (emptyPermissionsFetcher.type === "init") {
-      emptyPermissionsFetcher.load("/api/users/empty-permissions");
-    }
-  }, [emptyPermissionsFetcher]);
+  useMount(() => {
+    emptyPermissionsFetcher.load("/api/users/empty-permissions");
+  });
 
   useEffect(() => {
     if (emptyPermissionsFetcher.data) {

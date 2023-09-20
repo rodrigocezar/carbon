@@ -5,11 +5,9 @@ import {
   FormHelperText,
   FormLabel,
 } from "@chakra-ui/react";
-import { useFetcher } from "@remix-run/react";
 import { useEffect, useMemo } from "react";
 import { useControlField, useField } from "remix-validated-form";
-import type { getSuppliersList } from "~/modules/purchasing";
-import { mapRowsToOptions } from "~/utils/form";
+import { useSuppliers } from "~/stores/data";
 import type { SelectProps } from "./Select";
 
 type SupplierSelectProps = Omit<SelectProps, "options">;
@@ -27,23 +25,15 @@ const Supplier = ({
   const { getInputProps, error, defaultValue } = useField(name);
   const [value, setValue] = useControlField<string | undefined>(name);
 
-  const supplierFetcher =
-    useFetcher<Awaited<ReturnType<typeof getSuppliersList>>>();
-
-  useEffect(() => {
-    if (supplierFetcher.type === "init") {
-      supplierFetcher.load("/api/purchasing/suppliers");
-    }
-  }, [supplierFetcher]);
+  const [suppliers] = useSuppliers();
 
   const options = useMemo(
     () =>
-      mapRowsToOptions({
-        data: supplierFetcher.data?.data,
-        value: "id",
-        label: "name",
-      }),
-    [supplierFetcher.data]
+      suppliers.map((c) => ({
+        value: c.id,
+        label: c.name,
+      })) ?? [],
+    [suppliers]
   );
 
   const handleChange = (selection: {
