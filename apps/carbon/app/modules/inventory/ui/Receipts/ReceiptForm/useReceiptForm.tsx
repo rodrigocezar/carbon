@@ -58,7 +58,10 @@ export default function useReceiptForm({
   );
 
   const onClose = async () => {
-    if (!sourceDocumentId || !locationId || internalReceiptLines.length === 0) {
+    if (
+      internalReceiptLines.length === 0 ||
+      internalReceiptLines.every((line) => line.receivedQuantity === 0)
+    ) {
       await deleteReceipt();
     }
 

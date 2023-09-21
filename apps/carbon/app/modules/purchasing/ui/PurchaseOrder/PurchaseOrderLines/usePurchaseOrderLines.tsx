@@ -5,7 +5,7 @@ import { usePermissions } from "~/hooks";
 import { useSupabase } from "~/lib/supabase";
 import type { getAccountsList } from "~/modules/accounting";
 import type { PurchaseOrderLine } from "~/modules/purchasing";
-import { usePurchasedParts } from "~/stores/data";
+import { usePurchasedParts } from "~/stores/parts";
 
 export default function usePurchaseOrderLines() {
   const { supabase } = useSupabase();

@@ -8,6 +8,7 @@ import NProgress from "nprogress";
 import { useEffect } from "react";
 import { IconSidebar, Topbar } from "~/components/Layout";
 import { getSupabase, SupabaseProvider } from "~/lib/supabase";
+import { RealtimeDataProvider } from "~/modules/shared";
 import {
   getUser,
   getUserClaims,
@@ -19,7 +20,6 @@ import {
   getSessionFlash,
   requireAuthSession,
 } from "~/services/session";
-import { RealtimeDataProvider } from "~/stores/data";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { accessToken, expiresAt, expiresIn, userId } =

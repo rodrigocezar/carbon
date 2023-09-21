@@ -1,3 +1,4 @@
 import Notes from "./Notes";
+import RealtimeDataProvider from "./Realtime";
 
-export { Notes };
+export { RealtimeDataProvider, Notes };

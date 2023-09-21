@@ -2,7 +2,7 @@ import { useStore } from "@nanostores/react";
 import { type WritableAtom } from "nanostores";
 import { useCallback } from "react";
 
-export const useValue = <T>(atom: WritableAtom<T>) => {
+export function useNanoStore<T>(atom: WritableAtom<T>) {
   const value = useStore(atom);
 
   const set = useCallback(
@@ -17,4 +17,4 @@ export const useValue = <T>(atom: WritableAtom<T>) => {
   );
 
   return [value, set] as const;
-};
+}

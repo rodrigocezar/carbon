@@ -49,14 +49,17 @@ const Notes = ({ documentId, notes }: NotesProps) => {
               throw new Error("Invalid user");
             return (
               <Fragment key={note.id}>
+                {/* @ts-ignore */}
                 <Avatar path={note.user.avatarUrl} />
                 <VStack spacing={1} w="full" alignItems="start">
-                  <Text fontWeight="bold">{note.user?.fullName}</Text>
+                  {/* @ts-ignore */}
+                  <Text fontWeight="bold">{note.user?.fullName!}</Text>
                   <HTML text={note.note} />
                   <HStack spacing={4}>
                     <Text color="gray.500">
                       {formatTimeAgo(note.createdAt)}
                     </Text>
+                    {/* @ts-ignore */}
                     {user.id === note.user.id && (
                       <Form
                         method="post"

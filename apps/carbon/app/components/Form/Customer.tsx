@@ -7,7 +7,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useMemo } from "react";
 import { useControlField, useField } from "remix-validated-form";
-import { useCustomers } from "~/stores/data";
+import { useCustomers } from "~/stores";
 import type { SelectProps } from "./Select";
 
 type CustomerSelectProps = Omit<SelectProps, "options">;

@@ -58,9 +58,6 @@ function Document({
   children: React.ReactNode;
   title?: string;
 }) {
-  const loaderData = useLoaderData<typeof loader>();
-  const env = loaderData?.env ?? {};
-
   return (
     <html lang="en">
       <head>
@@ -71,11 +68,7 @@ function Document({
       <body>
         {children}
         <ScrollRestoration />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.env = ${JSON.stringify(env)}`,
-          }}
-        />
+
         <Scripts />
         {process.env.NODE_ENV === "development" && <LiveReload />}
       </body>
@@ -84,12 +77,20 @@ function Document({
 }
 
 export default function App() {
+  const loaderData = useLoaderData<typeof loader>();
+  const env = loaderData?.env ?? {};
+
   return (
     <Document>
       <ThemeProvider>
         <SkipNavLink zIndex={7}>Skip to content</SkipNavLink>
         <Outlet />
       </ThemeProvider>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `window.env = ${JSON.stringify(env)}`,
+        }}
+      />
     </Document>
   );
 }

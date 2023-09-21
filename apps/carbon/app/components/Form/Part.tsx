@@ -8,7 +8,7 @@ import {
 import { useMemo } from "react";
 import { useControlField, useField } from "remix-validated-form";
 import type { PartReplenishmentSystem } from "~/modules/parts";
-import { useParts } from "~/stores/data";
+import { useParts } from "~/stores";
 import type { SelectProps } from "./Select";
 
 type PartSelectProps = Omit<SelectProps, "options"> & {
