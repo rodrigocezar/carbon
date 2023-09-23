@@ -10,7 +10,6 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { memo, useMemo } from "react";
 import { BsPencilSquare, BsPlus } from "react-icons/bs";
 import { Table } from "~/components";
-import { useUrlParams } from "~/hooks";
 import type { Supplier } from "~/modules/purchasing";
 
 type SuppliersTableProps = {
@@ -20,7 +19,6 @@ type SuppliersTableProps = {
 
 const SuppliersTable = memo(({ data, count }: SuppliersTableProps) => {
   const navigate = useNavigate();
-  const [params] = useUrlParams();
 
   const columns = useMemo<ColumnDef<Supplier>[]>(() => {
     return [
@@ -28,7 +26,7 @@ const SuppliersTable = memo(({ data, count }: SuppliersTableProps) => {
         accessorKey: "name",
         header: "Name",
         cell: ({ row }) => (
-          <Link onClick={() => navigate(row.original.id as string)}>
+          <Link onClick={() => navigate(`/x/supplier/${row.original.id}`)}>
             {row.original.name}
           </Link>
         ),
@@ -88,8 +86,7 @@ const SuppliersTable = memo(({ data, count }: SuppliersTableProps) => {
         ),
       },
     ];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params]);
+  }, [navigate]);
 
   const renderContextMenu = useMemo(
     // eslint-disable-next-line react/display-name
@@ -97,14 +94,12 @@ const SuppliersTable = memo(({ data, count }: SuppliersTableProps) => {
       (
         <MenuItem
           icon={<BsPencilSquare />}
-          onClick={() =>
-            navigate(`/x/purchasing/suppliers/${row.id}?${params.toString()}`)
-          }
+          onClick={() => navigate(`/x/supplier/${row.id}`)}
         >
-          View Supplier
+          Edit Supplier
         </MenuItem>
       ),
-    [navigate, params]
+    [navigate]
   );
 
   return (

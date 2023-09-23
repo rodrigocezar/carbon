@@ -1,16 +1,9 @@
-import {
-  Button,
-  ButtonGroup,
-  IconButton,
-  Link,
-  MenuItem,
-} from "@chakra-ui/react";
+import { Link, MenuItem } from "@chakra-ui/react";
 import { useNavigate } from "@remix-run/react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { memo, useMemo } from "react";
-import { BsPencilSquare, BsPlus } from "react-icons/bs";
+import { BsPencilSquare } from "react-icons/bs";
 import { Table } from "~/components";
-import { useUrlParams } from "~/hooks";
 import type { Customer } from "~/modules/sales";
 
 type CustomersTableProps = {
@@ -20,7 +13,6 @@ type CustomersTableProps = {
 
 const CustomersTable = memo(({ data, count }: CustomersTableProps) => {
   const navigate = useNavigate();
-  const [params] = useUrlParams();
 
   const columns = useMemo<ColumnDef<Customer>[]>(() => {
     return [
@@ -28,61 +20,43 @@ const CustomersTable = memo(({ data, count }: CustomersTableProps) => {
         accessorKey: "name",
         header: "Name",
         cell: ({ row }) => (
-          <Link onClick={() => navigate(row.original.id)}>
+          <Link onClick={() => navigate(`/x/customer/${row.original.id}`)}>
             {row.original.name}
           </Link>
         ),
       },
       {
-        // @ts-ignore
-        accessorFn: (item) => item.customerType?.name ?? "",
+        accessorKey: "type",
         header: "Customer Type",
         cell: (item) => item.getValue(),
       },
       {
-        // @ts-ignore
-        accessorFn: (item) => item.customerStatus?.name ?? "",
+        accessorKey: "status",
         header: "Customer Status",
         cell: (item) => item.getValue(),
       },
-      {
-        id: "orders",
-        header: "Orders",
-        cell: () => (
-          <ButtonGroup
-            size="sm"
-            isAttached
-            variant="outline"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Button onClick={() => console.log("orders")}>0 Orders</Button>
-            <IconButton
-              aria-label="New Order"
-              icon={<BsPlus />}
-              onClick={() => console.log("new order")}
-            />
-          </ButtonGroup>
-        ),
-      },
-      {
-        id: "parts",
-        header: "Parts",
-        cell: () => (
-          <ButtonGroup
-            size="sm"
-            isAttached
-            variant="outline"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Button onClick={() => console.log("orders")}>0 Parts</Button>
-            <IconButton
-              aria-label="New Part"
-              icon={<BsPlus />}
-              onClick={() => console.log("new part")}
-            />
-          </ButtonGroup>
-        ),
-      },
+      // {
+      //   id: "orders",
+      //   header: "Orders",
+      //   cell: ({ row }) => (
+      //     <ButtonGroup size="sm" isAttached variant="outline">
+      //       <Button
+      //         onClick={() =>
+      //           navigate(`/x/sales/orders?customerId=${row.original.id}`)
+      //         }
+      //       >
+      //         {row.original.orderCount ?? 0} Orders
+      //       </Button>
+      //       <IconButton
+      //         aria-label="New Order"
+      //         icon={<BsPlus />}
+      //         onClick={() =>
+      //           navigate(`/x/purchase-order/new?customerId=${row.original.id}`)
+      //         }
+      //       />
+      //     </ButtonGroup>
+      //   ),
+      // },
     ];
   }, [navigate]);
 
@@ -92,14 +66,12 @@ const CustomersTable = memo(({ data, count }: CustomersTableProps) => {
       (
         <MenuItem
           icon={<BsPencilSquare />}
-          onClick={() =>
-            navigate(`/x/sales/customers/${row.id}?${params.toString()}`)
-          }
+          onClick={() => navigate(`/x/sales/customers/${row.id}`)}
         >
-          View Customer
+          Edit Customer
         </MenuItem>
       ),
-    [navigate, params]
+    [navigate]
   );
 
   return (
@@ -108,8 +80,8 @@ const CustomersTable = memo(({ data, count }: CustomersTableProps) => {
         count={count}
         columns={columns}
         data={data}
-        renderContextMenu={renderContextMenu}
         withPagination
+        renderContextMenu={renderContextMenu}
       />
     </>
   );
