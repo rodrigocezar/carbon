@@ -57,16 +57,6 @@ The monorepo follows the Turborepo covention of grouping packages into one of tw
 | `@carbon/tsconfig`     | Shared, extendable tsconfig configuration used across apps and packages |
 | `@carbon/utils`        | Shared utility functions used across apps and packages                  |
 
-## Tech Stack
-
-- [Remix](https://remix.run)
-- [Chakra UI](https://chakra-ui.com/)
-- [Supabase](https://supabase.com/)
-- [Postgres](https://postgresql.org/)
-- [Redis](https://redis.io)
-- [BullMQ](https://docs.bullmq.io)
-- [Turborepo](https://turbo.build)
-
 ## Local Development
 
 Make sure that you have [Docker installed](https://docs.docker.com/desktop/install/mac-install/) and [yarn installed](https://yarnpkg.com/lang/en/docs/install/#debian-stable)
