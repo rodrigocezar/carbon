@@ -2,7 +2,7 @@
 
 # Carbon ERP
 
-Carbon is a high permformance, open-source, single tenant (incomplete) ERP written in Typescript. It allows customers, suppliers, and employees to share a common platform for manufacturing that's easy to integrate with.
+Carbon is a high permformance, open-source, single tenant (incomplete) ERP written in Typescript. It allows customers, suppliers, and employees to share a common platform that's easy to integrate with.
 
 Technical highlights/roadmap:
 
