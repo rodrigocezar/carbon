@@ -37,7 +37,7 @@
     "dev:packages": "turbo run dev --filter=./packages/*",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "lint": "turbo run lint",
-    "prepare": "husky install",
+    "prepare": "npx husky install",
     "setup": "turbo run setup",
     "test": "turbo run test"
   },
