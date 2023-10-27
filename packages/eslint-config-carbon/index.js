@@ -8,12 +8,6 @@ const typescriptRules = require("./rules/typescript");
 const importSettings = require("./settings/import");
 const reactSettings = require("./settings/react");
 
-/**
- * @see https://github.com/eslint/eslint/issues/3458
- * @see https://www.npmjs.com/package/@rushstack/eslint-patch
- */
-require("@rushstack/eslint-patch/modern-module-resolution");
-
 const OFF = 0;
 // const WARN = 1;
 // const ERROR = 2;
