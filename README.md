@@ -41,7 +41,7 @@ The monorepo follows the Turborepo covention of grouping packages into one of tw
 
 ### `/apps`
 
-| Package Name | Description     | Command       |
+| Package Name | Description     | Local Command |
 | ------------ | --------------- | ------------- |
 | `carbon`     | ERP Application | `npm run dev` |
 
@@ -60,10 +60,10 @@ The monorepo follows the Turborepo covention of grouping packages into one of tw
 
 There are two other top-level folders worth mentioning:
 
-| Package Name | Description                                      | Command              |
-| ------------ | ------------------------------------------------ | -------------------- |
-| `shared`     | A shared API things like currency exchange rates | `npm run dev:shared` |
-| `www`        | The documentation site                           | `npm run dev:www`    |
+| Package Name | Description                                          | Local Command        |
+| ------------ | ---------------------------------------------------- | -------------------- |
+| `shared`     | A shared API for things like currency exchange rates | `npm run dev:shared` |
+| `www`        | The documentation site                               | `npm run dev:www`    |
 
 ## Local Development
 
