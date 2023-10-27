@@ -5,7 +5,8 @@ import { equipmentValidator, upsertEquipment } from "~/modules/resources";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
 import { assertIsPost } from "~/utils/http";
-import { error, success } from "~/utils/result";
+import { path } from "~/utils/path";
+import { error } from "~/utils/result";
 
 export async function action({ request }: ActionFunctionArgs) {
   assertIsPost(request);
@@ -21,24 +22,12 @@ export async function action({ request }: ActionFunctionArgs) {
     return validationError(validation.error);
   }
 
-  const {
-    name,
-    description,
-    equipmentTypeId,
-    locationId,
-    operatorsRequired,
-    setupHours,
-    workCellId,
-  } = validation.data;
+  const { id, ...data } = validation.data;
+
+  console.log(data);
 
   const insertEquipment = await upsertEquipment(client, {
-    name,
-    description,
-    equipmentTypeId,
-    locationId,
-    operatorsRequired,
-    setupHours,
-    workCellId,
+    ...data,
     createdBy: userId,
   });
   if (insertEquipment.error) {
@@ -51,8 +40,5 @@ export async function action({ request }: ActionFunctionArgs) {
     );
   }
 
-  return redirect(
-    `/x/resources/equipment`,
-    await flash(request, success("Created equipment"))
-  );
+  return redirect(path.to.equipment);
 }

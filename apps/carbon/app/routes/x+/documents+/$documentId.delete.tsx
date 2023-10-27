@@ -4,6 +4,7 @@ import { deleteDocument } from "~/modules/documents";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
 import { assertIsPost, notFound } from "~/utils/http";
+import { path } from "~/utils/path";
 import { error } from "~/utils/result";
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -19,7 +20,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
   if (moveToTrash.error) {
     return redirect(
-      "/x/documents/search",
+      path.to.documents,
       await flash(
         request,
         error(moveToTrash.error, "Failed to delete document")
@@ -27,5 +28,5 @@ export async function action({ request, params }: ActionFunctionArgs) {
     );
   }
 
-  return redirect("/x/documents/search");
+  return redirect(path.to.documents);
 }

@@ -5,16 +5,23 @@ import { Outlet, useLoaderData } from "@remix-run/react";
 import { useRouteData } from "~/hooks";
 import type { AccountListItem } from "~/modules/accounting";
 import {
-  getSalesPostingGroups,
   SalesPostingGroupsFilters,
   SalesPostingGroupsTable,
+  getSalesPostingGroups,
 } from "~/modules/accounting";
 import { getPartGroupsList } from "~/modules/parts";
 import { getCustomerTypesList } from "~/modules/sales";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
+import type { Handle } from "~/utils/handle";
+import { path } from "~/utils/path";
 import { getGenericQueryFilters } from "~/utils/query";
 import { error } from "~/utils/result";
+
+export const handle: Handle = {
+  breadcrumb: "Sales Groups",
+  to: path.to.accountingGroupsSales,
+};
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { client } = await requirePermissions(request, {
@@ -40,7 +47,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   ]);
   if (salesGroups.error) {
     return redirect(
-      "/x/accounting",
+      path.to.accounting,
       await flash(
         request,
         error(salesGroups.error, "Failed to fetch sales posting groups")
@@ -63,7 +70,7 @@ export default function SalesPostingGroupsRoute() {
   const routeData = useRouteData<{
     balanceSheetAccounts: AccountListItem[];
     incomeStatementAccounts: AccountListItem[];
-  }>("/x/accounting");
+  }>(path.to.accounting);
 
   return (
     <VStack w="full" h="full" spacing={0}>

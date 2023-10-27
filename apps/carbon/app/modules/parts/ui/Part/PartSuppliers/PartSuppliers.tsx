@@ -11,16 +11,17 @@ import {
 import { Link, Outlet, useNavigate } from "@remix-run/react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
-import Grid from "~/components/Grid";
+import { MdMoreHoriz } from "react-icons/md";
 import {
   EditableList,
   EditableNumber,
   EditableText,
 } from "~/components/Editable";
-import type { PartSupplier, UnitOfMeasureListItem } from "~/modules/parts";
-import usePartSuppliers from "./usePartSuppliers";
+import Grid from "~/components/Grid";
 import { useRouteData } from "~/hooks";
-import { MdMoreHoriz } from "react-icons/md";
+import type { PartSupplier, UnitOfMeasureListItem } from "~/modules/parts";
+import { path } from "~/utils/path";
+import usePartSuppliers from "./usePartSuppliers";
 
 type PartSuppliersProps = {
   partSuppliers: PartSupplier[];
@@ -28,10 +29,10 @@ type PartSuppliersProps = {
 
 const PartSuppliers = ({ partSuppliers }: PartSuppliersProps) => {
   const navigate = useNavigate();
-  const { canEdit, handleCellEdit } = usePartSuppliers();
+  const { canEdit, onCellEdit } = usePartSuppliers();
   const sharedPartData = useRouteData<{
     unitOfMeasures: UnitOfMeasureListItem[];
-  }>("/x/part");
+  }>(path.to.partRoot);
 
   const unitOfMeasureOptions = useMemo(() => {
     return (
@@ -95,15 +96,12 @@ const PartSuppliers = ({ partSuppliers }: PartSuppliersProps) => {
 
   const editableComponents = useMemo(
     () => ({
-      supplierPartId: EditableText(handleCellEdit),
-      supplierUnitOfMeasureCode: EditableList(
-        handleCellEdit,
-        unitOfMeasureOptions
-      ),
-      minimumOrderQuantity: EditableNumber(handleCellEdit),
-      conversionFactor: EditableNumber(handleCellEdit),
+      supplierPartId: EditableText(onCellEdit),
+      supplierUnitOfMeasureCode: EditableList(onCellEdit, unitOfMeasureOptions),
+      minimumOrderQuantity: EditableNumber(onCellEdit),
+      conversionFactor: EditableNumber(onCellEdit),
     }),
-    [handleCellEdit, unitOfMeasureOptions]
+    [onCellEdit, unitOfMeasureOptions]
   );
 
   return (

@@ -13,6 +13,7 @@ import {
   DeactivateUsersModal,
   ResendInviteModal,
 } from "~/modules/users";
+import { path } from "~/utils/path";
 
 type EmployeesTableProps = {
   data: Employee[];
@@ -72,9 +73,9 @@ const EmployeesTable = memo(
               <Link
                 onClick={() =>
                   navigate(
-                    `/x/users/employees/${
+                    `${path.to.employeeAccount(
                       row.original.user?.id
-                    }?${params.toString()}`
+                    )}?${params.toString()}`
                   )
                 }
               >
@@ -173,7 +174,9 @@ const EmployeesTable = memo(
             <MenuItem
               icon={<BsPencilSquare />}
               onClick={() =>
-                navigate(`/x/users/employees/${user.id}?${params.toString()}`)
+                navigate(
+                  `${path.to.employeeAccount(user.id)}?${params.toString()}`
+                )
               }
             >
               Edit Employee

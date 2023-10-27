@@ -37,11 +37,7 @@ export async function deletePurchaseOrder(
   client: SupabaseClient<Database>,
   purchaseOrderId: string
 ) {
-  return Promise.all([
-    client.from("purchaseOrder").delete().eq("id", purchaseOrderId),
-    client.from("purchaseOrderDelivery").delete().eq("id", purchaseOrderId),
-    client.from("purchaseOrderPayment").delete().eq("id", purchaseOrderId),
-  ]);
+  return client.from("purchaseOrder").delete().eq("id", purchaseOrderId);
 }
 
 export async function deletePurchaseOrderLine(
@@ -104,7 +100,7 @@ export async function getPurchaseOrder(
   purchaseOrderId: string
 ) {
   return client
-    .from("purchase_order_view")
+    .from("purchaseOrders")
     .select("*")
     .eq("id", purchaseOrderId)
     .single();
@@ -118,9 +114,7 @@ export async function getPurchaseOrders(
     supplierId: string | null;
   }
 ) {
-  let query = client
-    .from("purchase_order_view")
-    .select("*", { count: "exact" });
+  let query = client.from("purchaseOrders").select("*", { count: "exact" });
 
   if (args.search) {
     query = query.ilike("purchaseOrderId", `%${args.search}%`);
@@ -188,7 +182,7 @@ export async function getPurchaseOrderLine(
 export async function getPurchaseOrderSuppliers(
   client: SupabaseClient<Database>
 ) {
-  return client.from("purchase_order_suppliers_view").select("id, name");
+  return client.from("purchaseOrderSuppliers").select("id, name");
 }
 
 export async function getSupplier(
@@ -256,7 +250,7 @@ export async function getSuppliers(
     status: string | null;
   }
 ) {
-  let query = client.from("suppliers_view").select("*", {
+  let query = client.from("suppliers").select("*", {
     count: "exact",
   });
 
@@ -353,7 +347,7 @@ export async function getUninvoicedReceipts(
     supplier: string | null;
   }
 ) {
-  let query = client.from("receipts_posted_not_invoiced").select("*");
+  let query = client.from("receiptsPostedNotInvoiced").select("*");
 
   if (args?.supplier) {
     query = query.eq("supplierId", args.supplier);
@@ -392,6 +386,7 @@ export async function insertSupplierContact(
 ) {
   // Need to use service role here because it violates RLS
   // to select a contact that does not belong to any supplier
+  // TODO: replace this with a transaction
   const insertContact = await getSupabaseServiceRole()
     .from("contact")
     .insert([supplierContact.contact])

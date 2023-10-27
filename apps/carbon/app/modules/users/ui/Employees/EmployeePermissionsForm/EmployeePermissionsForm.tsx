@@ -1,4 +1,3 @@
-import { useMount } from "@carbon/react";
 import {
   Box,
   Button,
@@ -13,18 +12,20 @@ import {
   HStack,
   VStack,
 } from "@chakra-ui/react";
-import { useFetcher, useNavigate } from "@remix-run/react";
-import type { PostgrestResponse } from "@supabase/supabase-js";
+import { useNavigate } from "@remix-run/react";
 import { useState } from "react";
 import { ValidatedForm } from "remix-validated-form";
 import { Hidden, Select, Submit } from "~/components/Form";
-import type { EmployeeType, Permission } from "~/modules/users";
+import type { Permission } from "~/modules/users";
 import { employeeValidator } from "~/modules/users";
 import PermissionCheckboxes from "~/modules/users/ui/components/Permission";
+import type { ListItem } from "~/types";
 import type { TypeOfValidator } from "~/types/validators";
+import { path } from "~/utils/path";
 
 type EmployeePermissionsFormProps = {
   name: string;
+  employeeTypes: ListItem[];
   initialValues: TypeOfValidator<typeof employeeValidator> & {
     permissions: Record<string, Permission>;
   };
@@ -32,19 +33,14 @@ type EmployeePermissionsFormProps = {
 
 const EmployeePermissionsForm = ({
   name,
+  employeeTypes,
   initialValues,
 }: EmployeePermissionsFormProps) => {
   const navigate = useNavigate();
   const onClose = () => navigate(-1);
 
-  const employeeTypeFetcher = useFetcher<PostgrestResponse<EmployeeType>>();
-
-  useMount(() => {
-    employeeTypeFetcher.load("/api/users/employee-types");
-  });
-
   const employeeTypeOptions =
-    employeeTypeFetcher.data?.data?.map((et) => ({
+    employeeTypes?.map((et) => ({
       value: et.id,
       label: et.name,
     })) ?? [];
@@ -62,7 +58,7 @@ const EmployeePermissionsForm = ({
       <ValidatedForm
         validator={employeeValidator}
         method="post"
-        action={`/x/users/employees/${initialValues.id}`}
+        action={path.to.employeeAccount(initialValues.id)}
         defaultValues={initialValues}
       >
         <DrawerOverlay />
@@ -74,7 +70,6 @@ const EmployeePermissionsForm = ({
               <Select
                 name="employeeType"
                 label="Employee Type"
-                isLoading={employeeTypeFetcher.state === "loading"}
                 options={employeeTypeOptions}
                 placeholder="Select Employee Type"
               />

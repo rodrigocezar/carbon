@@ -6,6 +6,7 @@ import { deletePaymentTerm, getPaymentTerm } from "~/modules/accounting";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
 import { notFound } from "~/utils/http";
+import { path } from "~/utils/path";
 import { error, success } from "~/utils/result";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -18,7 +19,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const paymentTerm = await getPaymentTerm(client, paymentTermId);
   if (paymentTerm.error) {
     return redirect(
-      "/x/accounting/payment-terms",
+      path.to.paymentTerms,
       await flash(
         request,
         error(paymentTerm.error, "Failed to get payment term")
@@ -37,7 +38,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const { paymentTermId } = params;
   if (!paymentTermId) {
     return redirect(
-      "/x/accounting/payment-terms",
+      path.to.paymentTerms,
       await flash(request, error(params, "Failed to get an payment term id"))
     );
   }
@@ -48,7 +49,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   );
   if (deleteTypeError) {
     return redirect(
-      "/x/accounting/payment-terms",
+      path.to.paymentTerms,
       await flash(
         request,
         error(deleteTypeError, "Failed to delete payment term")
@@ -57,7 +58,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   return redirect(
-    "/x/accounting/payment-terms",
+    path.to.paymentTerms,
     await flash(request, success("Successfully deleted payment term"))
   );
 }
@@ -69,11 +70,11 @@ export default function DeletePaymentTermRoute() {
 
   if (!paymentTermId || !paymentTerm) return null; // TODO - handle this better (404?)
 
-  const onCancel = () => navigate("/x/accounting/payment-terms");
+  const onCancel = () => navigate(path.to.paymentTerms);
 
   return (
     <ConfirmDelete
-      action={`/x/accounting/payment-terms/delete/${paymentTermId}`}
+      action={path.to.deletePaymentTerm(paymentTermId)}
       name={paymentTerm.name}
       text={`Are you sure you want to delete the payment term: ${paymentTerm.name}? This cannot be undone.`}
       onCancel={onCancel}

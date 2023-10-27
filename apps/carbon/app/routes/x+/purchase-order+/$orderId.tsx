@@ -3,16 +3,24 @@ import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Outlet } from "@remix-run/react";
 import {
+  PurchaseOrderHeader,
+  PurchaseOrderSidebar,
   getExternalDocuments,
   getInternalDocuments,
   getPurchaseOrder,
-  PurchaseOrderHeader,
-  PurchaseOrderSidebar,
+  getPurchaseOrderLines,
 } from "~/modules/purchasing";
 import { getLocationsList } from "~/modules/resources";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
+import type { Handle } from "~/utils/handle";
+import { path } from "~/utils/path";
 import { error } from "~/utils/result";
+
+export const handle: Handle = {
+  breadcrumb: "Orders",
+  to: path.to.purchaseOrders,
+};
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const { client } = await requirePermissions(request, {
@@ -22,17 +30,23 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const { orderId } = params;
   if (!orderId) throw new Error("Could not find orderId");
 
-  const [purchaseOrder, externalDocuments, internalDocuments, locations] =
-    await Promise.all([
-      getPurchaseOrder(client, orderId),
-      getExternalDocuments(client, orderId),
-      getInternalDocuments(client, orderId),
-      getLocationsList(client),
-    ]);
+  const [
+    purchaseOrder,
+    purchaseOrderLines,
+    externalDocuments,
+    internalDocuments,
+    locations,
+  ] = await Promise.all([
+    getPurchaseOrder(client, orderId),
+    getPurchaseOrderLines(client, orderId),
+    getExternalDocuments(client, orderId),
+    getInternalDocuments(client, orderId),
+    getLocationsList(client),
+  ]);
 
   if (purchaseOrder.error) {
     return redirect(
-      "/x/purchasing/orders",
+      path.to.purchaseOrders,
       await flash(
         request,
         error(purchaseOrder.error, "Failed to load purchase order summary")
@@ -42,6 +56,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
   return json({
     purchaseOrder: purchaseOrder.data,
+    purchaseOrderLines: purchaseOrderLines.data ?? [],
     externalDocuments: externalDocuments.data ?? [],
     internalDocuments: internalDocuments.data ?? [],
     locations: locations.data ?? [],

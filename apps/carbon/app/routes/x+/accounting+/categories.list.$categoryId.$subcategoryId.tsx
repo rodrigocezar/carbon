@@ -8,6 +8,7 @@ import {
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
 import { notFound } from "~/utils/http";
+import { path } from "~/utils/path";
 import { error } from "~/utils/result";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -17,12 +18,13 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   });
 
   const { categoryId, subcategoryId } = params;
+  if (!categoryId) throw notFound("categoryId not found");
   if (!subcategoryId) throw notFound("subcategoryId not found");
 
   const subcategory = await getAccountSubcategory(client, subcategoryId);
   if (subcategory.error) {
     return redirect(
-      `/x/accounting/categories/list/${categoryId}`,
+      path.to.accountingCategoryList(categoryId),
       await flash(
         request,
         error(subcategory.error, "Failed to fetch G/L account subcategory")
@@ -41,7 +43,7 @@ export default function EditAccountSubcategoryRoute() {
   if (!categoryId) throw notFound("categoryId not found");
 
   const navigate = useNavigate();
-  const onClose = () => navigate(`/x/accounting/categories/list/${categoryId}`);
+  const onClose = () => navigate(path.to.accountingCategoryList(categoryId));
 
   const initialValues = {
     ...subcategory,

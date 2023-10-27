@@ -6,6 +6,7 @@ import { deleteUnitOfMeasure, getUnitOfMeasure } from "~/modules/parts";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
 import { notFound } from "~/utils/http";
+import { path } from "~/utils/path";
 import { error, success } from "~/utils/result";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -18,7 +19,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const unitOfMeasure = await getUnitOfMeasure(client, uomId);
   if (unitOfMeasure.error) {
     return redirect(
-      "/x/parts/uom",
+      path.to.uoms,
       await flash(
         request,
         error(unitOfMeasure.error, "Failed to get unit of measure")
@@ -37,7 +38,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const { uomId } = params;
   if (!uomId) {
     return redirect(
-      "/x/parts/uom",
+      path.to.uoms,
       await flash(request, error(params, "Failed to get an unit of measure id"))
     );
   }
@@ -45,7 +46,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const { error: deleteTypeError } = await deleteUnitOfMeasure(client, uomId);
   if (deleteTypeError) {
     return redirect(
-      "/x/parts/uom",
+      path.to.uoms,
       await flash(
         request,
         error(deleteTypeError, "Failed to delete unit of measure")
@@ -54,7 +55,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   return redirect(
-    "/x/parts/uom",
+    path.to.uoms,
     await flash(request, success("Successfully deleted unit of measure"))
   );
 }
@@ -64,13 +65,14 @@ export default function DeleteUnitOfMeasureRoute() {
   const { unitOfMeasure } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
 
-  if (!uomId || !unitOfMeasure) return null; // TODO - handle this better (404?)
+  if (!unitOfMeasure) return null;
+  if (!uomId) throw notFound("uomId not found");
 
-  const onCancel = () => navigate("/x/parts/uom");
+  const onCancel = () => navigate(path.to.uoms);
 
   return (
     <ConfirmDelete
-      action={`/x/parts/uom/delete/${uomId}`}
+      action={path.to.deleteUom(uomId)}
       name={unitOfMeasure.name}
       text={`Are you sure you want to delete the unit of measure: ${unitOfMeasure.name}? This cannot be undone.`}
       onCancel={onCancel}

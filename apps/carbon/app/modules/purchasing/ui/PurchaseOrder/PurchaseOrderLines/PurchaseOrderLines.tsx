@@ -28,23 +28,21 @@ import Grid from "~/components/Grid";
 import { useRouteData, useUser } from "~/hooks";
 import type { PurchaseOrder, PurchaseOrderLine } from "~/modules/purchasing";
 import type { ListItem } from "~/types";
+import { path } from "~/utils/path";
 import usePurchaseOrderLines from "./usePurchaseOrderLines";
 
-type PurchaseOrderLinesProps = {
-  purchaseOrderLines: PurchaseOrderLine[];
-};
-
-const PurchaseOrderLines = ({
-  purchaseOrderLines,
-}: PurchaseOrderLinesProps) => {
+const PurchaseOrderLines = () => {
   const { orderId } = useParams();
   if (!orderId) throw new Error("orderId not found");
 
   const navigate = useNavigate();
+
   const routeData = useRouteData<{
+    purchaseOrderLines: PurchaseOrderLine[];
     locations: ListItem[];
     purchaseOrder: PurchaseOrder;
-  }>(`/x/purchase-order/${orderId}`);
+  }>(path.to.purchaseOrder(orderId));
+
   const locations = routeData?.locations ?? [];
   const { defaults } = useUser();
   const {
@@ -53,10 +51,10 @@ const PurchaseOrderLines = ({
     supabase,
     partOptions,
     accountOptions,
-    handleCellEdit,
+    onCellEdit,
   } = usePurchaseOrderLines();
 
-  const isEditable = ["Draft", "In Review", "In External Review"].includes(
+  const isEditable = ["Draft", "To Review"].includes(
     routeData?.purchaseOrder?.status ?? ""
   );
 
@@ -243,17 +241,17 @@ const PurchaseOrderLines = ({
 
   const editableComponents = useMemo(
     () => ({
-      description: EditableText(handleCellEdit),
-      purchaseQuantity: EditableNumber(handleCellEdit),
-      unitPrice: EditableNumber(handleCellEdit),
-      partId: EditablePurchaseOrderLineNumber(handleCellEdit, {
+      description: EditableText(onCellEdit),
+      purchaseQuantity: EditableNumber(onCellEdit),
+      unitPrice: EditableNumber(onCellEdit),
+      partId: EditablePurchaseOrderLineNumber(onCellEdit, {
         client: supabase,
         parts: partOptions,
         accounts: accountOptions,
         defaultLocationId: defaults.locationId,
       }),
     }),
-    [handleCellEdit, supabase, partOptions, accountOptions, defaults.locationId]
+    [onCellEdit, supabase, partOptions, accountOptions, defaults.locationId]
   );
 
   return (
@@ -271,7 +269,7 @@ const PurchaseOrderLines = ({
         </CardHeader>
         <CardBody>
           <Grid<PurchaseOrderLine>
-            data={purchaseOrderLines}
+            data={routeData?.purchaseOrderLines ?? []}
             columns={columns}
             canEdit={canEdit && isEditable}
             editableComponents={editableComponents}

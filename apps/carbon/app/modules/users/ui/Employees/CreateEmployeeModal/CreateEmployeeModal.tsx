@@ -18,6 +18,7 @@ import { Input, Select, Submit } from "~/components/Form";
 import type { EmployeeType } from "~/modules/users";
 import { createEmployeeValidator } from "~/modules/users";
 import type { Result } from "~/types";
+import { path } from "~/utils/path";
 
 const CreateEmployeeModal = () => {
   const initialFocusRef = useRef<HTMLInputElement>(null);
@@ -26,7 +27,7 @@ const CreateEmployeeModal = () => {
   const employeeTypeFetcher = useFetcher<PostgrestResponse<EmployeeType>>();
 
   useMount(() => {
-    employeeTypeFetcher.load("/api/users/employee-types");
+    employeeTypeFetcher.load(path.to.api.employeeTypes);
   });
 
   const employeeTypeOptions =
@@ -48,7 +49,7 @@ const CreateEmployeeModal = () => {
         <ModalBody pb={6}>
           <ValidatedForm
             method="post"
-            action="/x/users/employees/new"
+            action={path.to.newEmployee}
             validator={createEmployeeValidator}
             // @ts-ignore
             fetcher={formFetcher}

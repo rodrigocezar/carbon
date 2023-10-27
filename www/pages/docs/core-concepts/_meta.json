@@ -1,5 +1,8 @@
 {
   "permissions": "Permissions",
   "fetching": "Data Fetching",
-  "writing": "Data Writes"
+  "writing": "Data Writes",
+  "realtime": "Realtime",
+  "transactions": "Transactions",
+  "serverless": "Serverless"
 }

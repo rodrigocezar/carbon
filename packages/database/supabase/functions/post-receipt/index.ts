@@ -1,24 +1,11 @@
 import { serve } from "https://deno.land/std@0.175.0/http/server.ts";
 import { format } from "https://deno.land/std@0.91.0/datetime/mod.ts";
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.33.1";
-
-import { client } from "https://esm.sh/v132/websocket@1.0.34/denonext/websocket.mjs";
 import type { Database } from "../../../src/types.ts";
-import { getConnectionPool, getDatabaseClient } from "../lib/database.ts";
+import { DB, getConnectionPool, getDatabaseClient } from "../lib/database.ts";
 import { corsHeaders } from "../lib/headers.ts";
 import { getSupabaseServiceRole } from "../lib/supabase.ts";
-
-// Use the supabase types to define a subset of the database we'll transact with
-interface DB {
-  generalLedger: Database["public"]["Tables"]["generalLedger"]["Insert"];
-  purchaseOrderDelivery: Database["public"]["Tables"]["purchaseOrderDelivery"]["Update"];
-  purchaseOrderLine: Database["public"]["Tables"]["purchaseOrderLine"]["Update"];
-  partLedger: Database["public"]["Tables"]["partLedger"]["Insert"];
-  partLedgerValueLedgerRelation: Database["public"]["Tables"]["partLedgerValueLedgerRelation"]["Insert"];
-  receipt: Database["public"]["Tables"]["receipt"]["Update"];
-  valueLedger: Database["public"]["Tables"]["valueLedger"]["Insert"];
-  valueLedgerGeneralLedgerRelation: Database["public"]["Tables"]["valueLedgerGeneralLedgerRelation"]["Insert"];
-}
+import { getCurrentAccountingPeriod } from "../shared/get-accounting-period.ts";
 
 const pool = getConnectionPool(1);
 const db = getDatabaseClient<DB>(pool);
@@ -72,8 +59,10 @@ serve(async (req: Request) => {
           [];
         const partLedgerInserts: Database["public"]["Tables"]["partLedger"]["Insert"][] =
           [];
-        const generalLedgerInserts: Database["public"]["Tables"]["generalLedger"]["Insert"][] =
-          [];
+        const journalLineInserts: Omit<
+          Database["public"]["Tables"]["journalLine"]["Insert"],
+          "journalId"
+        >[] = [];
 
         if (!receipt.data.sourceDocumentId)
           throw new Error("Receipt has no sourceDocumentId");
@@ -173,7 +162,7 @@ serve(async (req: Request) => {
             quantity: receiptLine.receivedQuantity,
           });
 
-          // general ledger entries
+          // journal lines
           let postingGroup:
             | Database["public"]["Tables"]["postingGroupInventory"]["Row"]
             | null = null;
@@ -208,7 +197,7 @@ serve(async (req: Request) => {
             throw new Error("No inventory posting group found");
           }
 
-          generalLedgerInserts.push({
+          journalLineInserts.push({
             accountNumber: postingGroup.inventoryInterimAccrualAccount,
             description: "Interim Inventory Accrual",
             amount: -expectedValue,
@@ -217,7 +206,7 @@ serve(async (req: Request) => {
             externalDocumentId:
               purchaseOrder.data?.supplierReference ?? undefined,
           });
-          generalLedgerInserts.push({
+          journalLineInserts.push({
             accountNumber: postingGroup.inventoryReceivedNotInvoicedAccount,
             description: "Inventory Received Not Invoiced",
             amount: expectedValue,
@@ -227,6 +216,8 @@ serve(async (req: Request) => {
               purchaseOrder.data?.supplierReference ?? undefined,
           });
         }
+
+        const accountingPeriodId = await getCurrentAccountingPeriod(client, db);
 
         await db.transaction().execute(async (trx) => {
           for await (const [purchaseOrderLineId, update] of Object.entries(
@@ -254,9 +245,27 @@ serve(async (req: Request) => {
             .returning(["id"])
             .execute();
 
-          const generalLedgerIds = await trx
-            .insertInto("generalLedger")
-            .values(generalLedgerInserts)
+          const journal = await trx
+            .insertInto("journal")
+            .values({
+              accountingPeriodId,
+              description: `Purchase Receipt ${receipt.data.receiptId}`,
+              postingDate: format(new Date(), "yyyy-MM-dd"),
+            })
+            .returning(["id"])
+            .execute();
+
+          const journalId = journal[0].id;
+          if (!journalId) throw new Error("Failed to insert journal");
+
+          const journalLineIds = await trx
+            .insertInto("journalLine")
+            .values(
+              journalLineInserts.map((journalLine) => ({
+                ...journalLine,
+                journalId,
+              }))
+            )
             .returning(["id"])
             .execute();
 
@@ -266,10 +275,10 @@ serve(async (req: Request) => {
             .returning(["id"])
             .execute();
 
-          const glEntriesPerValueEntry =
-            generalLedgerIds.length / valueLedgerIds.length;
+          const journalLinesPerValueEntry =
+            journalLineIds.length / valueLedgerIds.length;
           if (
-            glEntriesPerValueEntry !== 2 ||
+            journalLinesPerValueEntry !== 2 ||
             partLedgerIds.length !== valueLedgerIds.length
           ) {
             throw new Error("Failed to insert ledger entries");
@@ -291,18 +300,18 @@ serve(async (req: Request) => {
               })
               .execute();
 
-            for (let j = 0; j < glEntriesPerValueEntry; j++) {
-              const generalLedgerId =
-                generalLedgerIds[i * glEntriesPerValueEntry + j].id;
-              if (!generalLedgerId) {
+            for (let j = 0; j < journalLinesPerValueEntry; j++) {
+              const journalLineId =
+                journalLineIds[i * journalLinesPerValueEntry + j].id;
+              if (!journalLineId) {
                 throw new Error("Failed to insert ledger entries");
               }
 
               await trx
-                .insertInto("valueLedgerGeneralLedgerRelation")
+                .insertInto("valueLedgerJournalLineRelation")
                 .values({
                   valueLedgerId,
-                  generalLedgerId,
+                  journalLineId,
                 })
                 .execute();
             }
@@ -326,8 +335,7 @@ serve(async (req: Request) => {
 
     return new Response(
       JSON.stringify({
-        data: null,
-        error: null,
+        success: true,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -336,6 +344,7 @@ serve(async (req: Request) => {
   } catch (err) {
     console.error(err);
     if (receiptId) {
+      const client = getSupabaseServiceRole(req.headers.get("Authorization"));
       client.from("receipt").update({ status: "Draft" }).eq("id", receiptId);
     }
     return new Response(JSON.stringify(err), {
@@ -345,6 +354,7 @@ serve(async (req: Request) => {
   }
 });
 
+// TODO: should this be in a shared package?
 async function getInventoryPostingGroup(
   client: SupabaseClient<Database>,
   args: {

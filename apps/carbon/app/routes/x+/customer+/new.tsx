@@ -9,7 +9,8 @@ import {
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
 import { assertIsPost } from "~/utils/http";
-import { error, success } from "~/utils/result";
+import { path } from "~/utils/path";
+import { error } from "~/utils/result";
 
 export async function action({ request }: ActionFunctionArgs) {
   assertIsPost(request);
@@ -31,7 +32,7 @@ export async function action({ request }: ActionFunctionArgs) {
   });
   if (createCustomer.error) {
     return redirect(
-      "/x/sales/customers",
+      path.to.customers,
       await flash(
         request,
         error(createCustomer.error, "Failed to insert customer")
@@ -41,10 +42,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const customerId = createCustomer.data?.id;
 
-  return redirect(
-    `/x/customer/${customerId}`,
-    await flash(request, success("Created customer"))
-  );
+  return redirect(path.to.customer(customerId));
 }
 
 export default function CustomersNewRoute() {

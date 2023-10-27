@@ -14,15 +14,25 @@ import { useParams } from "@remix-run/react";
 import { FaHistory } from "react-icons/fa";
 import { usePermissions, useRouteData } from "~/hooks";
 import type { PurchaseOrder } from "~/modules/purchasing";
+import { PurchasingStatus } from "~/modules/purchasing";
+import { path } from "~/utils/path";
 import { usePurchaseOrder } from "../../PurchaseOrders/usePurchaseOrder";
 
 const PurchaseOrderHeader = () => {
   const permissions = usePermissions();
   const { orderId } = useParams();
   if (!orderId) throw new Error("Could not find orderId");
+
   const routeData = useRouteData<{ purchaseOrder: PurchaseOrder }>(
-    `/x/purchase-order/${orderId}`
+    path.to.purchaseOrder(orderId)
   );
+
+  // TODO: factor in default currency, po currency and exchange rate
+  // const currencyFormatter = useMemo(
+  //   () =>
+  //     new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }),
+  //   []
+  // );
 
   const { receive, release } = usePurchaseOrder();
 
@@ -46,7 +56,10 @@ const PurchaseOrderHeader = () => {
             onClick={() => {
               if (routeData?.purchaseOrder) receive(routeData.purchaseOrder);
             }}
-            isDisabled={routeData?.purchaseOrder?.status !== "Released"}
+            isDisabled={
+              routeData?.purchaseOrder?.status !== "To Receive" &&
+              routeData?.purchaseOrder?.status !== "To Receive and Invoice"
+            }
           >
             Receive
           </MenubarItem>
@@ -100,13 +113,28 @@ const PurchaseOrderHeader = () => {
               <Text color="gray.500">Type</Text>
               <Text fontWeight="bold">{routeData?.purchaseOrder?.type}</Text>
             </Stack>
+            {/* 
+            <Stack
+              direction={["row", "row", "column"]}
+              alignItems="start"
+              justifyContent="space-between"
+            >
+              <Text color="gray.500">Subtotal</Text>
+              <Text fontWeight="bold">
+                // TODO: this doesn't update when client-side lines are updated
+                {currencyFormatter.format(
+                  routeData?.purchaseOrder?.subtotal ?? 0
+                )}
+              </Text>
+            </Stack> 
+            */}
             <Stack
               direction={["row", "row", "column"]}
               alignItems="start"
               justifyContent="space-between"
             >
               <Text color="gray.500">Status</Text>
-              <Text fontWeight="bold">{routeData?.purchaseOrder?.status}</Text>
+              <PurchasingStatus status={routeData?.purchaseOrder?.status} />
             </Stack>
           </Stack>
         </CardBody>

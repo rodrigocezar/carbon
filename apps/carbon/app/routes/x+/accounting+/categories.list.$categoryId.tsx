@@ -10,6 +10,7 @@ import {
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
 import { notFound } from "~/utils/http";
+import { path } from "~/utils/path";
 import { error } from "~/utils/result";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -27,7 +28,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   ]);
   if (accountCategory.error) {
     return redirect(
-      "/x/accounting/categories",
+      path.to.accountingCategories,
       await flash(
         request,
         error(accountCategory.error, "Failed to fetch account category")
@@ -37,7 +38,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
   if (accountSubcategories.error) {
     return redirect(
-      "/x/accounting/categories",
+      path.to.accountingCategories,
       await flash(
         request,
         error(
@@ -60,7 +61,7 @@ export default function AccountCategoryListRoute() {
   const [params] = useUrlParams();
   const navigate = useNavigate();
   const onClose = () =>
-    navigate(`/x/accounting/categories?${params.toString()}`);
+    navigate(`${path.to.accountingCategories}?${params.toString()}`);
 
   return (
     <>

@@ -11,7 +11,14 @@ import {
 } from "~/modules/sales";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
+import type { Handle } from "~/utils/handle";
+import { path } from "~/utils/path";
 import { error } from "~/utils/result";
+
+export const handle: Handle = {
+  breadcrumb: "Customers",
+  to: path.to.customers,
+};
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const { client } = await requirePermissions(request, {
@@ -29,7 +36,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
   if (customer.error) {
     return redirect(
-      "/x/sales/customers",
+      path.to.customers,
       await flash(
         request,
         error(customer.error, "Failed to load customer summary")

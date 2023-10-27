@@ -18,6 +18,7 @@ import { Address } from "~/components";
 import { ConfirmDelete } from "~/components/Modals";
 import { usePermissions } from "~/hooks";
 import type { CustomerLocation } from "~/modules/sales";
+import { path } from "~/utils/path";
 
 type CustomerLocationsProps = {
   locations: CustomerLocation[];
@@ -26,7 +27,7 @@ type CustomerLocationsProps = {
 const CustomerLocations = ({ locations }: CustomerLocationsProps) => {
   const navigate = useNavigate();
   const { customerId } = useParams();
-  if (!customerId) throw new Error("customerId is required");
+  if (!customerId) throw new Error("customerId not found");
   const permissions = usePermissions();
   const canEdit = permissions.can("create", "sales");
   const isEmpty = locations === undefined || locations?.length === 0;
@@ -99,9 +100,9 @@ const CustomerLocations = ({ locations }: CustomerLocationsProps) => {
         </CardBody>
       </Card>
 
-      {deleteLocationModal.isOpen && (
+      {deleteLocationModal.isOpen && location?.id && (
         <ConfirmDelete
-          action={`/x/customer/${customerId}/locations/delete/${location?.id}`}
+          action={path.to.deleteCustomerLocation(customerId, location.id)}
           // @ts-ignore
           name={location?.address?.city ?? ""}
           text="Are you sure you want to delete this location?"

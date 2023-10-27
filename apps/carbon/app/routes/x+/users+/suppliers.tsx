@@ -5,14 +5,21 @@ import { Outlet, useLoaderData } from "@remix-run/react";
 import { usePermissions } from "~/hooks";
 import { getSupplierTypes } from "~/modules/purchasing";
 import {
-  getSuppliers,
   SupplierAccountsTable,
   SupplierAccountsTableFilters,
+  getSuppliers,
 } from "~/modules/users";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
+import type { Handle } from "~/utils/handle";
+import { path } from "~/utils/path";
 import { getGenericQueryFilters } from "~/utils/query";
 import { error } from "~/utils/result";
+
+export const handle: Handle = {
+  breadcrumb: "Suppliers",
+  to: path.to.supplierAccounts,
+};
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { client } = await requirePermissions(request, {
@@ -34,13 +41,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
   ]);
   if (suppliers.error) {
     return redirect(
-      "/x",
+      path.to.users,
       await flash(request, error(suppliers.error, "Error loading suppliers"))
     );
   }
   if (supplierTypes.error) {
     return redirect(
-      "/x",
+      path.to.users,
       await flash(
         request,
         error(supplierTypes.error, "Error loading supplier types")

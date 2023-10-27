@@ -1,4 +1,4 @@
-import { Select } from "@carbon/react";
+import { Select, useMount } from "@carbon/react";
 import {
   Button,
   Drawer,
@@ -22,6 +22,7 @@ import { usePermissions } from "~/hooks";
 import type { getSupplierLocations } from "~/modules/purchasing";
 import { partnerValidator } from "~/modules/resources";
 import type { TypeOfValidator } from "~/types/validators";
+import { path } from "~/utils/path";
 
 type PartnerFormProps = {
   initialValues: TypeOfValidator<typeof partnerValidator>;
@@ -42,18 +43,15 @@ const PartnerForm = ({ initialValues }: PartnerFormProps) => {
 
   const onSupplierChange = ({ value }: { value: string | number }) => {
     if (value)
-      supplierLocationFetcher.load(
-        `/api/purchasing/supplier-locations?supplierId=${value}`
-      );
+      supplierLocationFetcher.load(path.to.api.supplierLocations(`${value}`));
   };
 
-  useEffect(() => {
+  useMount(() => {
     if (initialValues.supplierId)
       supplierLocationFetcher.load(
-        `/api/purchasing/supplier-locations?supplierId=${initialValues.supplierId}`
+        path.to.api.supplierLocations(initialValues.supplierId)
       );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
   const supplierLocations = useMemo(
     () =>
@@ -70,9 +68,7 @@ const PartnerForm = ({ initialValues }: PartnerFormProps) => {
         validator={partnerValidator}
         method="post"
         action={
-          isEditing
-            ? `/x/resources/partners/${initialValues.id}`
-            : "/x/resources/partners/new"
+          isEditing ? path.to.partner(initialValues.id) : path.to.newPartner
         }
         defaultValues={initialValues}
       >

@@ -3,15 +3,22 @@ import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Outlet, useLoaderData } from "@remix-run/react";
 import {
-  getHolidays,
-  getHolidayYears,
   HolidaysTable,
   HolidaysTableFilters,
+  getHolidayYears,
+  getHolidays,
 } from "~/modules/resources";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
+import type { Handle } from "~/utils/handle";
+import { path } from "~/utils/path";
 import { getGenericQueryFilters } from "~/utils/query";
 import { error } from "~/utils/result";
+
+export const handle: Handle = {
+  breadcrumb: "Holidays",
+  to: path.to.holidays,
+};
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { client } = await requirePermissions(request, {
@@ -38,7 +45,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   if (holidays.error) {
     return redirect(
-      "/x/resources",
+      path.to.resources,
       await flash(request, error(holidays.error, "Failed to load holidays"))
     );
   }

@@ -6,7 +6,14 @@ import { ChartOfAccountsTable, getChartOfAccounts } from "~/modules/accounting";
 import ChartOfAccountsTableFilters from "~/modules/accounting/ui/ChartOfAccounts/ChartOfAccountsTableFilters";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
+import type { Handle } from "~/utils/handle";
+import { path } from "~/utils/path";
 import { error } from "~/utils/result";
+
+export const handle: Handle = {
+  breadcrumb: "Chart of Accounts",
+  to: path.to.chartOfAccounts,
+};
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { client } = await requirePermissions(request, {
@@ -30,7 +37,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   if (chartOfAccounts.error) {
     return redirect(
-      "/x/accounting",
+      path.to.accounting,
       await flash(
         request,
         error(chartOfAccounts.error, "Failed to get chart of accounts")

@@ -14,7 +14,12 @@ import { MdCallReceived } from "react-icons/md";
 import { Avatar, Table } from "~/components";
 import { ConfirmDelete } from "~/components/Modals";
 import { usePermissions } from "~/hooks";
-import type { PurchaseOrder } from "~/modules/purchasing";
+import type {
+  PurchaseOrder,
+  purchaseOrderStatusType,
+} from "~/modules/purchasing";
+import { PurchasingStatus } from "~/modules/purchasing";
+import { path } from "~/utils/path";
 import { usePurchaseOrder } from "../usePurchaseOrder";
 
 type PurchaseOrdersTableProps = {
@@ -38,7 +43,7 @@ const PurchaseOrdersTable = memo(
 
     const [selectedPurchaseOrder, setSelectedPurchaseOrder] =
       useState<PurchaseOrder | null>(null);
-    const closePurchaseOrderModal = useDisclosure();
+    const deletePurchaseOrderModal = useDisclosure();
 
     const onFavorite = useCallback(
       async (row: PurchaseOrder) => {
@@ -91,6 +96,15 @@ const PurchaseOrdersTable = memo(
           cell: (item) => item.getValue(),
         },
         {
+          accessorKey: "status",
+          header: "Status",
+          cell: (item) => {
+            const status =
+              item.getValue<(typeof purchaseOrderStatusType)[number]>();
+            return <PurchasingStatus status={status} />;
+          },
+        },
+        {
           accessorKey: "receiptPromisedDate",
           header: "Promised Date",
           cell: (item) => item.getValue(),
@@ -134,7 +148,10 @@ const PurchaseOrdersTable = memo(
 
     const defaultColumnVisibility = {
       createdAt: false,
+      createdByFullName: false,
+      receiptPromisedDate: false,
       updatedAt: false,
+      updatedByFullName: false,
     };
 
     const renderContextMenu = useMemo(() => {
@@ -173,14 +190,14 @@ const PurchaseOrdersTable = memo(
             isDisabled={!permissions.can("delete", "purchasing")}
             onClick={() => {
               setSelectedPurchaseOrder(row);
-              closePurchaseOrderModal.onOpen();
+              deletePurchaseOrderModal.onOpen();
             }}
           >
-            Close
+            Delete
           </MenuItem>
         </>
       );
-    }, [closePurchaseOrderModal, edit, onFavorite, permissions, receive]);
+    }, [deletePurchaseOrderModal, edit, onFavorite, permissions, receive]);
 
     return (
       <>
@@ -196,18 +213,18 @@ const PurchaseOrdersTable = memo(
           renderContextMenu={renderContextMenu}
         />
 
-        {selectedPurchaseOrder && (
+        {selectedPurchaseOrder && selectedPurchaseOrder.id && (
           <ConfirmDelete
-            action={`/x/documents/${selectedPurchaseOrder?.id}/close`}
-            isOpen={closePurchaseOrderModal.isOpen}
+            action={path.to.deletePurchaseOrder(selectedPurchaseOrder.id)}
+            isOpen={deletePurchaseOrderModal.isOpen}
             name={selectedPurchaseOrder.purchaseOrderId!}
-            text={`Are you sure you want to move ${selectedPurchaseOrder.purchaseOrderId!} to the trash?`}
+            text={`Are you sure you want to delete ${selectedPurchaseOrder.purchaseOrderId!}? This cannot be undone.`}
             onCancel={() => {
-              closePurchaseOrderModal.onClose();
+              deletePurchaseOrderModal.onClose();
               setSelectedPurchaseOrder(null);
             }}
             onSubmit={() => {
-              closePurchaseOrderModal.onClose();
+              deletePurchaseOrderModal.onClose();
               setSelectedPurchaseOrder(null);
             }}
           />

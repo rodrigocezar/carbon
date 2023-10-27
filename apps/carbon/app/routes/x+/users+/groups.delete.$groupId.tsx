@@ -6,6 +6,7 @@ import { deleteGroup, getGroup } from "~/modules/users";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
 import { notFound } from "~/utils/http";
+import { path } from "~/utils/path";
 import { error, success } from "~/utils/result";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -20,7 +21,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const group = await getGroup(client, groupId);
   if (group.error) {
     return redirect(
-      "/x/users/groups",
+      path.to.groups,
       await flash(request, error(group.error, "Failed to get group"))
     );
   }
@@ -36,7 +37,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const { groupId } = params;
   if (!groupId) {
     return redirect(
-      "/x/users/groups",
+      path.to.groups,
       await flash(request, error(params, "Failed to get an group id"))
     );
   }
@@ -44,13 +45,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const { error: deleteGroupError } = await deleteGroup(client, groupId);
   if (deleteGroupError) {
     return redirect(
-      "/x/users/groups",
+      path.to.groups,
       await flash(request, error(deleteGroupError, "Failed to delete group"))
     );
   }
 
   return redirect(
-    "/x/users/groups",
+    path.to.groups,
     await flash(request, success("Successfully deleted group"))
   );
 }
@@ -60,13 +61,14 @@ export default function DeleteEmployeeTypeRoute() {
   const { group } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
 
-  if (!groupId || !group) return null; // TODO - handle this better (404?)
+  if (!group) return null;
+  if (!groupId) throw new Error("groupId not found");
 
-  const onCancel = () => navigate("/x/users/groups");
+  const onCancel = () => navigate(path.to.groups);
 
   return (
     <ConfirmDelete
-      action={`/x/users/groups/delete/${groupId}`}
+      action={path.to.deleteGroup(groupId)}
       name={group.name}
       text={`Are you sure you want to delete the group: ${group.name}? This cannot be undone.`}
       onCancel={onCancel}

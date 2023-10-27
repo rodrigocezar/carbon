@@ -21,7 +21,6 @@ import {
   Boolean,
   Hidden,
   Input,
-  Number,
   Select,
   SelectControlled,
   Submit,
@@ -40,6 +39,7 @@ import {
   normalBalanceTypes,
 } from "~/modules/accounting";
 import type { TypeOfValidator } from "~/types/validators";
+import { path } from "~/utils/path";
 
 type ChartOfAccountFormProps = {
   initialValues: TypeOfValidator<typeof accountValidator>;
@@ -80,8 +80,8 @@ const ChartOfAccountForm = ({ initialValues }: ChartOfAccountFormProps) => {
         method="post"
         action={
           isEditing
-            ? `/x/accounting/charts/${initialValues.id}`
-            : "/x/accounting/charts/new"
+            ? path.to.chartOfAccount(initialValues.id!)
+            : path.to.newChartOfAccount
         }
         defaultValues={initialValues}
       >
@@ -103,7 +103,7 @@ const ChartOfAccountForm = ({ initialValues }: ChartOfAccountFormProps) => {
               w="full"
             >
               <VStack spacing={4} alignItems="start">
-                <Number name="number" label="Number" />
+                <Input name="number" label="Account Number" />
                 <Input name="name" label="Name" />
                 <Select
                   name="type"

@@ -18,7 +18,8 @@ import {
   sendMagicLink,
 } from "~/services/auth";
 import { flash, requireAuthSession } from "~/services/session";
-import type { Result } from "~/types";
+import type { ListItem, Result } from "~/types";
+import { path } from "~/utils/path";
 import type { GenericQueryFilters } from "~/utils/query";
 import { setGenericQueryFilters } from "~/utils/query";
 import { error, success } from "~/utils/result";
@@ -304,7 +305,7 @@ export async function getCurrentUser(
   const user = await getUser(client, userId);
   if (user?.error || user?.data === null) {
     throw redirect(
-      "/x",
+      path.to.authenticatedRoot,
       await flash(request, error(user.error, "Failed to get user"))
     );
   }
@@ -430,7 +431,7 @@ export async function getGroupMembers(
   groupId: string
 ) {
   return client
-    .from("group_member") // group_member is a view
+    .from("groupMembers")
     .select("name, groupId, memberGroupId, memberUserId")
     .eq("groupId", groupId);
 }
@@ -531,11 +532,12 @@ export async function getUserClaims(
   } finally {
     // if we don't have permissions from redis, get them from the database
     if (!claims) {
+      // TODO: remove service role from here, and move it up a level
       const rawClaims = await getClaims(getSupabaseServiceRole(), userId);
 
       if (rawClaims.error || rawClaims.data === null) {
         throw redirect(
-          "/x",
+          path.to.authenticatedRoot,
           await flash(
             request,
             error(rawClaims.error, "Failed to get rawClaims")
@@ -550,7 +552,7 @@ export async function getUserClaims(
 
       if (!claims) {
         throw redirect(
-          "/x",
+          path.to.authenticatedRoot,
           await flash(request, error(rawClaims, "Failed to parse claims"))
         );
       }
@@ -571,11 +573,7 @@ export async function getUserDefaults(
   client: SupabaseClient<Database>,
   userId: string
 ) {
-  return client
-    .from("user_default_view")
-    .select("*")
-    .eq("userId", userId)
-    .single();
+  return client.from("userDefaults").select("*").eq("userId", userId).single();
 }
 
 export async function getUsers(client: SupabaseClient<Database>) {
@@ -655,10 +653,7 @@ function makeClaimsFromEmployeeType({
     create: boolean;
     update: boolean;
     delete: boolean;
-    feature:
-      | { id: string; name: string }
-      | { id: string; name: string }[]
-      | null;
+    feature: ListItem | ListItem[] | null;
   }[];
 }) {
   const claims: Record<string, boolean> = {};
@@ -800,7 +795,6 @@ function makeSupplierClaims() {
   // TODO: this should be more dynamic
   const claims: Record<string, boolean> = {
     documents_view: true,
-    inventory_view: true,
     purchasing_view: true,
     parts_view: true,
   };

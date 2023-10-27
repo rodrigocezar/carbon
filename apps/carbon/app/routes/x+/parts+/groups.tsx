@@ -4,14 +4,21 @@ import { json, redirect } from "@remix-run/node";
 import { Outlet, useLoaderData } from "@remix-run/react";
 import { getAccountsList } from "~/modules/accounting";
 import {
-  getPartGroups,
   PartGroupsTable,
   PartGroupsTableFilters,
+  getPartGroups,
 } from "~/modules/parts";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
+import type { Handle } from "~/utils/handle";
+import { path } from "~/utils/path";
 import { getGenericQueryFilters } from "~/utils/query";
 import { error } from "~/utils/result";
+
+export const handle: Handle = {
+  breadcrumb: "Part Groups",
+  to: path.to.partGroups,
+};
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { client } = await requirePermissions(request, {
@@ -36,14 +43,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   if (partGroups.error) {
     return redirect(
-      "/x/parts",
+      path.to.parts,
       await flash(request, error(null, "Error loading part groups"))
     );
   }
 
   if (accounts.error) {
     return redirect(
-      "/x/parts/groups",
+      path.to.partGroups,
       await flash(request, error(accounts.error, "Error loading accounts"))
     );
   }

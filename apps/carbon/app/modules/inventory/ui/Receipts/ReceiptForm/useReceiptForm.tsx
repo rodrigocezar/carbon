@@ -13,6 +13,7 @@ import type {
 import type { PurchaseOrderLine } from "~/modules/purchasing";
 import type { ListItem } from "~/types";
 import type { TypeOfValidator } from "~/types/validators";
+import { path } from "~/utils/path";
 
 export default function useReceiptForm({
   receipt,
@@ -32,7 +33,7 @@ export default function useReceiptForm({
 
   const routeData = useRouteData<{
     locations: ListItem[];
-  }>("/x/inventory/receipts");
+  }>(path.to.receipts);
 
   const [internalReceiptLines, setReceiptLines] = useState<ReceiptLine[]>(
     receiptLines ?? []
@@ -65,11 +66,11 @@ export default function useReceiptForm({
       await deleteReceipt();
     }
 
-    navigate("/x/inventory/receipts");
+    navigate(path.to.receipts);
   };
 
   const onPost = () => {
-    navigate(`/x/inventory/receipts/${receipt.id}/post`);
+    navigate(path.to.receiptPost(receipt.id));
   };
 
   const sourceDocumentIdFromParams = params.get("sourceDocumentId");
@@ -92,12 +93,9 @@ export default function useReceiptForm({
     if (!supabase) return;
 
     try {
-      await fetch(
-        `/api/settings/sequence/rollback?table=receipt&currentSequence=${receipt.receiptId}`,
-        {
-          method: "DELETE",
-        }
-      )
+      await fetch(path.to.api.rollback("receipt", receipt.receiptId), {
+        method: "DELETE",
+      })
         .then(() => console.log("successfully rolled back receipt sequence"))
         .catch(console.error);
 
@@ -127,7 +125,7 @@ export default function useReceiptForm({
         supabase
           ?.from("purchaseOrder")
           .select("id, purchaseOrderId")
-          .eq("status", "Released")
+          .or("status.eq.To Receive, status.eq.To Receive and Invoice")
           .then((response) => {
             if (response.error) {
               setError(response.error.message);
@@ -158,7 +156,7 @@ export default function useReceiptForm({
           purchaseOrderLines,
         ] = await Promise.all([
           supabase
-            .from("purchase_order_view")
+            .from("purchaseOrders")
             .select("*")
             .eq("id", sourceDocumentId)
             .single(),
@@ -168,7 +166,7 @@ export default function useReceiptForm({
             .select("*")
             .eq("receiptId", receipt.receiptId),
           supabase
-            .from("receipt_quantity_received_by_line")
+            .from("receiptQuantityReceivedByLine")
             .select("*")
             .eq("sourceDocumentId", sourceDocumentId),
           locationId
@@ -352,7 +350,7 @@ export default function useReceiptForm({
     ];
   }, [routeData?.locations]);
 
-  const handleCellEdit = useCallback(
+  const onCellEdit = useCallback(
     async (id: string, value: unknown, row: ReceiptLine) => {
       if (!supabase) throw new Error("Supabase client not found");
       return await supabase
@@ -367,9 +365,9 @@ export default function useReceiptForm({
 
   const receiptLineEditableComponents = useMemo(
     () => ({
-      receivedQuantity: EditableNumber(handleCellEdit),
+      receivedQuantity: EditableNumber(onCellEdit),
     }),
-    [handleCellEdit]
+    [onCellEdit]
   );
 
   return {

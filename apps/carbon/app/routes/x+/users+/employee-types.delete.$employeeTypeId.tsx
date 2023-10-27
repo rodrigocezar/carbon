@@ -6,6 +6,7 @@ import { deleteEmployeeType, getEmployeeType } from "~/modules/users";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
 import { notFound } from "~/utils/http";
+import { path } from "~/utils/path";
 import { error, success } from "~/utils/result";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -19,7 +20,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const employeeType = await getEmployeeType(client, employeeTypeId);
   if (employeeType.error) {
     return redirect(
-      "/x/users/employee-types",
+      path.to.employeeTypes,
       await flash(
         request,
         error(employeeType.error, "Failed to get employee type")
@@ -40,7 +41,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const { employeeTypeId } = params;
   if (!employeeTypeId) {
     return redirect(
-      "/x/users/employee-types",
+      path.to.employeeTypes,
       await flash(request, error(params, "Failed to get an employee type id"))
     );
   }
@@ -51,7 +52,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   );
   if (deleteTypeError) {
     return redirect(
-      "/x/users/employee-types",
+      path.to.employeeTypes,
       await flash(
         request,
         error(deleteTypeError, "Failed to delete employee type")
@@ -62,7 +63,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   // TODO - delete employeeType group
 
   return redirect(
-    "/x/users/employee-types",
+    path.to.employeeTypes,
     await flash(request, success("Successfully deleted employee type"))
   );
 }
@@ -72,13 +73,14 @@ export default function DeleteEmployeeTypeRoute() {
   const { employeeType } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
 
-  if (!employeeTypeId || !employeeType) return null; // TODO - handle this better (404?)
+  if (!employeeType) return null;
+  if (!employeeTypeId) throw new Error("employeeTypeId is not found");
 
-  const onCancel = () => navigate("/x/users/employee-types");
+  const onCancel = () => navigate(path.to.employeeTypes);
 
   return (
     <ConfirmDelete
-      action={`/x/users/employee-types/delete/${employeeTypeId}`}
+      action={path.to.deleteEmployeeType(employeeTypeId)}
       name={employeeType.name}
       text={`Are you sure you want to delete the employee type: ${employeeType.name}? This cannot be undone.`}
       onCancel={onCancel}

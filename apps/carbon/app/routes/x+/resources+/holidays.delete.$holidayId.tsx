@@ -6,6 +6,7 @@ import { deleteHoliday, getHoliday } from "~/modules/resources";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
 import { notFound } from "~/utils/http";
+import { path } from "~/utils/path";
 import { error, success } from "~/utils/result";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -20,7 +21,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const holiday = await getHoliday(client, holidayId);
   if (holiday.error) {
     return redirect(
-      "/x/resources/holidays",
+      path.to.holidays,
       await flash(request, error(holiday.error, "Failed to get holiday"))
     );
   }
@@ -38,7 +39,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const { holidayId } = params;
   if (!holidayId) {
     return redirect(
-      "/x/resources/holidays",
+      path.to.holidays,
       await flash(request, error(params, "Failed to get holiday id"))
     );
   }
@@ -46,7 +47,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const { error: deleteHolidayError } = await deleteHoliday(client, holidayId);
   if (deleteHolidayError) {
     return redirect(
-      "/x/resources/holidays",
+      path.to.holidays,
       await flash(
         request,
         error(deleteHolidayError, "Failed to delete holiday")
@@ -55,7 +56,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   return redirect(
-    "/x/resources/holidays",
+    path.to.holidays,
     await flash(request, success("Successfully deleted holiday"))
   );
 }
@@ -65,13 +66,14 @@ export default function DeleteHolidayRoute() {
   const { holiday } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
 
-  if (!holidayId || !holiday) return null;
+  if (!holiday) return null;
+  if (!holidayId) throw new Error("holidayId is not found");
 
-  const onCancel = () => navigate("/x/resources/holidays");
+  const onCancel = () => navigate(path.to.holidays);
 
   return (
     <ConfirmDelete
-      action={`/x/resources/holidays/delete/${holidayId}`}
+      action={path.to.deleteHoliday(holidayId)}
       name={holiday.name}
       text={`Are you sure you want to delete the holiday: ${holiday.name}? This cannot be undone.`}
       onCancel={onCancel}

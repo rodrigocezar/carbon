@@ -1,25 +1,31 @@
 import { Box, Grid } from "@chakra-ui/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { redirect } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { json } from "@remix-run/router";
 import { validationError } from "remix-validated-form";
 import { PageTitle, SectionTitle } from "~/components/Layout";
 import type { PublicAttributes } from "~/modules/account";
 import {
+  ProfileForm,
+  ProfilePhotoForm,
+  UserAttributesForm,
   accountProfileValidator,
   getAccount,
   getPublicAttributes,
-  ProfileForm,
-  ProfilePhotoForm,
   updateAvatar,
   updatePublicAccount,
-  UserAttributesForm,
 } from "~/modules/account";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
+import type { Handle } from "~/utils/handle";
 import { assertIsPost } from "~/utils/http";
+import { path } from "~/utils/path";
 import { error, success } from "~/utils/result";
+
+export const handle: Handle = {
+  breadcrumb: "Profile",
+  to: path.to.profile,
+};
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { client, userId } = await requirePermissions(request, {});
@@ -31,14 +37,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   if (user.error || !user.data) {
     return redirect(
-      "/x",
+      path.to.authenticatedRoot,
       await flash(request, error(user.error, "Failed to get user"))
     );
   }
 
   if (publicAttributes.error) {
     return redirect(
-      "/x",
+      path.to.authenticatedRoot,
       await flash(
         request,
         error(publicAttributes.error, "Failed to get user attributes")
@@ -82,12 +88,12 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   if (formData.get("intent") === "photo") {
-    const path = formData.get("path");
-    if (typeof path === "string") {
-      const avatarUpdate = await updateAvatar(client, userId, path);
+    const photoPath = formData.get("path");
+    if (typeof photoPath === "string") {
+      const avatarUpdate = await updateAvatar(client, userId, photoPath);
       if (avatarUpdate.error) {
         return redirect(
-          "/x/account/profile",
+          path.to.profile,
           await flash(
             request,
             error(avatarUpdate.error, "Failed to update avatar")
@@ -96,12 +102,12 @@ export async function action({ request }: ActionFunctionArgs) {
       }
 
       return redirect(
-        "/x/account/profile",
+        path.to.profile,
         await flash(request, success("Updated avatar"))
       );
     } else {
       return redirect(
-        "/x/account/profile",
+        path.to.profile,
         await flash(request, error(null, "Invalid avatar path"))
       );
     }

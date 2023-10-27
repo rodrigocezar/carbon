@@ -11,8 +11,15 @@ import {
 } from "~/modules/users";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
+import type { Handle } from "~/utils/handle";
+import { path } from "~/utils/path";
 import { getGenericQueryFilters } from "~/utils/query";
 import { error } from "~/utils/result";
+
+export const handle: Handle = {
+  breadcrumb: "Customers",
+  to: path.to.customerAccounts,
+};
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { client } = await requirePermissions(request, {
@@ -35,7 +42,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   if (customers.error) {
     redirect(
-      "/x",
+      path.to.users,
       await flash(request, error(customers.error, "Failed to fetch customers"))
     );
   }

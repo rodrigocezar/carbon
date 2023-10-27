@@ -10,7 +10,7 @@
     "start": "next start "
   },
   "dependencies": {
-    "next": "^12.3.0",
+    "next": "^13.5.6",
     "nextra": "^2.2.19",
     "nextra-theme-docs": "^2.2.19",
     "react": "^18.2.0",
@@ -25,8 +25,8 @@
     "@types/react-dom": "^18.0.6",
     "autoprefixer": "~10.4.13",
     "eslint-config-carbon": "*",
-    "postcss": "~8.4.21",
+    "postcss": "~8.4.31",
     "tailwindcss": "~3.2.7",
-    "typescript": "^4.8.3"
+    "typescript": "^5.2.2"
   }
 }

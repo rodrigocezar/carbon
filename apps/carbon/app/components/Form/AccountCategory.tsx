@@ -12,6 +12,7 @@ import type {
   AccountCategory as AccountCategoryType,
   getAccountCategoriesList,
 } from "~/modules/accounting";
+import { path } from "~/utils/path";
 import type { SelectProps } from "./Select";
 
 type AccountCategorySelectProps = Omit<SelectProps, "options" | "onChange"> & {
@@ -35,7 +36,7 @@ const AccountCategory = ({
     useFetcher<Awaited<ReturnType<typeof getAccountCategoriesList>>>();
 
   useMount(() => {
-    accountCategoryFetcher.load("/api/accounting/categories");
+    accountCategoryFetcher.load(path.to.api.accountingCategories);
   });
 
   const options = useMemo(() => {
@@ -56,13 +57,13 @@ const AccountCategory = ({
     setValue(newValue);
 
     if (onChange && typeof onChange === "function") {
-      const categories = accountCategoryFetcher.data?.data;
+      const categories = accountCategoryFetcher.data?.data ?? [];
       if (!categories) {
         onChange(undefined);
         return;
       }
 
-      const category = categories.find(
+      const category = categories?.find(
         (category) => category.id === selection.value
       );
 
@@ -71,8 +72,7 @@ const AccountCategory = ({
   };
 
   const controlledValue = useMemo(
-    // @ts-ignore
-    () => options.find((option) => option.value === value),
+    () => options?.find((option) => option.value === value),
     [value, options]
   );
 

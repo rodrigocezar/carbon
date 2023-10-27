@@ -6,6 +6,7 @@ import { deletePartGroup, getPartGroup } from "~/modules/parts";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
 import { notFound } from "~/utils/http";
+import { path } from "~/utils/path";
 import { error, success } from "~/utils/result";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -18,7 +19,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const partGroup = await getPartGroup(client, groupId);
   if (partGroup.error) {
     return redirect(
-      "/x/parts/groups",
+      path.to.partGroups,
       await flash(request, error(partGroup.error, "Failed to get part group"))
     );
   }
@@ -34,7 +35,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const { groupId } = params;
   if (!groupId) {
     return redirect(
-      "/x/parts/groups",
+      path.to.partGroups,
       await flash(request, error(params, "Failed to get an part group id"))
     );
   }
@@ -42,7 +43,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const { error: deleteTypeError } = await deletePartGroup(client, groupId);
   if (deleteTypeError) {
     return redirect(
-      "/x/parts/groups",
+      path.to.partGroups,
       await flash(
         request,
         error(deleteTypeError, "Failed to delete part group")
@@ -51,23 +52,25 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   return redirect(
-    "/x/parts/groups",
+    path.to.partGroups,
     await flash(request, success("Successfully deleted part group"))
   );
 }
 
 export default function DeletePartGroupRoute() {
   const { groupId } = useParams();
+  if (!groupId) throw new Error("groupId not found");
+
   const { partGroup } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
 
-  if (!groupId || !partGroup) return null; // TODO - handle this better (404?)
+  if (!partGroup) return null;
 
-  const onCancel = () => navigate("/x/parts/groups");
+  const onCancel = () => navigate(path.to.partGroups);
 
   return (
     <ConfirmDelete
-      action={`/x/parts/groups/delete/${groupId}`}
+      action={path.to.deletePartGroup(groupId)}
       name={partGroup.name}
       text={`Are you sure you want to delete the part group: ${partGroup.name}? This cannot be undone.`}
       onCancel={onCancel}

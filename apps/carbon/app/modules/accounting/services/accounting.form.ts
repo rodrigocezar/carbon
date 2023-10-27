@@ -1,15 +1,7 @@
 import { withZod } from "@remix-validated-form/with-zod";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-
-export const generalLedgerDocumentType = [
-  "Quote",
-  "Order",
-  "Invoice",
-  "Credit Memo",
-  "Blanket Order",
-  "Return Order",
-] as const;
+import { months } from "~/modules/shared";
 
 export const accountTypes = [
   "Posting",
@@ -32,6 +24,15 @@ const costLedgerTypes = [
   "Indirect Cost",
   "Variance",
   "Total",
+] as const;
+
+export const journalLineDocumentType = [
+  "Quote",
+  "Order",
+  "Invoice",
+  "Credit Memo",
+  "Blanket Order",
+  "Return Order",
 ] as const;
 
 const partLedgerTypes = [
@@ -107,6 +108,32 @@ export const accountValidator = withZod(
       },
       { message: "Account category is required", path: ["accountCategoryId"] }
     )
+    .refine(
+      (data) => {
+        if (data.number.startsWith(".") || data.number.endsWith(".")) {
+          return false;
+        }
+
+        return true;
+      },
+      {
+        message: "Account number cannot start or end with a dot",
+        path: ["number"],
+      }
+    )
+    .refine(
+      (data) => {
+        if (data.number.includes("..")) {
+          return false;
+        }
+
+        return true;
+      },
+      {
+        message: "Account number cannot include two consecutive dots",
+        path: ["number"],
+      }
+    )
 );
 
 export const accountCategoryValidator = withZod(
@@ -126,13 +153,28 @@ export const accountCategoryValidator = withZod(
   })
 );
 
-export const generalLedgerValidator = withZod(
+export const fiscalYearSettingsValidator = withZod(
+  z.object({
+    startMonth: z.enum(months, {
+      errorMap: (issue, ctx) => ({
+        message: "Start month is required",
+      }),
+    }),
+    taxStartMonth: z.enum(months, {
+      errorMap: (issue, ctx) => ({
+        message: "Tax start month is required",
+      }),
+    }),
+  })
+);
+
+export const journalLineValidator = withZod(
   z.object({
     postingDate: zfd.text(z.string().optional()),
     accountNumber: z.string().min(1, { message: "Account is required" }),
     description: z.string().optional(),
     amount: z.number(),
-    documentType: z.union([z.enum(generalLedgerDocumentType), z.undefined()]),
+    documentType: z.union([z.enum(journalLineDocumentType), z.undefined()]),
     documentId: z.string().optional(),
     externalDocumentId: z.string().optional(),
   })

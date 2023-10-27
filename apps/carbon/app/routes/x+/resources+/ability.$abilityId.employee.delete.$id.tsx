@@ -7,6 +7,7 @@ import type { Ability } from "~/modules/resources";
 import { deleteEmployeeAbility } from "~/modules/resources";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
+import { path } from "~/utils/path";
 import { error, success } from "~/utils/result";
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -21,7 +22,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const removeEmployeeAbility = await deleteEmployeeAbility(client, id);
   if (removeEmployeeAbility.error) {
     return redirect(
-      `/x/resources/ability/${abilityId}`,
+      path.to.ability(abilityId),
       await flash(
         request,
         error(removeEmployeeAbility.error, "Failed to delete employee ability")
@@ -30,7 +31,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   return redirect(
-    `/x/resources/ability/${abilityId}`,
+    path.to.ability(abilityId),
     await flash(request, success("Successfully deleted employee ability"))
   );
 }
@@ -38,17 +39,22 @@ export async function action({ request, params }: ActionFunctionArgs) {
 export default function DeleteEmployeeAbilityRoute() {
   const navigate = useNavigate();
   const { abilityId, id } = useParams();
+
+  if (!id) throw new Error("id is not found");
+  if (!abilityId) throw new Error("abilityId is not found");
+
   const routeData = useRouteData<{
     ability: Ability;
-  }>(`/x/resources/ability/${abilityId}`);
+  }>(path.to.ability(abilityId));
 
-  if (!abilityId || !routeData?.ability) return null;
+  if (!routeData?.ability) return null;
+  if (!abilityId) throw new Error("abilityId is not found");
 
   const employee = Array.isArray(routeData?.ability.employeeAbility)
     ? routeData.ability.employeeAbility.find((ea) => ea.id === id)
     : undefined;
 
-  const onCancel = () => navigate(`/x/resources/ability/${abilityId}`);
+  const onCancel = () => navigate(path.to.ability(abilityId));
 
   const name =
     (Array.isArray(employee?.user)
@@ -57,7 +63,7 @@ export default function DeleteEmployeeAbilityRoute() {
 
   return (
     <ConfirmDelete
-      action={`/x/resources/ability/${abilityId}/employee/delete/${id}`}
+      action={path.to.deleteEmployeeAbility(abilityId, id)}
       name={name}
       text={`Are you sure you want remove delete ${name}? This cannot be undone.`}
       onCancel={onCancel}

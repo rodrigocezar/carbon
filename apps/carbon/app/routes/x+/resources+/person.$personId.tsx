@@ -13,21 +13,28 @@ import {
 } from "~/modules/account";
 import type { EmployeeJob } from "~/modules/resources";
 import {
-  employeeJobValidator,
-  getEmployeeAbilities,
-  getEmployeeJob,
   PersonAbilities,
   PersonDaysOff,
   PersonHeader,
   PersonOvertime,
   PersonTabs,
+  employeeJobValidator,
+  getEmployeeAbilities,
+  getEmployeeJob,
   upsertEmployeeJob,
 } from "~/modules/resources";
 import { getNotes } from "~/modules/shared";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
+import type { Handle } from "~/utils/handle";
 import { assertIsPost } from "~/utils/http";
+import { path } from "~/utils/path";
 import { error, success } from "~/utils/result";
+
+export const handle: Handle = {
+  breadcrumb: "People",
+  to: path.to.people,
+};
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const { client } = await requirePermissions(request, {
@@ -38,7 +45,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
   if (!personId) {
     throw redirect(
-      "/app/x/resources/people",
+      path.to.people,
       await flash(request, error(null, "No person ID provided"))
     );
   }
@@ -61,7 +68,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
   if (user.error || !user.data) {
     return redirect(
-      "/x/resources/people",
+      path.to.people,
       await flash(request, error(user.error, "Failed to get user"))
     );
   }

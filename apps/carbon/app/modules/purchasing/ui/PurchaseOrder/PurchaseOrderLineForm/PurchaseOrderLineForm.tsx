@@ -43,6 +43,7 @@ import {
 } from "~/modules/purchasing";
 import type { ListItem } from "~/types";
 import type { TypeOfValidator } from "~/types/validators";
+import { path } from "~/utils/path";
 
 type PurchaseOrderLineFormProps = {
   initialValues: TypeOfValidator<typeof purchaseOrderLineValidator>;
@@ -57,10 +58,12 @@ const PurchaseOrderLineForm = ({
   const { defaults } = useUser();
   const { orderId } = useParams();
 
+  if (!orderId) throw new Error("orderId not found");
+
   const routeData = useRouteData<{
     locations: ListItem[];
     purchaseOrder: PurchaseOrder;
-  }>(`/x/purchase-order/${orderId}`);
+  }>(path.to.purchaseOrder(orderId));
 
   const locations = routeData?.locations ?? [];
   const locationOptions = locations.map((location) => ({
@@ -68,7 +71,7 @@ const PurchaseOrderLineForm = ({
     value: location.id,
   }));
 
-  const isEditable = ["Draft", "In Review", "In External Review"].includes(
+  const isEditable = ["Draft", "To Review"].includes(
     routeData?.purchaseOrder?.status ?? ""
   );
 
@@ -92,7 +95,7 @@ const PurchaseOrderLineForm = ({
 
   useEffect(() => {
     if (locationId) {
-      shelfFetcher.load(`/api/parts/shelf?locationId=${locationId}`);
+      shelfFetcher.load(path.to.api.shelves(locationId));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locationId]);
@@ -191,8 +194,8 @@ const PurchaseOrderLineForm = ({
         method="post"
         action={
           isEditing
-            ? `/x/purchase-order/${orderId}/lines/${initialValues.id}`
-            : `/x/purchase-order/${orderId}/lines/new`
+            ? path.to.purchaseOrderLine(orderId, initialValues.id!)
+            : path.to.newPurchaseOrderLine(orderId)
         }
       >
         <DrawerOverlay />

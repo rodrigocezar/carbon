@@ -261,7 +261,7 @@ CREATE POLICY "Employees with accounting_delete can delete accounts" ON "account
     AND (get_my_claim('role'::text)) = '"employee"'::jsonb
   );
 
-CREATE VIEW "account_categories_view" AS
+CREATE OR REPLACE VIEW "accountCategories" AS
   SELECT
     "id",
     "category",
@@ -275,7 +275,7 @@ CREATE VIEW "account_categories_view" AS
   FROM "accountCategory"
 ;
 
-CREATE VIEW "accounts_view" AS
+CREATE OR REPLACE VIEW "accounts" AS
   SELECT 
     "id",
     "number",

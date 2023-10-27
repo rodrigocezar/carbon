@@ -10,11 +10,20 @@ import {
 } from "~/modules/accounting";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
+import type { Handle } from "~/utils/handle";
+import { path } from "~/utils/path";
 import { error } from "~/utils/result";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Carbon | Accounting" }];
 };
+
+export const handle: Handle = {
+  breadcrumb: "Accounting",
+  to: path.to.accounting,
+  module: "accounting",
+};
+
 export async function loader({ request }: LoaderFunctionArgs) {
   const { client } = await requirePermissions(request, {
     view: "accounting",
@@ -35,7 +44,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   if (balanceSheetAccounts.error) {
     return redirect(
-      "/x",
+      path.to.authenticatedRoot,
       await flash(
         request,
         error(
@@ -48,7 +57,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   if (incomeStatementAccounts.error) {
     return redirect(
-      "/x",
+      path.to.authenticatedRoot,
       await flash(
         request,
         error(
@@ -66,7 +75,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   });
 }
 
-export default function UsersRoute() {
+export default function AccountingRoute() {
   const { groups } = useAccountingSidebar();
 
   return (

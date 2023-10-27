@@ -13,6 +13,7 @@ import {
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
 import { assertIsPost } from "~/utils/http";
+import { path } from "~/utils/path";
 import { error, success } from "~/utils/result";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -27,7 +28,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
   if (partPurchasing.error) {
     return redirect(
-      "/x/parts",
+      path.to.parts,
       await flash(
         request,
         error(partPurchasing.error, "Failed to load part purchasing")
@@ -65,7 +66,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   });
   if (updatePartPurchasing.error) {
     return redirect(
-      `/x/part/${partId}`,
+      path.to.part(partId),
       await flash(
         request,
         error(updatePartPurchasing.error, "Failed to update part purchasing")
@@ -74,7 +75,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   return redirect(
-    `/x/part/${partId}/purchasing`,
+    path.to.partPurchasing(partId),
     await flash(request, success("Updated part purchasing"))
   );
 }
@@ -82,7 +83,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 export default function PartPurchasingRoute() {
   const sharedPartData = useRouteData<{
     unitOfMeasures: UnitOfMeasureListItem[];
-  }>("/x/part");
+  }>(path.to.partRoot);
   const { partPurchasing } = useLoaderData<typeof loader>();
 
   const initialValues = {

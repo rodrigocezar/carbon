@@ -10,8 +10,15 @@ import {
 } from "~/modules/resources";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
+import type { Handle } from "~/utils/handle";
+import { path } from "~/utils/path";
 import { getGenericQueryFilters } from "~/utils/query";
 import { error } from "~/utils/result";
+
+export const handle: Handle = {
+  breadcrumb: "Attributes",
+  to: path.to.attributes,
+};
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { client } = await requirePermissions(request, {
@@ -31,7 +38,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   if (categories.error) {
     redirect(
-      "/x",
+      path.to.authenticatedRoot,
       await flash(
         request,
         error(categories.error, "Failed to fetch attribute categories")

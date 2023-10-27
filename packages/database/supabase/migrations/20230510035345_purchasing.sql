@@ -19,8 +19,8 @@ CREATE TABLE "paymentTerm" (
 
   CONSTRAINT "paymentTerm_pkey" PRIMARY KEY ("id"),
   CONSTRAINT "paymentTerm_name_key" UNIQUE ("name", "active"),
-  CONSTRAINT "paymentTerm_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE CASCADE,
-  CONSTRAINT "paymentTerm_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE CASCADE
+  CONSTRAINT "paymentTerm_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE RESTRICT,
+  CONSTRAINT "paymentTerm_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE RESTRICT
 );
 
 ALTER TABLE "paymentTerm" ENABLE ROW LEVEL SECURITY;
@@ -84,8 +84,8 @@ CREATE TABLE "shippingMethod" (
   CONSTRAINT "shippingMethod_pkey" PRIMARY KEY ("id"),
   CONSTRAINT "shippingMethod_name_key" UNIQUE ("name"),
   CONSTRAINT "shippingMethod_carrierAccountId_fkey" FOREIGN KEY ("carrierAccountId") REFERENCES "account" ("number") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "shippingMethod_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE CASCADE,
-  CONSTRAINT "shippingMethod_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE CASCADE
+  CONSTRAINT "shippingMethod_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE RESTRICT,
+  CONSTRAINT "shippingMethod_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE RESTRICT
 );
 
 CREATE INDEX "shippingMethod_name_idx" ON "shippingMethod" ("name");
@@ -137,8 +137,8 @@ CREATE TABLE "shippingTerm" (
 
   CONSTRAINT "shippingTerm_pkey" PRIMARY KEY ("id"),
   CONSTRAINT "shippingTerm_name_key" UNIQUE ("name"),
-  CONSTRAINT "shippingTerm_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE CASCADE,
-  CONSTRAINT "shippingTerm_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE CASCADE
+  CONSTRAINT "shippingTerm_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE RESTRICT,
+  CONSTRAINT "shippingTerm_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE RESTRICT
 );
 
 
@@ -150,11 +150,12 @@ CREATE TYPE "purchaseOrderType" AS ENUM (
 
 CREATE TYPE "purchaseOrderStatus" AS ENUM (
   'Draft',
-  'In Review',
-  'In External Review',
-  'Approved',
+  'To Review',
   'Rejected',
-  'Released',
+  'To Receive',
+  'To Receive and Invoice',
+  'To Invoice',
+  'Completed',
   'Closed'
 );
 
@@ -179,9 +180,9 @@ CREATE TABLE "purchaseOrder" (
   CONSTRAINT "purchaseOrder_purchaseOrderId_key" UNIQUE ("purchaseOrderId"),
   CONSTRAINT "purchaseOrder_supplierId_fkey" FOREIGN KEY ("supplierId") REFERENCES "supplier" ("id") ON DELETE CASCADE,
   CONSTRAINT "purchaseOrder_supplierContactId_fkey" FOREIGN KEY ("supplierContactId") REFERENCES "supplierContact" ("id") ON DELETE CASCADE,
-  CONSTRAINT "purchaseOrder_closedBy_fkey" FOREIGN KEY ("closedBy") REFERENCES "user" ("id") ON DELETE CASCADE,
-  CONSTRAINT "purchaseOrder_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE CASCADE,
-  CONSTRAINT "purchaseOrder_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE CASCADE
+  CONSTRAINT "purchaseOrder_closedBy_fkey" FOREIGN KEY ("closedBy") REFERENCES "user" ("id") ON DELETE RESTRICT,
+  CONSTRAINT "purchaseOrder_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE RESTRICT,
+  CONSTRAINT "purchaseOrder_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE RESTRICT
 );
 
 CREATE INDEX "purchaseOrder_purchaseOrderId_idx" ON "purchaseOrder" ("purchaseOrderId");
@@ -195,6 +196,19 @@ CREATE TYPE "purchaseOrderLineType" AS ENUM (
   'Part',
   'Fixed Asset'
 );
+
+CREATE TABLE "purchaseOrderStatusHistory" (
+  "id" TEXT NOT NULL DEFAULT xid(),
+  "purchaseOrderId" TEXT NOT NULL,
+  "status" "purchaseOrderStatus" NOT NULL,
+  "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  "createdBy" TEXT NOT NULL,
+
+  CONSTRAINT "purchaseOrderStatusHistory_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "purchaseOrderStatusHistory_purchaseOrderId_fkey" FOREIGN KEY ("purchaseOrderId") REFERENCES "purchaseOrder" ("id") ON DELETE CASCADE,
+  CONSTRAINT "purchaseOrderStatusHistory_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE RESTRICT
+);
+
 
 CREATE TABLE "purchaseOrderLine" (
   "id" TEXT NOT NULL DEFAULT xid(),
@@ -258,8 +272,8 @@ CREATE TABLE "purchaseOrderLine" (
   -- TODO: Add assetId foreign key
   CONSTRAINT "purchaseOrderLine_shelfId_fkey" FOREIGN KEY ("shelfId", "locationId") REFERENCES "shelf" ("id", "locationId") ON DELETE CASCADE,
   CONSTRAINT "purchaseOrderLine_unitOfMeasureCode_fkey" FOREIGN KEY ("unitOfMeasureCode") REFERENCES "unitOfMeasure" ("code") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "purchaseOrderLine_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE CASCADE,
-  CONSTRAINT "purchaseOrderLine_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE CASCADE
+  CONSTRAINT "purchaseOrderLine_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user" ("id") ON DELETE RESTRICT,
+  CONSTRAINT "purchaseOrderLine_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE RESTRICT
 );
 
 CREATE TABLE "purchaseOrderPayment" (
@@ -309,7 +323,7 @@ CREATE TABLE "purchaseOrderDelivery" (
   CONSTRAINT "purchaseOrderDelivery_shippingTermId_fkey" FOREIGN KEY ("shippingTermId") REFERENCES "shippingTerm" ("id") ON DELETE CASCADE,
   CONSTRAINT "purchaseOrderDelivery_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "customer" ("id") ON DELETE CASCADE,
   CONSTRAINT "purchaseOrderDelivery_customerLocationId_fkey" FOREIGN KEY ("customerLocationId") REFERENCES "customerLocation" ("id") ON DELETE CASCADE,
-  CONSTRAINT "purchaseOrderDelivery_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE CASCADE
+  CONSTRAINT "purchaseOrderDelivery_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user" ("id") ON DELETE RESTRICT
 );
 
 CREATE TYPE "purchaseOrderTransactionType" AS ENUM (
@@ -365,40 +379,28 @@ CREATE POLICY "Users can delete their own purchase order favorites" ON "purchase
     auth.uid()::text = "userId"
   ); 
 
-CREATE VIEW "purchase_order_view" AS
+CREATE OR REPLACE VIEW "purchaseOrders" AS
   SELECT
-    p."id",
-    p."purchaseOrderId",
-    p."status",
-    p."type",
-    p."orderDate",
-    p."notes",
-    p."supplierId",
-    p."supplierContactId",
-    p."supplierReference",
-    p."createdBy",
+    p.*,
     pd."receiptRequestedDate",
     pd."receiptPromisedDate",
     pd."dropShipment",
     pol."lineCount",
+    pol."subtotal",
     l."id" AS "locationId",
     l."name" AS "locationName",
     s."name" AS "supplierName",
     u."avatarUrl" AS "createdByAvatar",
     u."fullName" AS "createdByFullName",
-    p."createdAt",
-    p."updatedBy",
     u2."avatarUrl" AS "updatedByAvatar",
     u2."fullName" AS "updatedByFullName",
-    p."updatedAt",
-    p."closedAt",
     u3."avatarUrl" AS "closedByAvatar",
     u3."fullName" AS "closedByFullName",
     EXISTS(SELECT 1 FROM "purchaseOrderFavorite" pf WHERE pf."purchaseOrderId" = p.id AND pf."userId" = auth.uid()::text) AS favorite
   FROM "purchaseOrder" p
   LEFT JOIN "purchaseOrderDelivery" pd ON pd."id" = p."id"
   LEFT JOIN (
-    SELECT "purchaseOrderId", COUNT(*) AS "lineCount"
+    SELECT "purchaseOrderId", COUNT(*) AS "lineCount", SUM("unitPrice" * "purchaseQuantity") AS "subtotal"
     FROM "purchaseOrderLine"
     GROUP BY "purchaseOrderId"
   ) pol ON pol."purchaseOrderId" = p."id"
@@ -419,7 +421,7 @@ ALTER TABLE "supplier"
   ADD CONSTRAINT "supplier_defaultShippingMethodId_fkey" FOREIGN KEY ("defaultShippingMethodId") REFERENCES "shippingMethod" ("id") ON DELETE SET NULL,
   ADD CONSTRAINT "supplier_defaultShippingTermId_fkey" FOREIGN KEY ("defaultShippingTermId") REFERENCES "shippingTerm" ("id") ON DELETE SET NULL;
 
-CREATE VIEW "purchase_order_suppliers_view" AS
+CREATE OR REPLACE VIEW "purchaseOrderSuppliers" AS
   SELECT DISTINCT
     s."id",
     s."name"

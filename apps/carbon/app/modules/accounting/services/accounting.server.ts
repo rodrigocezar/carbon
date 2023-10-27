@@ -12,7 +12,8 @@ import type {
   accountValidator,
   currencyValidator,
   defaultAcountValidator,
-  generalLedgerValidator,
+  fiscalYearSettingsValidator,
+  journalLineValidator,
   partLedgerValidator,
   paymentTermValidator,
   valueLedgerValidator,
@@ -164,7 +165,7 @@ export async function getAccountCategories(
     incomeBalance: string | null;
   }
 ) {
-  let query = client.from("account_categories_view").select("*", {
+  let query = client.from("accountCategories").select("*", {
     count: "exact",
   });
 
@@ -253,8 +254,9 @@ function getAccountTotal(
   type: "netChange" | "balance" | "balanceAtDate",
   transactionsByAccount: Record<string, Transaction>
 ) {
-  if (!account.totaling)
-    return transactionsByAccount[account.number][type] ?? 0;
+  if (!account.totaling) {
+    return transactionsByAccount[account.number]?.[type] ?? 0;
+  }
 
   let total = 0;
   const [start, end] = account.totaling.split("..");
@@ -262,7 +264,7 @@ function getAccountTotal(
 
   accounts.forEach((account) => {
     if (account.number >= start && account.number <= end) {
-      total += transactionsByAccount[account.number][type] ?? 0;
+      total += transactionsByAccount[account.number]?.[type] ?? 0;
     }
   });
 
@@ -286,10 +288,7 @@ export async function getChartOfAccounts(
     endDate: string | null;
   }
 ) {
-  let accountsQuery = client
-    .from("accounts_view")
-    .select("*")
-    .eq("active", true);
+  let accountsQuery = client.from("accounts").select("*").eq("active", true);
 
   if (args.incomeBalance) {
     accountsQuery = accountsQuery.eq("incomeBalance", args.incomeBalance);
@@ -297,7 +296,7 @@ export async function getChartOfAccounts(
 
   accountsQuery = setGenericQueryFilters(accountsQuery, args, "number");
 
-  let transactionsQuery = client.rpc("gl_transactions_by_account_number", {
+  let transactionsQuery = client.rpc("journalLinesByAccountNumber", {
     from_date:
       args.startDate ?? getDateNYearsAgo(50).toISOString().split("T")[0],
     to_date: args.endDate ?? new Date().toISOString().split("T")[0],
@@ -383,8 +382,24 @@ export async function getCurrenciesList(client: SupabaseClient<Database>) {
     .order("name", { ascending: true });
 }
 
+export async function getCurrentAccountingPeriod(
+  client: SupabaseClient<Database>,
+  date: string
+) {
+  return client
+    .from("accountingPeriod")
+    .select("*")
+    .lte("startDate", date)
+    .gte("endDate", date)
+    .single();
+}
+
 export async function getDefaultAccounts(client: SupabaseClient<Database>) {
   return client.from("accountDefault").select("*").eq("id", true).single();
+}
+
+export async function getFiscalYearSettings(client: SupabaseClient<Database>) {
+  return client.from("fiscalYearSettings").select("*").eq("id", true).single();
 }
 
 export async function getInventoryPostingGroup(
@@ -568,16 +583,16 @@ export async function getSalesPostingGroups(
   return query;
 }
 
-export async function insertGeneralLedgerEntries(
+export async function insertJournalLines(
   client: SupabaseClient<Database>,
-  generalEntries: TypeOfValidator<typeof generalLedgerValidator>[]
+  journalLines: TypeOfValidator<typeof journalLineValidator>[]
 ) {
-  return client.from("generalLedger").insert(generalEntries);
+  return client.from("journalLedger").insert(journalLines);
 }
 
-export async function insertGeneralLedgerEntry(
+export async function insertJournalEntry(
   client: SupabaseClient<Database>,
-  generalEntry: TypeOfValidator<typeof generalLedgerValidator>
+  generalEntry: TypeOfValidator<typeof journalLineValidator>
 ) {
   return client.from("generalLedger").insert([generalEntry]);
 }
@@ -617,6 +632,18 @@ export async function updateDefaultAccounts(
   }
 ) {
   return client.from("accountDefault").update(defaultAccounts).eq("id", true);
+}
+
+export async function updateFiscalYearSettings(
+  client: SupabaseClient<Database>,
+  fiscalYearSettings: TypeOfValidator<typeof fiscalYearSettingsValidator> & {
+    updatedBy: string;
+  }
+) {
+  return client
+    .from("fiscalYearSettings")
+    .update(sanitize(fiscalYearSettings))
+    .eq("id", true);
 }
 
 export async function upsertAccount(
@@ -705,7 +732,10 @@ export async function upsertCurrency(
       })
 ) {
   if (currency.isBaseCurrency) {
-    await client.from("currency").update({ isBaseCurrency: false });
+    await client
+      .from("currency")
+      .update({ isBaseCurrency: false })
+      .eq("isBaseCurrency", true);
   }
 
   if ("createdBy" in currency) {

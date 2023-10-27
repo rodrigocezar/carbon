@@ -6,6 +6,7 @@ import { deleteShift, getShift } from "~/modules/resources";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
 import { notFound } from "~/utils/http";
+import { path } from "~/utils/path";
 import { error, success } from "~/utils/result";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -20,7 +21,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const shift = await getShift(client, shiftId);
   if (shift.error) {
     return redirect(
-      "/x/resources/shifts",
+      path.to.shifts,
       await flash(request, error(shift.error, "Failed to get shift"))
     );
   }
@@ -38,7 +39,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const { shiftId } = params;
   if (!shiftId) {
     return redirect(
-      "/x/resources/shifts",
+      path.to.shifts,
       await flash(request, error(params, "Failed to get shift id"))
     );
   }
@@ -46,13 +47,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const { error: deleteShiftError } = await deleteShift(client, shiftId);
   if (deleteShiftError) {
     return redirect(
-      "/x/resources/shifts",
+      path.to.shifts,
       await flash(request, error(deleteShiftError, "Failed to delete shift"))
     );
   }
 
   return redirect(
-    "/x/resources/shifts",
+    path.to.shifts,
     await flash(request, success("Successfully deleted shift"))
   );
 }
@@ -62,15 +63,16 @@ export default function DeleteShiftRoute() {
   const { shift } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
 
-  if (!shiftId || !shift) return null; // TODO - handle this better (404?)
+  if (!shift) return null;
+  if (!shiftId) throw notFound("shiftId not found");
 
-  const onCancel = () => navigate("/x/resources/shifts");
+  const onCancel = () => navigate(path.to.shifts);
   if (Array.isArray(shift.location))
     throw new Error("Shift location is an array");
 
   return (
     <ConfirmDelete
-      action={`/x/resources/shifts/delete/${shiftId}`}
+      action={path.to.deleteShift(shiftId)}
       name={shift.name}
       text={`Are you sure you want to delete the shift: ${shift.name} from ${
         shift.location?.name ?? "unknown location"

@@ -10,7 +10,8 @@ import {
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
 import { assertIsPost } from "~/utils/http";
-import { error, success } from "~/utils/result";
+import { path } from "~/utils/path";
+import { error } from "~/utils/result";
 
 export async function action({ request }: ActionFunctionArgs) {
   assertIsPost(request);
@@ -35,7 +36,7 @@ export async function action({ request }: ActionFunctionArgs) {
   });
   if (createAttributeCategory.error) {
     return redirect(
-      "/x/resources/attributes",
+      path.to.attributes,
       await flash(
         request,
         error(
@@ -46,15 +47,12 @@ export async function action({ request }: ActionFunctionArgs) {
     );
   }
 
-  return redirect(
-    "/x/resources/attributes",
-    await flash(request, success("Created attribute category "))
-  );
+  return redirect(path.to.attributes);
 }
 
 export default function NewAttributeCategoryRoute() {
   const navigate = useNavigate();
-  const onClose = () => navigate("/x/resources/attributes");
+  const onClose = () => navigate(path.to.attributes);
 
   const initialValues = {
     name: "",

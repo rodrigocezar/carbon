@@ -9,8 +9,15 @@ import {
 } from "~/modules/resources";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
+import type { Handle } from "~/utils/handle";
+import { path } from "~/utils/path";
 import { getGenericQueryFilters } from "~/utils/query";
 import { error } from "~/utils/result";
+
+export const handle: Handle = {
+  breadcrumb: "Abilities",
+  to: path.to.abilities,
+};
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { client } = await requirePermissions(request, {
@@ -27,7 +34,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   if (abilities.error) {
     return redirect(
-      "/x/resources",
+      path.to.resources,
       await flash(request, error(abilities.error, "Failed to load abilities"))
     );
   }

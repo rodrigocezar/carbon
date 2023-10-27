@@ -29,6 +29,7 @@ import { usePermissions } from "~/hooks";
 import type { getWorkCellList } from "~/modules/resources";
 import { equipmentValidator } from "~/modules/resources";
 import type { TypeOfValidator } from "~/types/validators";
+import { path } from "~/utils/path";
 
 type EquipmentFormProps = {
   initialValues: TypeOfValidator<typeof equipmentValidator>;
@@ -69,7 +70,7 @@ const EquipmentForm = ({
 
   useEffect(() => {
     if (location) {
-      workCellFetcher.load(`/api/resources/work-cells?location=${location}`);
+      workCellFetcher.load(path.to.api.workCells(location));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location]);
@@ -90,8 +91,8 @@ const EquipmentForm = ({
         method="post"
         action={
           isEditing
-            ? `/x/resources/equipment/unit/${initialValues.id}`
-            : "/x/resources/equipment/unit/new"
+            ? path.to.equipmentUnit(initialValues.id!)
+            : path.to.newEquipmentUnit
         }
         defaultValues={initialValues}
       >

@@ -6,6 +6,7 @@ import { deleteDepartment, getDepartment } from "~/modules/resources";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
 import { notFound } from "~/utils/http";
+import { path } from "~/utils/path";
 import { error, success } from "~/utils/result";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -20,7 +21,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const department = await getDepartment(client, departmentId);
   if (department.error) {
     return redirect(
-      "/x/resources/departments",
+      path.to.departments,
       await flash(request, error(department.error, "Failed to get department"))
     );
   }
@@ -38,7 +39,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const { departmentId } = params;
   if (!departmentId) {
     return redirect(
-      "/x/resources/departments",
+      path.to.departments,
       await flash(request, error(params, "Failed to get department id"))
     );
   }
@@ -49,7 +50,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   );
   if (deleteDepartmentError) {
     return redirect(
-      "/x/resources/departments",
+      path.to.departments,
       await flash(
         request,
         error(deleteDepartmentError, "Failed to delete department")
@@ -58,7 +59,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   return redirect(
-    "/x/resources/departments",
+    path.to.departments,
     await flash(request, success("Successfully deleted department"))
   );
 }
@@ -68,13 +69,14 @@ export default function DeleteDepartmentRoute() {
   const { department } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
 
-  if (!departmentId || !department) return null;
+  if (!department) return null;
+  if (!departmentId) throw new Error("departmentId is not found");
 
-  const onCancel = () => navigate("/x/resources/departments");
+  const onCancel = () => navigate(path.to.departments);
 
   return (
     <ConfirmDelete
-      action={`/x/resources/departments/delete/${departmentId}`}
+      action={path.to.deleteDepartment(departmentId)}
       name={department.name}
       text={`Are you sure you want to delete the department: ${department.name}? This cannot be undone.`}
       onCancel={onCancel}

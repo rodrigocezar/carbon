@@ -9,7 +9,8 @@ import {
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
 import { assertIsPost } from "~/utils/http";
-import { error, success } from "~/utils/result";
+import { path } from "~/utils/path";
+import { error } from "~/utils/result";
 
 export async function action({ request }: ActionFunctionArgs) {
   assertIsPost(request);
@@ -31,7 +32,7 @@ export async function action({ request }: ActionFunctionArgs) {
   });
   if (createSupplier.error) {
     return redirect(
-      "/x/purchasing/suppliers",
+      path.to.suppliers,
       await flash(
         request,
         error(createSupplier.error, "Failed to insert supplier")
@@ -41,10 +42,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const supplierId = createSupplier.data?.id;
 
-  return redirect(
-    `/x/supplier/${supplierId}`,
-    await flash(request, success("Created supplier"))
-  );
+  return redirect(path.to.supplier(supplierId));
 }
 
 export default function SuppliersNewRoute() {

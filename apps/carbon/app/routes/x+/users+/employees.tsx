@@ -6,13 +6,20 @@ import { usePermissions } from "~/hooks";
 import {
   EmployeesTable,
   EmployeesTableFilters,
-  getEmployees,
   getEmployeeTypes,
+  getEmployees,
 } from "~/modules/users";
 import { requirePermissions } from "~/services/auth";
 import { flash } from "~/services/session";
+import type { Handle } from "~/utils/handle";
+import { path } from "~/utils/path";
 import { getGenericQueryFilters } from "~/utils/query";
 import { error } from "~/utils/result";
+
+export const handle: Handle = {
+  breadcrumb: "Employees",
+  to: path.to.employeeAccounts,
+};
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { client } = await requirePermissions(request, {
@@ -36,13 +43,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   if (employees.error) {
     return redirect(
-      "/x",
+      path.to.users,
       await flash(request, error(employees.error, "Error loading employees"))
     );
   }
   if (employeeTypes.error) {
     return redirect(
-      "/x",
+      path.to.users,
       await flash(
         request,
         error(employeeTypes.error, "Error loading employee types")

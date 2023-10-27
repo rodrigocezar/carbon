@@ -1,5 +1,5 @@
 import { formatDate } from "@carbon/utils";
-import { Link, MenuItem, Tag } from "@chakra-ui/react";
+import { Link, MenuItem } from "@chakra-ui/react";
 import { useNavigate } from "@remix-run/react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { memo, useCallback, useMemo } from "react";
@@ -7,7 +7,9 @@ import { BsPencilSquare } from "react-icons/bs";
 import { IoMdTrash } from "react-icons/io";
 import { Table } from "~/components";
 import { usePermissions, useRealtime, useUrlParams } from "~/hooks";
-import type { Receipt } from "~/modules/inventory";
+import type { Receipt, receiptStatusType } from "~/modules/inventory";
+import { ReceiptStatus } from "~/modules/inventory";
+import { path } from "~/utils/path";
 
 type ReceiptsTableProps = {
   data: Receipt[];
@@ -15,7 +17,7 @@ type ReceiptsTableProps = {
 };
 
 const ReceiptsTable = memo(({ data, count }: ReceiptsTableProps) => {
-  useRealtime("receipt");
+  useRealtime("receipt", `id=in.(${data.map((d) => d.id).join(",")})`);
 
   const [params] = useUrlParams();
   const navigate = useNavigate();
@@ -43,13 +45,14 @@ const ReceiptsTable = memo(({ data, count }: ReceiptsTableProps) => {
         accessorKey: "sourceDocumentReadableId",
         header: "Source Document ID",
         cell: ({ row }) => {
+          if (!row.original.sourceDocumentId) return null;
           switch (row.original.sourceDocument) {
             case "Purchase Order":
               return (
                 <Link
                   onClick={() =>
                     navigate(
-                      `/x/purchase-order/${row.original.sourceDocumentId}`
+                      path.to.purchaseOrder(row.original.sourceDocumentId!)
                     )
                   }
                 >
@@ -67,25 +70,11 @@ const ReceiptsTable = memo(({ data, count }: ReceiptsTableProps) => {
         cell: (item) => item.getValue() ?? null,
       },
       {
-        accessorKey: "supplier.name",
-        header: "Supplier",
-        cell: (item) => item.getValue() ?? null,
-      },
-      {
         accessorKey: "status",
         header: "Status",
         cell: (item) => {
-          const status = item.getValue<"Draft" | "Pending" | "Posted">();
-          switch (status) {
-            case "Draft":
-              return <Tag>Draft</Tag>;
-            case "Pending":
-              return <Tag colorScheme="orange">Pending</Tag>;
-            case "Posted":
-              return <Tag colorScheme="green">Posted</Tag>;
-            default:
-              return null;
-          }
+          const status = item.getValue<(typeof receiptStatusType)[number]>();
+          return <ReceiptStatus status={status} />;
         },
       },
       {
@@ -106,7 +95,7 @@ const ReceiptsTable = memo(({ data, count }: ReceiptsTableProps) => {
             isDisabled={!permissions.can("update", "inventory")}
             icon={<BsPencilSquare />}
             onClick={() => {
-              navigate(`/x/inventory/receipts/${row.id}?${params.toString()}`);
+              navigate(`${path.to.receipt(row.id)}?${params.toString()}`);
             }}
           >
             Edit Receipt
@@ -119,9 +108,7 @@ const ReceiptsTable = memo(({ data, count }: ReceiptsTableProps) => {
             }
             icon={<IoMdTrash />}
             onClick={() => {
-              navigate(
-                `/x/inventory/receipts/delete/${row.id}?${params.toString()}`
-              );
+              navigate(`${path.to.deleteReceipt(row.id)}?${params.toString()}`);
             }}
           >
             Delete Receipt
@@ -132,11 +119,21 @@ const ReceiptsTable = memo(({ data, count }: ReceiptsTableProps) => {
     [navigate, params, permissions]
   );
 
+  const defaultColumnVisibility = {
+    location_name: false,
+    postingDate: false,
+  };
+
   return (
     <Table<(typeof data)[number]>
       data={data}
       columns={columns}
       count={count}
+      defaultColumnVisibility={defaultColumnVisibility}
+      withColumnOrdering
+      withFilters
+      withPagination
+      withSimpleSorting
       renderContextMenu={renderContextMenu}
     />
   );
