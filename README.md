@@ -41,10 +41,9 @@ The monorepo follows the Turborepo covention of grouping packages into one of tw
 
 ### `/apps`
 
-| Package Name | Description      |
-| ------------ | ---------------- |
-| `carbon`     | ERP Application  |
-| `shared`     | Shared Resources |
+| Package Name | Description     | Command       |
+| ------------ | --------------- | ------------- |
+| `carbon`     | ERP Application | `npm run dev` |
 
 ### `/packages`
 
@@ -58,6 +57,13 @@ The monorepo follows the Turborepo covention of grouping packages into one of tw
 | `@carbon/redis`        | Redis cache client                                                      |
 | `@carbon/tsconfig`     | Shared, extendable tsconfig configuration used across apps and packages |
 | `@carbon/utils`        | Shared utility functions used across apps and packages                  |
+
+There are two other top-level folders worth mentioning:
+
+| Package Name | Description                                      | Command              |
+| ------------ | ------------------------------------------------ | -------------------- |
+| `shared`     | A shared API things like currency exchange rates | `npm run dev:shared` |
+| `www`        | The documentation site                           | `npm run dev:www`    |
 
 ## Local Development
 

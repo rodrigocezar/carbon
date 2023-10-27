@@ -3,8 +3,9 @@
   "license": "AGPL-3.0-or-later",
   "workspaces": [
     "apps/*",
-    "www",
-    "packages/*"
+    "packages/*",
+    "shared",
+    "www"
   ],
   "scripts": {
     "build": "turbo run build",
@@ -33,6 +34,7 @@
     "deploy": "turbo run deploy",
     "dev": "turbo run dev --filter=./apps/* --filter=./packages/*",
     "dev:apps": "turbo run dev --filter=./apps/*",
+    "dev:shared": "turbo run dev --filter=./shared",
     "dev:www": "turbo run dev --filter=./www",
     "dev:packages": "turbo run dev --filter=./packages/*",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
